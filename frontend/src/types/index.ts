@@ -87,6 +87,8 @@ export interface PYQ {
   patternPriority: 'high' | 'medium' | 'low';
 }
 
+export type TopicPriority = 'VERY_HIGH' | 'HIGH' | 'MEDIUM' | 'LOW' | 'high' | 'medium' | 'low';
+
 export interface PYQPatternItem {
   topic: string;
   unit: number;
@@ -96,14 +98,123 @@ export interface PYQPatternItem {
   examOccurrence: string;
 }
 
+export interface BEUTopicRankItem {
+  rank: number;
+  unit: number;
+  topic: string;
+  pyqFrequency: string;
+  yearsAppeared: number[];
+  typicalMarks: string;
+  importanceScore: number;
+  priority: 'VERY_HIGH' | 'HIGH' | 'MEDIUM' | 'LOW';
+  reason: string;
+}
+
+export interface BEUMostRepeatedQuestion {
+  id: string;
+  question: string;
+  type: 'Exact Repeated' | 'Conceptually Modified';
+  unit: number;
+  timesRepeated: number;
+  yearsAsked: number[];
+  typicalMarks: string;
+  wordingChangesNote: string;
+  probabilityAssessment: 'Very High Probability' | 'High Probability' | 'Moderate Probability' | 'Low Probability';
+}
+
+export interface BEUNumericalProblem {
+  unit: number;
+  topic: string;
+  frequency: string;
+  typicalMarks: string;
+  standardProblemModel: string;
+  keyFormulae: string[];
+}
+
+export interface BEUDerivationProblem {
+  unit: number;
+  derivationName: string;
+  yearsAsked: number[];
+  typicalMarks: string;
+  keyStepsSummary: string;
+}
+
+export interface BEUTheoryQuestion {
+  unit: number;
+  topic: string;
+  yearsAsked: number[];
+  typicalMarks: string;
+  mustIncludeDiagramsOrPoints: string[];
+}
+
+export interface BEUUnitAnalysis {
+  unitNumber: number;
+  unitTitle: string;
+  overallImportance: string;
+  unitRank: number;
+  pyqWeightagePercentage: number;
+  mostImportantTopics: string[];
+  mostRepeatedQuestions: string[];
+  numericalTopics: string[];
+  derivationTopics: string[];
+  theoryTopics: string[];
+  lowPriorityTopics: string[];
+}
+
+export interface BEUPrepStrategies {
+  sevenDayStrategy: {
+    dayRange: string;
+    focusUnits: string;
+    topicsToCover: string[];
+    actionItems: string;
+  }[];
+  threeDayStrategy: {
+    day: string;
+    focusArea: string;
+    topicsToCover: string[];
+    timeAllocation: string;
+  }[];
+  oneDayRevisionStrategy: {
+    timeSlot: string;
+    unitOrTopic: string;
+    keyChecklist: string[];
+  }[];
+  finalTopTopicsToStudyFirst: string[];
+}
+
+export interface BEUQuestionPatternMeta {
+  totalExamMarks: number;
+  totalQuestions: number;
+  compulsoryQuestion: string;
+  choiceStructure: string;
+  theoryNumericalRatio: string;
+  marksPerQuestion: string;
+  recentTrends: string[];
+}
+
 export interface PYQAnalysis {
   subjectId: string;
   subjectName: string;
+  subjectCode?: string;
+  branch?: string;
+  semester?: number;
   totalPapersAnalyzed: number;
+  yearsCovered?: number[];
   patterns: PYQPatternItem[];
   unitWeightage: { unit: number; unitTitle: string; percentage: number }[];
   highYieldTips: string[];
   disclaimer: string;
+  // Full 16-point extensions:
+  questionPattern?: BEUQuestionPatternMeta;
+  unitWiseAnalysis?: BEUUnitAnalysis[];
+  topRankedTopics?: BEUTopicRankItem[];
+  mostRepeatedQuestions?: BEUMostRepeatedQuestion[];
+  importantNumericals?: BEUNumericalProblem[];
+  importantDerivations?: BEUDerivationProblem[];
+  importantTheoryQuestions?: BEUTheoryQuestion[];
+  preparationStrategy?: BEUPrepStrategies;
+  summaryOverview?: string;
+  formattedMarkdownReport?: string;
 }
 
 export interface Note {
@@ -117,6 +228,7 @@ export interface Note {
   description: string;
   fileUrl: string;
   fileType: 'pdf' | 'doc' | 'image';
+  thumbnailUrl?: string;
   fileSize: string;
   authorId: string;
   authorName: string;
@@ -138,12 +250,17 @@ export interface StudyVideo {
   title: string;
   description: string;
   videoUrl: string;
-  youtubeId: string;
+  videoType?: 'youtube' | 'upload';
+  youtubeId?: string;
+  thumbnailUrl?: string;
   duration: string;
   channelName: string;
+  authorName?: string;
+  authorCollege?: string;
   likes: number;
   views: string;
   tags: string[];
+  createdAt?: string;
 }
 
 export interface Comment {
@@ -264,6 +381,10 @@ export interface MentorProfile {
   bio: string;
   skills: string[];
   domain: string;
+  hourlyRate: number;
+  sessionDuration?: string;
+  companyOrExam?: string;
+  totalSessionsGiven?: number;
   rating: number;
   reviewsCount: number;
   availableSlots: number;
@@ -274,29 +395,52 @@ export interface MentorProfile {
 export interface MentorshipRequest {
   id: string;
   mentorId: string;
+  mentorName?: string;
+  mentorAvatar?: string;
+  mentorCollege?: string;
   studentId: string;
   studentName: string;
   studentCollege: string;
   topic: string;
   message: string;
   status: 'pending' | 'accepted' | 'declined';
+  amountPaid?: number;
+  paymentMethod?: 'UPI' | 'CARD' | 'NET_BANKING' | 'POINTS';
+  paymentStatus?: 'PAID' | 'PENDING' | 'REFUNDED';
+  transactionId?: string;
+  scheduledDate?: string;
+  scheduledTime?: string;
+  meetLink?: string;
   createdAt: string;
+}
+
+export interface OpportunitySource {
+  name: string;
+  url: string;
+  isOfficial?: boolean;
+  type?: 'primary' | 'application' | 'reference' | 'circular';
 }
 
 export interface Opportunity {
   id: string;
   title: string;
   organization: string;
-  category: 'internship' | 'hackathon' | 'workshop' | 'competition' | 'scholarship' | 'job' | 'gate';
+  category: 'internship' | 'hackathon' | 'workshop' | 'competition' | 'scholarship' | 'job' | 'gate' | 'career_event';
   description: string;
-  location: string;
-  isOnline: boolean;
-  deadline: string;
-  stipendOrPrize?: string;
+  sourceName: string;
   sourceUrl: string;
-  verifiedSource: string;
-  branchRelevance: string[];
-  tags: string[];
+  applicationUrl?: string;
+  publishedDate?: string;
+  deadline: string;
+  lastVerified?: string;
+  isOfficialSource: boolean;
+  sources?: OpportunitySource[];
+  location?: string;
+  isOnline?: boolean;
+  stipendOrPrize?: string;
+  verifiedSource?: string; // Backward compatibility alias
+  branchRelevance?: string[];
+  tags?: string[];
 }
 
 export interface Notice {
@@ -304,8 +448,16 @@ export interface Notice {
   title: string;
   category: 'exam' | 'result' | 'scholarship' | 'admission' | 'career' | 'general';
   isOfficial: boolean;
-  source: string;
+  source: string; // Backward compatible alias for sourceName
+  sourceName?: string;
+  sourceUrl?: string;
+  applicationUrl?: string;
   publishedAt: string;
+  publishedDate?: string;
+  deadline?: string;
+  lastVerified?: string;
+  isOfficialSource?: boolean;
+  sources?: OpportunitySource[];
   summary: string;
   content: string;
   fileUrl?: string;
@@ -359,4 +511,78 @@ export interface KnowledgeNode {
   pyqWeight: 'High' | 'Medium' | 'Low';
   relatedTopics: string[];
   aiSummary: string;
+}
+
+export interface GoalTask {
+  id: string;
+  title: string;
+  description: string;
+  estimatedHours: number;
+  priority: 'HIGH' | 'MEDIUM' | 'LOW';
+  completed: boolean;
+  category: 'learn' | 'practice' | 'project' | 'beu_prep';
+}
+
+export interface GoalResource {
+  id: string;
+  title: string;
+  type: 'doc' | 'video' | 'practice' | 'project' | 'beu_pyq';
+  url: string;
+  whyUseful: string;
+  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+  estimatedTime: string;
+}
+
+export interface GoalMilestone {
+  id: string;
+  phaseNumber: number;
+  title: string;
+  timeframe: string;
+  whyThisStep: string;
+  status: 'completed' | 'in_progress' | 'upcoming';
+  tasks: GoalTask[];
+  recommendedResources: GoalResource[];
+  projectIdea?: {
+    title: string;
+    description: string;
+    techStack: string[];
+  };
+}
+
+export interface GoalMap {
+  id: string;
+  userId: string;
+  goalTitle: string;
+  category: 'career' | 'academic' | 'skill' | 'project' | 'custom';
+  targetOutcome: string;
+  targetDeadline: string;
+  createdAt: string;
+  progressPercent: number;
+  streakDays: number;
+  studentProfile: {
+    branch: string;
+    semester: number;
+    currentLevel: 'beginner' | 'intermediate' | 'advanced';
+    existingSkills: string[];
+    hoursDaily: number;
+    learningPreference: string[];
+  };
+  gapAnalysis: {
+    alreadyLearned: string[];
+    inProgress: string[];
+    skillGap: string[];
+    highPriority: string[];
+    mediumPriority: string[];
+  };
+  beuAcademicContext?: {
+    relevantSubjects: string[];
+    highYieldUnits: string[];
+    examPatternFocus: string;
+  };
+  milestones: GoalMilestone[];
+  healthCheck: {
+    status: 'ON_TRACK' | 'SLIGHTLY_BEHIND' | 'NEEDS_ADJUSTMENT';
+    summary: string;
+    suggestions: string[];
+  };
 }

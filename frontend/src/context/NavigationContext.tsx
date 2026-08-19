@@ -10,6 +10,7 @@ export type PageId =
   | 'login'
   | 'register'
   | 'dashboard'
+  | 'goalmap'
   | 'study-hub'
   | 'subject-detail'
   | 'pyq-analyzer'

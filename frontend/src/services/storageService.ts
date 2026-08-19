@@ -2,28 +2,31 @@ import {
   User, Subject, SyllabusTopic, PYQ, Note, StudyVideo,
   Post, Community, Conversation, Message, Project,
   MentorProfile, MentorshipRequest, Opportunity, Notice,
-  AppNotification, Report, KnowledgeNode, StudyPlanTask
+  AppNotification, Report, KnowledgeNode, StudyPlanTask, GoalMap, GoalTask
 } from '../types';
 import {
   MOCK_USERS, MOCK_SUBJECTS, MOCK_SYLLABUS_TOPICS, MOCK_PYQS,
   MOCK_NOTES, MOCK_VIDEOS, MOCK_POSTS, MOCK_COMMUNITIES,
   MOCK_PROJECTS, MOCK_MENTORS, MOCK_OPPORTUNITIES, MOCK_NOTICES,
   MOCK_NOTIFICATIONS, MOCK_KNOWLEDGE_NODES, MOCK_STUDY_PLAN_TASKS,
-  MOCK_REPORTS
+  MOCK_REPORTS, MOCK_GOALMAPS
 } from '../data/mockData';
 
 const STORAGE_KEYS = {
   USERS: 'beu_users',
   POSTS: 'beu_posts',
   NOTES: 'beu_notes',
+  VIDEOS: 'beu_videos',
   COMMUNITIES: 'beu_communities',
   MESSAGES: 'beu_messages',
   PROJECTS: 'beu_projects',
+  OPPORTUNITIES: 'beu_opportunities',
   NOTICES: 'beu_notices',
   NOTIFICATIONS: 'beu_notifications',
   STUDY_TASKS: 'beu_study_tasks',
   REPORTS: 'beu_reports',
-  MENTOR_REQUESTS: 'beu_mentor_requests'
+  MENTOR_REQUESTS: 'beu_mentor_requests',
+  GOALMAPS: 'beu_goalmaps'
 };
 
 // Helper to initialize local storage
@@ -108,8 +111,17 @@ export const StorageService = {
 
   // Videos
   getVideos: (subjectId?: string): StudyVideo[] => {
-    if (subjectId) return MOCK_VIDEOS.filter(v => v.subjectId === subjectId);
-    return MOCK_VIDEOS;
+    const videos: StudyVideo[] = initStorage(STORAGE_KEYS.VIDEOS, MOCK_VIDEOS);
+    if (subjectId) return videos.filter(v => v.subjectId === subjectId);
+    return videos;
+  },
+  addVideo: (newVideo: StudyVideo): void => {
+    const videos = [newVideo, ...StorageService.getVideos()];
+    setStorage(STORAGE_KEYS.VIDEOS, videos);
+  },
+  likeVideo: (videoId: string): void => {
+    const videos = StorageService.getVideos().map(v => v.id === videoId ? { ...v, likes: v.likes + 1 } : v);
+    setStorage(STORAGE_KEYS.VIDEOS, videos);
   },
 
   // Posts
@@ -259,9 +271,20 @@ export const StorageService = {
     const reqs: MentorshipRequest[] = initStorage(STORAGE_KEYS.MENTOR_REQUESTS, []);
     return reqs.filter(r => r.mentorId === mentorUserId);
   },
+  getMyBookedSessions: (studentId: string): MentorshipRequest[] => {
+    const reqs: MentorshipRequest[] = initStorage(STORAGE_KEYS.MENTOR_REQUESTS, []);
+    return reqs.filter(r => r.studentId === studentId);
+  },
 
   // Opportunities
-  getOpportunities: (): Opportunity[] => MOCK_OPPORTUNITIES,
+  getOpportunities: (): Opportunity[] => initStorage(STORAGE_KEYS.OPPORTUNITIES, MOCK_OPPORTUNITIES),
+  getOpportunityById: (id: string): Opportunity | undefined => {
+    return StorageService.getOpportunities().find(o => o.id === id);
+  },
+  addOpportunity: (opportunity: Opportunity): void => {
+    const opportunities = [opportunity, ...StorageService.getOpportunities()];
+    setStorage(STORAGE_KEYS.OPPORTUNITIES, opportunities);
+  },
 
   // Notices
   getNotices: (): Notice[] => initStorage(STORAGE_KEYS.NOTICES, MOCK_NOTICES),
@@ -309,5 +332,159 @@ export const StorageService = {
   updateReportStatus: (reportId: string, status: 'reviewed' | 'dismissed' | 'removed'): void => {
     const reports = StorageService.getReports().map(r => r.id === reportId ? { ...r, status } : r);
     setStorage(STORAGE_KEYS.REPORTS, reports);
+  },
+
+  // BEU GoalMap Persistence
+  getGoalMaps: (userId?: string): GoalMap[] => {
+    const goalMaps: GoalMap[] = initStorage(STORAGE_KEYS.GOALMAPS, MOCK_GOALMAPS);
+    if (userId) return goalMaps.filter(g => g.userId === userId);
+    return goalMaps;
+  },
+  saveGoalMap: (goalMap: GoalMap): void => {
+    const existing = StorageService.getGoalMaps();
+    const index = existing.findIndex(g => g.id === goalMap.id);
+    let updated: GoalMap[];
+    if (index >= 0) {
+      updated = [...existing];
+      updated[index] = goalMap;
+    } else {
+      updated = [goalMap, ...existing];
+    }
+    setStorage(STORAGE_KEYS.GOALMAPS, updated);
+  },
+  deleteGoalMap: (goalMapId: string): void => {
+    const existing = StorageService.getGoalMaps();
+    const updated = existing.filter(g => g.id !== goalMapId);
+    setStorage(STORAGE_KEYS.GOALMAPS, updated);
+  },
+  toggleGoalTask: (goalMapId: string, taskId: string): GoalMap | null => {
+    const existing = StorageService.getGoalMaps();
+    const targetMap = existing.find(g => g.id === goalMapId);
+    if (!targetMap) return null;
+
+    let totalTasks = 0;
+    let completedTasks = 0;
+
+    const updatedMilestones = targetMap.milestones.map(m => {
+      const updatedTasks = m.tasks.map(t => {
+        const isCompleted = t.id === taskId ? !t.completed : t.completed;
+        if (isCompleted) completedTasks++;
+        totalTasks++;
+        return { ...t, completed: isCompleted };
+      });
+
+      const allMilestoneTasksDone = updatedTasks.length > 0 && updatedTasks.every(t => t.completed);
+      const someMilestoneTasksDone = updatedTasks.some(t => t.completed);
+
+      return {
+        ...m,
+        tasks: updatedTasks,
+        status: allMilestoneTasksDone
+          ? ('completed' as const)
+          : someMilestoneTasksDone
+          ? ('in_progress' as const)
+          : ('upcoming' as const)
+      };
+    });
+
+    const progressPercent = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+    const updatedMap: GoalMap = {
+      ...targetMap,
+      milestones: updatedMilestones,
+      progressPercent
+    };
+
+    StorageService.saveGoalMap(updatedMap);
+    return updatedMap;
+  },
+  addGoalTask: (goalMapId: string, milestoneId: string, taskData: Omit<GoalTask, 'id'>): GoalMap | null => {
+    const existing = StorageService.getGoalMaps();
+    const targetMap = existing.find(g => g.id === goalMapId);
+    if (!targetMap) return null;
+
+    const newTask: GoalTask = {
+      ...taskData,
+      id: `t-cust-${Date.now()}`
+    };
+
+    let totalTasks = 0;
+    let completedTasks = 0;
+
+    const updatedMilestones = targetMap.milestones.map(m => {
+      let tasks = m.tasks;
+      if (m.id === milestoneId) {
+        tasks = [...m.tasks, newTask];
+      }
+      tasks.forEach(t => {
+        totalTasks++;
+        if (t.completed) completedTasks++;
+      });
+      return {
+        ...m,
+        tasks
+      };
+    });
+
+    const progressPercent = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+    const updatedMap: GoalMap = {
+      ...targetMap,
+      milestones: updatedMilestones,
+      progressPercent
+    };
+
+    StorageService.saveGoalMap(updatedMap);
+    return updatedMap;
+  },
+  deleteGoalTask: (goalMapId: string, taskId: string): GoalMap | null => {
+    const existing = StorageService.getGoalMaps();
+    const targetMap = existing.find(g => g.id === goalMapId);
+    if (!targetMap) return null;
+
+    let totalTasks = 0;
+    let completedTasks = 0;
+
+    const updatedMilestones = targetMap.milestones.map(m => {
+      const filteredTasks = m.tasks.filter(t => t.id !== taskId);
+      filteredTasks.forEach(t => {
+        totalTasks++;
+        if (t.completed) completedTasks++;
+      });
+      return {
+        ...m,
+        tasks: filteredTasks
+      };
+    });
+
+    const progressPercent = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+    const updatedMap: GoalMap = {
+      ...targetMap,
+      milestones: updatedMilestones,
+      progressPercent
+    };
+
+    StorageService.saveGoalMap(updatedMap);
+    return updatedMap;
+  },
+  updateGoalMapSchedule: (goalMapId: string, hoursDaily: number, targetDeadline: string): GoalMap | null => {
+    const existing = StorageService.getGoalMaps();
+    const targetMap = existing.find(g => g.id === goalMapId);
+    if (!targetMap) return null;
+
+    const updatedMap: GoalMap = {
+      ...targetMap,
+      targetDeadline,
+      studentProfile: {
+        ...targetMap.studentProfile,
+        hoursDaily
+      },
+      healthCheck: {
+        ...targetMap.healthCheck,
+        summary: `Your GoalMap is calibrated for ${hoursDaily} hours/day over ${targetDeadline}. Pacing is updated.`
+      }
+    };
+
+    StorageService.saveGoalMap(updatedMap);
+    return updatedMap;
   }
 };

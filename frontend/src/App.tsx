@@ -19,12 +19,12 @@ import { RegisterPage } from './pages/RegisterPage';
 
 // Authenticated Core Pages
 import { DashboardPage } from './pages/DashboardPage';
+import { GoalMapPage } from './pages/GoalMapPage';
 import { StudyHubPage } from './pages/StudyHubPage';
 import { SubjectDetailPage } from './pages/SubjectDetailPage';
 import { PYQAnalyzerPage } from './pages/PYQAnalyzerPage';
 import { AIAssistantPage } from './pages/AIAssistantPage';
 import { StudyPlannerPage } from './pages/StudyPlannerPage';
-import { KnowledgeMapPage } from './pages/KnowledgeMapPage';
 import { NotesPage } from './pages/NotesPage';
 import { VideosPage } from './pages/VideosPage';
 import { SocialFeedPage } from './pages/SocialFeedPage';
@@ -77,12 +77,13 @@ const AppContent: React.FC = () => {
 
       // Core Authenticated
       case 'dashboard': return <DashboardPage />;
+      case 'goalmap':
+      case 'knowledge-map': return <GoalMapPage />;
       case 'study-hub': return <StudyHubPage />;
       case 'subject-detail': return <SubjectDetailPage />;
       case 'pyq-analyzer': return <PYQAnalyzerPage />;
       case 'ai-assistant': return <AIAssistantPage />;
       case 'study-planner': return <StudyPlannerPage />;
-      case 'knowledge-map': return <KnowledgeMapPage />;
       case 'notes': return <NotesPage />;
       case 'videos': return <VideosPage />;
       case 'social': return <SocialFeedPage />;

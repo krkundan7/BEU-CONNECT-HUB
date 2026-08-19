@@ -14,9 +14,12 @@ export class OpportunityController {
 
   static async list(req: Request, res: Response, next: NextFunction) {
     try {
+      const { category, search, onlyOnline, onlyOfficial } = req.query;
       const opportunities = await OpportunityService.getOpportunities(
-        req.query.category as any,
-        req.query.search as string
+        category as any,
+        search as string,
+        onlyOnline !== undefined ? onlyOnline === 'true' : undefined,
+        onlyOfficial !== undefined ? onlyOfficial === 'true' : undefined
       );
       return ResponseFormatter.success(res, opportunities);
     } catch (error) {

@@ -14,7 +14,8 @@ export class AIController {
 
   static async analyzePYQ(req: Request, res: Response, next: NextFunction) {
     try {
-      const analysis = await AIChatService.analyzePYQ(req.body.subjectName);
+      const { subjectName, branch, semester } = req.body;
+      const analysis = await AIChatService.analyzePYQ(subjectName, branch, semester);
       return ResponseFormatter.success(res, analysis, 'Historical PYQ pattern analysis generated');
     } catch (error) {
       next(error);

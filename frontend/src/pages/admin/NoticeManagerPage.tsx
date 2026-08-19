@@ -15,6 +15,9 @@ export const NoticeManagerPage: React.FC = () => {
   const [content, setContent] = useState('');
   const [isUrgent, setIsUrgent] = useState(false);
   const [source, setSource] = useState('Examination Controller, Bihar Engineering University, Patna');
+  const [sourceUrl, setSourceUrl] = useState('https://beup.ac.in');
+  const [applicationUrl, setApplicationUrl] = useState('');
+  const [deadline, setDeadline] = useState('');
 
   const handlePublish = (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,15 +29,25 @@ export const NoticeManagerPage: React.FC = () => {
       category,
       isOfficial: true,
       source,
-      publishedAt: 'August 17, 2025',
+      sourceName: source,
+      sourceUrl: sourceUrl || 'https://beup.ac.in',
+      applicationUrl: applicationUrl || undefined,
+      publishedAt: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+      publishedDate: new Date().toISOString().split('T')[0],
+      deadline: deadline || undefined,
+      lastVerified: new Date().toISOString().split('T')[0],
+      isOfficialSource: true,
+      sources: [
+        { name: source, url: sourceUrl || 'https://beup.ac.in', isOfficial: true, type: 'circular' }
+      ],
       summary: summary || title,
       content,
       isUrgent,
-      fileUrl: 'https://example.com/official-notice.pdf'
+      fileUrl: sourceUrl || 'https://beup.ac.in'
     };
 
     StorageService.createNotice(newNotice);
-    showToast('Official university notice published across the platform!', 'success');
+    showToast('Official university notice published with verified source link!', 'success');
     navigateTo('beu-hub');
   };
 
@@ -91,6 +104,31 @@ export const NoticeManagerPage: React.FC = () => {
                 value={source}
                 onChange={(e) => setSource(e.target.value)}
                 required
+                className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-navy-900 bg-white"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block font-semibold text-beu-dark mb-1">Official Circular / Portal URL</label>
+              <input
+                type="url"
+                value={sourceUrl}
+                onChange={(e) => setSourceUrl(e.target.value)}
+                required
+                placeholder="https://beup.ac.in/..."
+                className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-navy-900 bg-white font-mono text-xs"
+              />
+            </div>
+
+            <div>
+              <label className="block font-semibold text-beu-dark mb-1">Application / Action Deadline (Optional)</label>
+              <input
+                type="text"
+                value={deadline}
+                onChange={(e) => setDeadline(e.target.value)}
+                placeholder="e.g. September 25, 2025"
                 className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-navy-900 bg-white"
               />
             </div>

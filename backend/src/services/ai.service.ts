@@ -1,9 +1,22 @@
 import prisma from '../config/prisma.js';
 import { aiService } from '../integrations/ai/geminiAI.service.js';
+import { AIChatMessage } from '../integrations/ai/ai.interface.js';
 import { AIRole } from '@prisma/client';
 
 export class AIChatService {
-  static async handleChat(userId: string, data: { conversationId?: string; message: string }) {
+  static async handleChat(
+    userId: string,
+    data: {
+      conversationId?: string;
+      message: string;
+      attachment?: {
+        type: 'image' | 'pdf';
+        dataUrl: string;
+        name?: string;
+        size?: string;
+      };
+    }
+  ) {
     let conversationId = data.conversationId;
 
     if (!conversationId) {
@@ -21,7 +34,9 @@ export class AIChatService {
       data: {
         conversationId,
         role: AIRole.USER,
-        content: data.message,
+        content: data.attachment
+          ? `[Attached ${data.attachment.type.toUpperCase()}: ${data.attachment.name || 'document'}] ${data.message}`
+          : data.message,
       },
     });
 
@@ -32,10 +47,15 @@ export class AIChatService {
       take: 10,
     });
 
-    const aiInput = history.map(h => ({
+    const aiInput: AIChatMessage[] = history.map(h => ({
       role: h.role.toLowerCase() as 'user' | 'assistant' | 'system',
       content: h.content,
     }));
+
+    // Attach current file to latest message for multimodal analysis
+    if (data.attachment && aiInput.length > 0) {
+      aiInput[aiInput.length - 1].attachment = data.attachment;
+    }
 
     // Generate AI response
     const aiResponseText = await aiService.generateAcademicResponse(aiInput);
@@ -55,8 +75,8 @@ export class AIChatService {
     };
   }
 
-  static async analyzePYQ(subjectName: string) {
-    const analysis = await aiService.analyzePYQPatterns(subjectName, []);
+  static async analyzePYQ(subjectName: string, branch?: string, semester?: number) {
+    const analysis = await aiService.analyzePYQPatterns(subjectName, branch, semester, []);
     return analysis;
   }
 

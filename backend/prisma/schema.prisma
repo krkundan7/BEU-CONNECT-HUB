@@ -667,39 +667,55 @@ model StudyVideo {
 }
 
 model Opportunity {
-  id             String              @id @default(uuid())
-  title          String
-  description    String
-  category       OpportunityCategory @default(INTERNSHIP)
-  organization   String
-  location       String              @default("Remote")
-  isOnline       Boolean             @default(true)
-  stipendOrPrize String?
-  deadline       String
-  source         String
-  sourceUrl      String
-  createdAt      DateTime            @default(now())
-  updatedAt      DateTime            @updatedAt
+  id               String              @id @default(uuid())
+  title            String
+  description      String
+  category         OpportunityCategory @default(INTERNSHIP)
+  organization     String
+  location         String              @default("Remote")
+  isOnline         Boolean             @default(true)
+  stipendOrPrize   String?
+  deadline         String
+  source           String              // Backward compatible alias for sourceName
+  sourceName       String              @default("Official Source")
+  sourceUrl        String
+  applicationUrl   String?
+  publishedDate    String?
+  lastVerified     String?
+  isOfficialSource Boolean             @default(true)
+  sourcesJson      String?             // JSON string for secondary/multiple original sources
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
 
   @@index([category])
+  @@index([isOfficialSource])
 }
 
 model Notice {
-  id          String         @id @default(uuid())
-  title       String
-  category    NoticeCategory @default(EXAM)
-  isOfficial  Boolean        @default(true)
-  source      String
-  summary     String
-  content     String
-  isUrgent    Boolean        @default(false)
-  fileUrl     String?
-  publishedAt String
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  id               String         @id @default(uuid())
+  title            String
+  category         NoticeCategory @default(EXAM)
+  isOfficial       Boolean        @default(true)
+  source           String         // Backward compatible alias for sourceName
+  sourceName       String         @default("Examination Controller, BEU")
+  sourceUrl        String?
+  applicationUrl   String?
+  summary          String
+  content          String
+  isUrgent         Boolean        @default(false)
+  fileUrl          String?
+  publishedAt      String
+  publishedDate    String?
+  deadline         String?
+  lastVerified     String?
+  isOfficialSource Boolean        @default(true)
+  sourcesJson      String?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
 
   @@index([category])
   @@index([isOfficial])
+  @@index([isOfficialSource])
 }
 
 model Report {

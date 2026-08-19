@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import {
   LayoutDashboard, BookOpen, Bot, Users, User,
   Menu, X, Sparkles, FileSpreadsheet, Calendar,
-  GitGraph, Radio, Handshake, Briefcase, Building2,
+  Compass, Radio, Handshake, Briefcase, Building2,
   TrendingUp, ShieldCheck, Settings
 } from 'lucide-react';
 
@@ -17,16 +17,16 @@ export const MobileBottomNav: React.FC = () => {
 
   const mainTabs = [
     { id: 'dashboard' as PageId, label: 'Home', icon: LayoutDashboard },
-    { id: 'study-hub' as PageId, label: 'Study', icon: BookOpen },
+    { id: 'goalmap' as PageId, label: 'GoalMap', icon: Compass },
     { id: 'ai-assistant' as PageId, label: 'BEU AI', icon: Bot, isHighlighted: true },
     { id: 'communities' as PageId, label: 'Community', icon: Users },
     { id: 'profile' as PageId, label: 'Profile', icon: User }
   ];
 
   const moreItems = [
+    { id: 'study-hub' as PageId, label: 'Study Hub (Syllabus)', icon: BookOpen },
     { id: 'pyq-analyzer' as PageId, label: 'PYQ Pattern Analyzer', icon: FileSpreadsheet },
     { id: 'study-planner' as PageId, label: 'Study Planner', icon: Calendar },
-    { id: 'knowledge-map' as PageId, label: 'Knowledge Concept Map', icon: GitGraph },
     { id: 'social' as PageId, label: 'Campus Social Feed', icon: Radio },
     { id: 'projects' as PageId, label: 'Project Partner Finder', icon: Handshake },
     { id: 'mentorship' as PageId, label: 'Senior-Junior Mentorship', icon: Sparkles },

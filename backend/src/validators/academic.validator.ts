@@ -12,11 +12,13 @@ export const createPYQSchema = z.object({
 
 export const createNoteSchema = z.object({
   body: z.object({
-    subjectId: z.string().uuid(),
+    subjectId: z.string(),
     title: z.string().min(3).max(150),
-    description: z.string().max(500).optional(),
+    description: z.string().max(1000).optional(),
     unitNumber: z.number().int().min(1).max(10),
-    fileUrl: z.string().url(),
+    fileUrl: z.string().min(1),
+    fileType: z.enum(['pdf', 'image', 'doc']).optional().default('pdf'),
+    thumbnailUrl: z.string().optional(),
   }),
 });
 
@@ -36,14 +38,22 @@ export const createStudyVideoSchema = z.object({
 export const aiChatSchema = z.object({
   body: z.object({
     conversationId: z.string().uuid().optional(),
-    message: z.string().min(1, 'Message is required').max(3000),
+    message: z.string().min(1, 'Message is required').max(5000),
+    attachment: z.object({
+      type: z.enum(['image', 'pdf']),
+      dataUrl: z.string(),
+      name: z.string().optional(),
+      size: z.string().optional(),
+    }).optional(),
   }),
 });
 
 export const aiAnalyzePYQSchema = z.object({
   body: z.object({
-    subjectId: z.string().uuid().optional(),
+    subjectId: z.string().optional(),
     subjectName: z.string().min(2),
+    branch: z.string().optional(),
+    semester: z.number().int().min(1).max(8).optional(),
   }),
 });
 

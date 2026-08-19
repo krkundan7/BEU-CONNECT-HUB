@@ -61,12 +61,12 @@ export const GlobalSearchModal: React.FC = () => {
   ).slice(0, 3);
 
   const opportunities = StorageService.getOpportunities().filter(o =>
-    !q || o.title.toLowerCase().includes(o.title) || o.organization.toLowerCase().includes(q) || o.category.toLowerCase().includes(q)
+    !q || o.title.toLowerCase().includes(q) || o.organization.toLowerCase().includes(q) || o.category.toLowerCase().includes(q) || (o.tags && o.tags.some(t => t.toLowerCase().includes(q)))
   ).slice(0, 3);
 
   const notices = StorageService.getNotices().filter(n =>
-    !q || n.title.toLowerCase().includes(q) || n.summary.toLowerCase().includes(q)
-  ).slice(0, 2);
+    !q || n.title.toLowerCase().includes(q) || n.summary.toLowerCase().includes(q) || n.source.toLowerCase().includes(q)
+  ).slice(0, 3);
 
   const hasResults = subjects.length > 0 || notes.length > 0 || pyqs.length > 0 || communities.length > 0 || students.length > 0 || opportunities.length > 0 || notices.length > 0;
 
@@ -230,7 +230,99 @@ export const GlobalSearchModal: React.FC = () => {
             </div>
           )}
 
-          {/* Communities & Opportunities */}
+          {/* Opportunities with Verified Sources */}
+          {opportunities.length > 0 && (
+            <div>
+              <p className="px-2 text-[11px] font-bold uppercase tracking-wider text-beu-muted mb-1.5 flex items-center justify-between">
+                <span>Verified Career Opportunities</span>
+                <span className="text-[10px] text-emerald-600 font-semibold">Direct Source Links</span>
+              </p>
+              <div className="space-y-1.5">
+                {opportunities.map(opp => {
+                  const targetUrl = opp.applicationUrl || opp.sourceUrl;
+                  return (
+                    <div
+                      key={opp.id}
+                      onClick={() => handleSelect(() => {
+                        if (targetUrl) {
+                          window.open(targetUrl, '_blank', 'noopener,noreferrer');
+                        } else {
+                          navigateTo('career-hub');
+                        }
+                      })}
+                      className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-purple-50/60 border border-slate-100 hover:border-purple-200 transition-colors text-left group cursor-pointer"
+                    >
+                      <div className="flex items-center gap-2.5 truncate">
+                        <div className="p-1.5 rounded-lg bg-purple-50 text-purple-700 flex-shrink-0">
+                          <Briefcase className="w-4 h-4" />
+                        </div>
+                        <div className="truncate">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[10px] font-extrabold uppercase text-purple-700 bg-purple-100/70 px-1.5 py-0.2 rounded">
+                              {opp.category}
+                            </span>
+                            <p className="text-xs font-bold text-slate-900 group-hover:text-purple-900 truncate">{opp.title}</p>
+                          </div>
+                          <p className="text-[11px] text-slate-500 truncate">{opp.organization} • Source: <strong>{opp.sourceName || opp.verifiedSource}</strong></p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
+                        {opp.stipendOrPrize && (
+                          <span className="hidden sm:inline text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                            {opp.stipendOrPrize}
+                          </span>
+                        )}
+                        <span className="text-[11px] font-bold text-purple-700 flex items-center gap-0.5 group-hover:translate-x-0.5 transition-transform">
+                          Apply <ArrowRight className="w-3.5 h-3.5" />
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Official Notices */}
+          {notices.length > 0 && (
+            <div>
+              <p className="px-2 text-[11px] font-bold uppercase tracking-wider text-beu-muted mb-1.5 flex items-center justify-between">
+                <span>Official BEU Circulars</span>
+                <span className="text-[10px] text-emerald-600 font-semibold">100% Authentic</span>
+              </p>
+              <div className="space-y-1.5">
+                {notices.map(n => (
+                  <div
+                    key={n.id}
+                    onClick={() => handleSelect(() => navigateTo('beu-hub'))}
+                    className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-red-50/40 border border-slate-100 hover:border-red-200 transition-colors text-left group cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2.5 truncate">
+                      <div className="p-1.5 rounded-lg bg-red-50 text-red-600 flex-shrink-0">
+                        <Bell className="w-4 h-4" />
+                      </div>
+                      <div className="truncate">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[10px] font-bold uppercase text-red-700 bg-red-100/70 px-1.5 py-0.2 rounded">
+                            {n.category}
+                          </span>
+                          <p className="text-xs font-bold text-slate-900 group-hover:text-red-900 truncate">{n.title}</p>
+                        </div>
+                        <p className="text-[11px] text-slate-500 truncate">Issuing Authority: {n.sourceName || n.source}</p>
+                      </div>
+                    </div>
+
+                    <span className="text-[11px] font-bold text-red-700 flex items-center gap-0.5 group-hover:translate-x-0.5 transition-transform flex-shrink-0 ml-2">
+                      View <ArrowRight className="w-3.5 h-3.5" />
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Communities */}
           {communities.length > 0 && (
             <div>
               <p className="px-2 text-[11px] font-bold uppercase tracking-wider text-beu-muted mb-1.5">Student Communities</p>

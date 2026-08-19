@@ -3,9 +3,10 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigation, PageId } from '../context/NavigationContext';
 import {
   LayoutDashboard, BookOpen, Bot, FileSpreadsheet, Calendar,
-  GitGraph, FileText, Video, Radio, Users, MessageSquare,
+  FileText, Video, Radio, Users, MessageSquare,
   Sparkles, Handshake, Briefcase, Building2, TrendingUp,
-  ShieldCheck, AlertOctagon, BellRing, Settings, CheckCircle2
+  ShieldCheck, AlertOctagon, BellRing, Settings, CheckCircle2,
+  Compass
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -26,7 +27,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     {
       title: 'Main',
       items: [
-        { id: 'dashboard' as PageId, label: 'Dashboard', icon: LayoutDashboard, badge: null }
+        { id: 'dashboard' as PageId, label: 'Dashboard', icon: LayoutDashboard, badge: null },
+        { id: 'goalmap' as PageId, label: 'BEU GoalMap GPS', icon: Compass, badge: 'AI GPS' }
       ]
     },
     {
@@ -36,7 +38,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         { id: 'ai-assistant' as PageId, label: 'BEU AI Assistant', icon: Bot, badge: 'AI' },
         { id: 'pyq-analyzer' as PageId, label: 'PYQ Pattern Analyzer', icon: FileSpreadsheet, badge: 'Hot' },
         { id: 'study-planner' as PageId, label: 'Personal Study Planner', icon: Calendar, badge: null },
-        { id: 'knowledge-map' as PageId, label: 'Knowledge Concept Map', icon: GitGraph, badge: null },
         { id: 'notes' as PageId, label: 'Shared Notes', icon: FileText, badge: null },
         { id: 'videos' as PageId, label: 'Study Videos', icon: Video, badge: null }
       ]

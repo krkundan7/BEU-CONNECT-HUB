@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigation } from '../context/NavigationContext';
 import {
-  BookOpen, Bot, FileSpreadsheet, Calendar, GitGraph, FileText,
+  BookOpen, Bot, FileSpreadsheet, Calendar, Compass, FileText,
   Video, Radio, Users, MessageSquare, Sparkles, Handshake,
   Briefcase, Building2, TrendingUp, ShieldCheck, ArrowLeft
 } from 'lucide-react';
@@ -13,11 +13,11 @@ export const FeaturesPage: React.FC = () => {
     {
       category: '1. Academic & Intelligent Learning',
       items: [
+        { title: 'BEU GoalMap GPS', desc: 'AI-driven career and semester goal planner generating phased milestones, daily study tasks, and BEU exam high-yield targets.', icon: Compass },
         { title: 'Interactive Syllabus Navigator', desc: 'Branch → Semester → Subject → Unit hierarchy with real-time syllabus tracking.', icon: BookOpen },
         { title: 'BEU AI Academic Assistant', desc: 'Step-by-step problem solver in English, Hindi & Hinglish with academic safety guardrails.', icon: Bot },
         { title: 'AI PYQ Pattern Analyzer', desc: 'Historical frequency identification (🔴 High, 🟡 Medium, 🟢 Low Priority) for smarter exam preparation.', icon: FileSpreadsheet },
         { title: 'Personal Study Planner', desc: 'Automated daily revision timetables based on exam deadlines and daily hours.', icon: Calendar },
-        { title: 'BEU Knowledge Map', desc: 'Interactive concept graph mapping topics, dependencies, and formulas.', icon: GitGraph }
       ]
     },
     {
