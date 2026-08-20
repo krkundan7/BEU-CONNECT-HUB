@@ -4,27 +4,65 @@ const urlSchema = z.string().trim().url({ message: 'Must be a valid URL with htt
 
 /**
  * University administrative circular & exam notice validation schema.
- * Enforces verified source citations, notice category tagging (EXAM, RESULT, ADMISSION, SCHOLARSHIP),
- * urgency flags, and optional circular PDF/application URLs.
+ * Enforces verified source citations, notice category tagging,
+ * urgency flags, branch/semester audience arrays, and optional circular PDF/application URLs.
  */
 export const createNoticeSchema = z.object({
   body: z.object({
-    title: z.string().min(5).max(250),
-    category: z.enum(['EXAM', 'RESULT', 'ADMISSION', 'SCHOLARSHIP', 'CAREER', 'GENERAL']).default('EXAM'),
+    notificationNumber: z.string().optional(),
+    title: z.string().min(5).max(300),
+    category: z.enum([
+      'EXAM',
+      'RESULT',
+      'ADMIT_CARD',
+      'TIME_TABLE',
+      'REGISTRATION',
+      'ACADEMIC',
+      'HOLIDAY',
+      'SCHOLARSHIP',
+      'INTERNSHIP',
+      'PLACEMENT',
+      'ADMISSION',
+      'NOTICE',
+      'CIRCULAR',
+      'ANNOUNCEMENT',
+      'CAREER',
+      'GENERAL',
+      'OTHER',
+    ]).default('EXAM'),
     isOfficial: z.boolean().default(true),
-    source: z.string().min(2, 'Official issuing source is required'),
+    source: z.string().min(2, 'Official issuing source is required').optional(),
     sourceName: z.string().optional(),
     sourceUrl: urlSchema.optional().or(z.literal('')),
+    documentUrl: urlSchema.optional().or(z.literal('')),
     applicationUrl: urlSchema.optional().or(z.literal('')),
-    summary: z.string().min(5).max(500),
+    summary: z.string().min(5).max(800),
     content: z.string().min(10),
     isUrgent: z.boolean().optional().default(false),
+    isImportant: z.boolean().optional().default(false),
+    isAllBranches: z.boolean().optional().default(true),
+    isAllSemesters: z.boolean().optional().default(true),
+    targetBranchCodes: z.array(z.string()).optional().default([]),
+    targetSemesterNumbers: z.array(z.number().min(1).max(8)).optional().default([]),
     fileUrl: urlSchema.optional().or(z.literal('')),
-    publishedAt: z.string().optional().default(() => new Date().toISOString().split('T')[0]),
+    publishedAt: z.string().optional(),
     publishedDate: z.string().optional(),
     deadline: z.string().optional(),
     lastVerified: z.string().optional(),
     isOfficialSource: z.boolean().default(true),
+  }),
+});
+
+export const queryNoticeSchema = z.object({
+  query: z.object({
+    category: z.string().optional(),
+    branchCode: z.string().optional(),
+    semesterNumber: z.coerce.number().min(1).max(8).optional(),
+    isImportant: z.preprocess(val => (val === 'true' ? true : val === 'false' ? false : val), z.boolean().optional()),
+    isUrgent: z.preprocess(val => (val === 'true' ? true : val === 'false' ? false : val), z.boolean().optional()),
+    search: z.string().optional(),
+    page: z.coerce.number().int().min(1).default(1),
+    limit: z.coerce.number().int().min(1).max(100).default(20),
   }),
 });
 

@@ -104,10 +104,30 @@ enum OpportunityCategory {
 enum NoticeCategory {
   EXAM
   RESULT
-  ADMISSION
+  ADMIT_CARD
+  TIME_TABLE
+  REGISTRATION
+  ACADEMIC
+  HOLIDAY
   SCHOLARSHIP
+  INTERNSHIP
+  PLACEMENT
+  ADMISSION
+  NOTICE
+  CIRCULAR
+  ANNOUNCEMENT
   CAREER
   GENERAL
+  OTHER
+}
+
+enum NoticeVerificationStatus {
+  FETCHED
+  UNVERIFIED
+  VERIFIED
+  PUBLISHED
+  UPDATED
+  ARCHIVED
 }
 
 enum NotificationType {
@@ -260,6 +280,7 @@ model User {
   topicProgress      TopicProgress[]
   reportsFiled       Report[]           @relation("ReporterRelation")
   adminActions       AdminAction[]
+  noticeReadStates   NoticeReadState[]
 
   @@index([email])
   @@index([role])
@@ -368,6 +389,7 @@ model Branch {
   users               User[]
   subjects            Subject[]
   syllabi             Syllabus[]
+  noticeBranches      NoticeBranch[]
 
   @@index([code])
   @@index([category])
@@ -384,6 +406,7 @@ model Semester {
   users     User[]
   subjects  Subject[]
   syllabi   Syllabus[]
+  noticeSemesters NoticeSemester[]
 
   @@index([number])
 }
@@ -913,30 +936,91 @@ model Opportunity {
 }
 
 model Notice {
-  id               String         @id @default(uuid())
-  title            String
-  category         NoticeCategory @default(EXAM)
-  isOfficial       Boolean        @default(true)
-  source           String         // Backward compatible alias for sourceName
-  sourceName       String         @default("Examination Controller, BEU")
-  sourceUrl        String?
-  applicationUrl   String?
-  summary          String
-  content          String
-  isUrgent         Boolean        @default(false)
-  fileUrl          String?
-  publishedAt      String
-  publishedDate    String?
-  deadline         String?
-  lastVerified     String?
-  isOfficialSource Boolean        @default(true)
-  sourcesJson      String?
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
+  id                 String                   @id @default(uuid())
+  title              String
+  notificationNumber String?
+  category           NoticeCategory           @default(EXAM)
+  isOfficial         Boolean                  @default(true)
+  source             String                   // Backward compatible alias for sourceName
+  sourceName         String                   @default("Examination Controller, BEU")
+  sourceUrl          String?
+  applicationUrl     String?
+  documentUrl        String?                  // Direct official PDF document link
+  summary            String
+  content            String
+  isUrgent           Boolean                  @default(false)
+  isImportant        Boolean                  @default(false)
+  isAllBranches      Boolean                  @default(true)
+  isAllSemesters     Boolean                  @default(true)
+  fileUrl            String?
+  publishedAt        String
+  publishedDate      String?
+  deadline           String?
+  lastVerified       String?
+  isOfficialSource   Boolean                  @default(true)
+  verificationStatus NoticeVerificationStatus @default(VERIFIED)
+  contentHash        String?                  @unique
+  sourcesJson        String?
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
+
+  targetBranches     NoticeBranch[]
+  targetSemesters    NoticeSemester[]
+  readStates         NoticeReadState[]
 
   @@index([category])
+  @@index([verificationStatus])
   @@index([isOfficial])
   @@index([isOfficialSource])
+  @@index([isUrgent])
+  @@index([isImportant])
+  @@index([contentHash])
+}
+
+model NoticeBranch {
+  id         String   @id @default(uuid())
+  noticeId   String
+  branchId   String?
+  branchCode String  // e.g. "CSE", "ECE", "ME", "CE"
+  createdAt  DateTime @default(now())
+
+  notice     Notice   @relation(fields: [noticeId], references: [id], onDelete: Cascade)
+  branch     Branch?  @relation(fields: [branchId], references: [id])
+
+  @@unique([noticeId, branchCode])
+  @@index([noticeId])
+  @@index([branchCode])
+  @@index([branchId])
+}
+
+model NoticeSemester {
+  id             String    @id @default(uuid())
+  noticeId       String
+  semesterId     String?
+  semesterNumber Int       // 1 to 8
+  createdAt      DateTime  @default(now())
+
+  notice         Notice    @relation(fields: [noticeId], references: [id], onDelete: Cascade)
+  semester       Semester? @relation(fields: [semesterId], references: [id])
+
+  @@unique([noticeId, semesterNumber])
+  @@index([noticeId])
+  @@index([semesterNumber])
+  @@index([semesterId])
+}
+
+model NoticeReadState {
+  id        String   @id @default(uuid())
+  noticeId  String
+  userId    String
+  readAt    DateTime @default(now())
+
+  notice    Notice   @relation(fields: [noticeId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([noticeId, userId])
+  @@index([noticeId])
+  @@index([userId])
 }
 
 model Report {

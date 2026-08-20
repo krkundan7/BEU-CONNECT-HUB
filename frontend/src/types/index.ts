@@ -538,14 +538,43 @@ export interface Opportunity {
   tags?: string[];
 }
 
+export type NoticeCategoryType =
+  | 'exam'
+  | 'result'
+  | 'admit_card'
+  | 'time_table'
+  | 'registration'
+  | 'academic'
+  | 'holiday'
+  | 'scholarship'
+  | 'internship'
+  | 'placement'
+  | 'admission'
+  | 'notice'
+  | 'circular'
+  | 'announcement'
+  | 'career'
+  | 'general'
+  | 'other';
+
+export type NoticeVerificationStatusType =
+  | 'FETCHED'
+  | 'UNVERIFIED'
+  | 'VERIFIED'
+  | 'PUBLISHED'
+  | 'UPDATED'
+  | 'ARCHIVED';
+
 export interface Notice {
   id: string;
+  notificationNumber?: string;
   title: string;
-  category: 'exam' | 'result' | 'scholarship' | 'admission' | 'career' | 'general';
+  category: NoticeCategoryType | string;
   isOfficial: boolean;
   source: string; // Backward compatible alias for sourceName
   sourceName?: string;
   sourceUrl?: string;
+  documentUrl?: string;
   applicationUrl?: string;
   publishedAt: string;
   publishedDate?: string;
@@ -557,6 +586,14 @@ export interface Notice {
   content: string;
   fileUrl?: string;
   isUrgent?: boolean;
+  isImportant?: boolean;
+  isAllBranches?: boolean;
+  isAllSemesters?: boolean;
+  targetBranches?: string[];
+  targetSemesters?: number[];
+  verificationStatus?: NoticeVerificationStatusType | string;
+  isRead?: boolean;
+  contentHash?: string;
 }
 
 export interface AppNotification {
