@@ -3,9 +3,12 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigation } from '../context/NavigationContext';
 import { useNotification } from '../context/NotificationContext';
 import { AvatarUploadModal } from '../components/AvatarUploadModal';
+import { MOCK_COLLEGES } from '../data/mockData';
+import { BEU_BRANCHES_LIST } from './BEUHubPage';
 import {
   Settings, User, Lock, Bell, Shield, LogOut,
-  Trash2, CheckCircle2, EyeOff, Save, Camera, UploadCloud
+  Trash2, CheckCircle2, EyeOff, Save, Camera, UploadCloud,
+  Building2, GraduationCap
 } from 'lucide-react';
 
 export const SettingsPage: React.FC = () => {
@@ -18,6 +21,10 @@ export const SettingsPage: React.FC = () => {
 
   // Account State
   const [name, setName] = useState(currentUser?.name || '');
+  const [college, setCollege] = useState(currentUser?.college || 'Government Engineering College');
+  const [branch, setBranch] = useState(currentUser?.branch || 'Computer Science & Engineering');
+  const [branchCode, setBranchCode] = useState(currentUser?.branchCode || 'CSE');
+  const [semester, setSemester] = useState(currentUser?.semester || 3);
   const [bio, setBio] = useState(currentUser?.bio || '');
   const [github, setGithub] = useState(currentUser?.github || '');
   const [linkedin, setLinkedin] = useState(currentUser?.linkedin || '');
@@ -35,8 +42,25 @@ export const SettingsPage: React.FC = () => {
 
   const handleSaveAccount = (e: React.FormEvent) => {
     e.preventDefault();
-    updateProfile({ name, bio, github, linkedin });
+    updateProfile({
+      name,
+      college,
+      branch,
+      branchCode,
+      semester: Number(semester),
+      bio,
+      github,
+      linkedin
+    });
     showToast('Profile details updated successfully!', 'success');
+  };
+
+  const handleBranchChange = (code: string) => {
+    setBranchCode(code);
+    const found = BEU_BRANCHES_LIST.find(b => b.code === code);
+    if (found) {
+      setBranch(found.name);
+    }
   };
 
   return (
@@ -136,6 +160,54 @@ export const SettingsPage: React.FC = () => {
                   onChange={(e) => setName(e.target.value)}
                   className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-navy-900 bg-white"
                 />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-beu-dark mb-1">Engineering College</label>
+                <select
+                  value={college}
+                  onChange={(e) => setCollege(e.target.value)}
+                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-navy-900 bg-white"
+                >
+                  {MOCK_COLLEGES.map(col => (
+                    <option key={col.id} value={col.name}>
+                      {col.name} ({col.location})
+                    </option>
+                  ))}
+                  <option value="Other Bihar Engineering College">Other BEU Affiliated College</option>
+                </select>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-semibold text-beu-dark mb-1">Branch</label>
+                  <select
+                    value={branchCode}
+                    onChange={(e) => handleBranchChange(e.target.value)}
+                    className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-navy-900 bg-white"
+                  >
+                    {BEU_BRANCHES_LIST.filter(b => b.code !== 'ALL').map(b => (
+                      <option key={b.code} value={b.code}>
+                        {b.code} - {b.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-beu-dark mb-1">Semester</label>
+                  <select
+                    value={semester}
+                    onChange={(e) => setSemester(Number(e.target.value))}
+                    className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-navy-900 bg-white"
+                  >
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map(s => (
+                      <option key={s} value={s}>
+                        Semester {s} (B.Tech)
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               <div>
