@@ -127,6 +127,7 @@ export interface Subject {
   regulationId?: string;
   name: string;
   code: string;
+  category?: 'BSC' | 'PCC' | 'ESC' | 'HSMC' | 'PEC' | 'OEC' | string;
   shortName?: string;
   credits: number;
   ltp?: string;

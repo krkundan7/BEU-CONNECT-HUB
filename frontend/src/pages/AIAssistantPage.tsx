@@ -9,6 +9,7 @@ import {
   UploadCloud, ArrowRight, CheckCircle2
 } from 'lucide-react';
 import { useNotification } from '../context/NotificationContext';
+import { useNavigation } from '../context/NavigationContext';
 
 interface AttachedDoc {
   type: 'image' | 'pdf';
@@ -20,12 +21,13 @@ interface AttachedDoc {
 export const AIAssistantPage: React.FC = () => {
   const { currentUser } = useAuth();
   const { showToast } = useNotification();
+  const { aiPromptData, setAiPromptData } = useNavigation();
 
-  const [selectedBranch, setSelectedBranch] = useState(currentUser?.branchCode || 'CSE');
-  const [selectedSemester, setSelectedSemester] = useState<number>(currentUser?.semester || 3);
+  const [selectedBranch, setSelectedBranch] = useState(aiPromptData?.branch || currentUser?.branchCode || 'CSE');
+  const [selectedSemester, setSelectedSemester] = useState<number>(aiPromptData?.semester || currentUser?.semester || 3);
   const [language, setLanguage] = useState<'english' | 'hindi' | 'hinglish'>('hinglish');
   const [activeMode, setActiveMode] = useState<'all' | 'scan' | 'exam14' | 'pyq' | 'viva' | 'plan'>('all');
-  const [inputQuery, setInputQuery] = useState('');
+  const [inputQuery, setInputQuery] = useState(aiPromptData?.prompt || '');
   const [isTyping, setIsTyping] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -46,6 +48,18 @@ export const AIAssistantPage: React.FC = () => {
   );
 
   const [messages, setMessages] = useState<AIChatMessage[]>([initialWelcome]);
+
+  // Handle incoming AI context from syllabus navigation
+  useEffect(() => {
+    if (aiPromptData?.prompt) {
+      if (aiPromptData.branch) setSelectedBranch(aiPromptData.branch);
+      if (aiPromptData.semester) setSelectedSemester(aiPromptData.semester);
+      setInputQuery(aiPromptData.prompt);
+      // Auto-trigger message
+      handleSendMessage(aiPromptData.prompt);
+      setAiPromptData(null);
+    }
+  }, [aiPromptData]);
 
   useEffect(() => {
     chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });

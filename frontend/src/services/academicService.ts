@@ -191,6 +191,72 @@ export const AcademicService = {
     return { subjects: [], units: [], topics: [] };
   },
 
+  /**
+   * Generates a targeted academic YouTube search URL for a syllabus topic.
+   */
+  getYouTubeSearchUrl(subjectName: string, topicTitle: string, branchCode?: string): string {
+    // BEU-COMMENT-7: Normalized YouTube academic search query generation based on university, subject and topic
+    const cleanSubj = subjectName.replace(/\(.*?\)/g, '').trim();
+    const cleanTopic = topicTitle.replace(/^[0-9.]+\s*/, '').trim();
+    const query = `BEU ${cleanSubj} ${cleanTopic}`;
+    return `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+  },
+
+  /**
+   * Retrieves user topic progress records from local cache.
+   */
+  getLocalProgressMap(): Record<string, TopicProgress> {
+    try {
+      const stored = localStorage.getItem(LOCAL_PROGRESS_KEY);
+      return stored ? JSON.parse(stored) : {};
+    } catch {
+      return {};
+    }
+  },
+
+  /**
+   * Computes multi-level progress metrics across Topic, Unit, and Subject levels.
+   */
+  computeHierarchyProgress(subject: Subject, progressMap: Record<string, TopicProgress>) {
+    // BEU-COMMENT-8: Multi-tier progress calculation aggregating topic completions to unit and subject percentages
+    let totalTopics = 0;
+    let completedTopics = 0;
+
+    const unitProgressMap: Record<string, { total: number; completed: number; percentage: number }> = {};
+
+    if (subject.units) {
+      for (const unit of subject.units) {
+        let uTotal = 0;
+        let uCompleted = 0;
+
+        for (const topic of unit.topics) {
+          uTotal++;
+          totalTopics++;
+          const status = progressMap[topic.id]?.status || topic.progress?.[0]?.status;
+          if (status === 'COMPLETED') {
+            uCompleted++;
+            completedTopics++;
+          }
+        }
+
+        unitProgressMap[unit.id] = {
+          total: uTotal,
+          completed: uCompleted,
+          percentage: uTotal > 0 ? Math.round((uCompleted / uTotal) * 100) : 0,
+        };
+      }
+    }
+
+    const overallPercentage = totalTopics > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
+
+    return {
+      totalTopics,
+      completedTopics,
+      overallPercentage,
+      unitProgressMap,
+    };
+  },
+
   async getUserProgress(branchCode?: string, semesterNumber?: number): Promise<any> {
     try {
       const res = await fetch(`${API_BASE}/academic/my-progress`);
@@ -202,8 +268,7 @@ export const AcademicService = {
       // Fallback to local storage
     }
 
-    const stored = localStorage.getItem(LOCAL_PROGRESS_KEY);
-    const map = stored ? JSON.parse(stored) : {};
+    const map = this.getLocalProgressMap();
     const values: any[] = Object.values(map);
     const completed = values.filter(v => v.status === 'COMPLETED').length;
     const inProg = values.filter(v => v.status === 'IN_PROGRESS').length;

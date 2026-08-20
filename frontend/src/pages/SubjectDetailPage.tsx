@@ -345,40 +345,53 @@ export const SubjectDetailPage: React.FC = () => {
                               <div className="flex items-center gap-2 self-end sm:self-auto">
                                 <button
                                   onClick={() => {
+                                    const promptText = `University: Bihar Engineering University (BEU), Patna\nSubject: ${subject.name} (${subject.code})\nUnit: ${unit.unitTitle}\nTopic: ${topic.title}\n\nPlease explain this syllabus topic with formulas, derivations, and a 14-mark model BEU exam solution in Hinglish.`;
                                     navigateTo('ai-assistant', {
-                                      prompt: `Mujhe BEU ${subject.name} ke topic "${topic.title}" ko formula aur important questions ke saath Hinglish mein samjhao.`,
+                                      prompt: promptText,
+                                      aiContext: {
+                                        university: 'Bihar Engineering University (BEU), Patna',
+                                        subject: subject.name,
+                                        subjectCode: subject.code,
+                                        unit: unit.unitTitle,
+                                        topic: topic.title,
+                                        prompt: promptText,
+                                      },
                                     });
                                   }}
-                                  className="text-xs font-semibold text-purple-700 hover:bg-purple-50 px-2 py-1 rounded-lg flex items-center gap-1"
+                                  className="px-2.5 py-1.5 rounded-xl text-xs font-bold text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 transition-colors flex items-center gap-1"
+                                  title="Ask AI Tutor"
                                 >
-                                  <Sparkles className="w-3 h-3" />
-                                  <span>AI Tutor</span>
+                                  <Sparkles className="w-3.5 h-3.5" />
+                                  <span>Ask AI</span>
                                 </button>
+
+                                <a
+                                  href={AcademicService.getYouTubeSearchUrl(subject.name, topic.title, subject.branchCode)}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="px-2.5 py-1.5 rounded-xl text-xs font-bold text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 transition-colors flex items-center gap-1"
+                                  title="Search YouTube Lectures"
+                                >
+                                  <Video className="w-3.5 h-3.5" />
+                                  <span>YouTube</span>
+                                </a>
 
                                 <button
                                   onClick={() => handleTopicStatusToggle(topic.id, currentStatus)}
                                   className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
                                     currentStatus === 'COMPLETED'
                                       ? 'bg-emerald-600 text-white'
-                                      : currentStatus === 'IN_PROGRESS'
-                                      ? 'bg-blue-600 text-white'
-                                      : currentStatus === 'REVISION_REQUIRED'
-                                      ? 'bg-amber-500 text-white'
-                                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200'
                                   }`}
                                 >
-                                  {currentStatus === 'COMPLETED' && <CheckCircle2 className="w-3.5 h-3.5" />}
-                                  {currentStatus === 'IN_PROGRESS' && <Clock className="w-3.5 h-3.5" />}
-                                  {currentStatus === 'REVISION_REQUIRED' && <AlertCircle className="w-3.5 h-3.5" />}
-                                  <span>
-                                    {currentStatus === 'COMPLETED'
-                                      ? 'Completed'
-                                      : currentStatus === 'IN_PROGRESS'
-                                      ? 'In Progress'
-                                      : currentStatus === 'REVISION_REQUIRED'
-                                      ? 'Revision Req.'
-                                      : 'Not Started'}
-                                  </span>
+                                  {currentStatus === 'COMPLETED' ? (
+                                    <>
+                                      <CheckCircle2 className="w-3.5 h-3.5" />
+                                      <span>Done</span>
+                                    </>
+                                  ) : (
+                                    <span>Mark as Done</span>
+                                  )}
                                 </button>
                               </div>
                             </div>

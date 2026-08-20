@@ -44,6 +44,7 @@ export class AcademicService {
    * Get all 34 BEU B.Tech Programmes / Branches
    */
   static async getBranches() {
+    // BEU-COMMENT-2: Branch category filtering and official branch code validation logic
     try {
       const branches = await prisma.branch.findMany({
         orderBy: [{ category: 'asc' }, { name: 'asc' }],
@@ -62,6 +63,7 @@ export class AcademicService {
    * Get all Semesters (1 to 8)
    */
   static async getSemesters() {
+    // BEU-COMMENT-3: Semester group mapping adhering to BEU 1st Year Group A/B and discipline core structure
     try {
       const semesters = await prisma.semester.findMany({
         orderBy: { number: 'asc' },
@@ -98,6 +100,7 @@ export class AcademicService {
     regulationCode?: string;
     search?: string;
   }) {
+    // BEU-COMMENT-4: Strict branch-semester subject relationship enforcement preventing cross-discipline leakage
     try {
       const where: any = {};
 
@@ -146,7 +149,16 @@ export class AcademicService {
     let filtered = [...BEU_OFFICIAL_SUBJECTS];
 
     if (filters?.branchCode) {
-      filtered = filtered.filter(s => s.branchCode === filters.branchCode);
+      const bCode = filters.branchCode;
+      filtered = filtered.filter(s => {
+        if (s.branchCode === bCode) return true;
+        // Group A common 1st year subjects (Physics/Maths/BEE/PPS) apply to all computing & electrical branches
+        if ((filters.semesterNumber === 1 || filters.semesterNumber === 2) && s.branchCode === 'CSE') {
+          const isGroupABranch = ['IT', 'ECE', 'EE', 'EEE', 'CSE_AIML', 'CSE_DS', 'CSE_CYBER', 'CSE_IOT', 'CSE_AI', 'CSE_NET', 'CSE_IOT_BC', 'EE_VLSI', 'ECE_ACT', 'RA'].includes(bCode);
+          if (isGroupABranch) return true;
+        }
+        return false;
+      });
     }
     if (filters?.semesterNumber) {
       filtered = filtered.filter(s => s.semesterNumber === Number(filters.semesterNumber));
@@ -178,6 +190,7 @@ export class AcademicService {
    * Resolves deep subject details including unit outlines, subtopics, exam priorities, and personalized user progress mappings.
    */
   static async getSubjectById(subjectIdOrCode: string, userId?: string) {
+    // BEU-COMMENT-5: Five-tier hierarchical traversal resolving Branch -> Semester -> Subject -> Unit -> Topic
     try {
       const subject = await prisma.subject.findFirst({
         where: {

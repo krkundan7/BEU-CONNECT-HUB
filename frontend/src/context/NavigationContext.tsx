@@ -39,6 +39,17 @@ export type PageId =
   | 'admin-resources'
   | 'admin-syllabus';
 
+export interface AIPromptContext {
+  prompt?: string;
+  university?: string;
+  branch?: string;
+  semester?: number;
+  subject?: string;
+  subjectCode?: string;
+  unit?: string;
+  topic?: string;
+}
+
 interface NavigationContextType {
   currentPage: PageId;
   navigateTo: (page: PageId, params?: Record<string, any>) => void;
@@ -48,6 +59,8 @@ interface NavigationContextType {
   setSelectedCommunityId: (id: string | null) => void;
   viewedUserId: string | null;
   setViewedUserId: (id: string | null) => void;
+  aiPromptData: AIPromptContext | null;
+  setAiPromptData: (data: AIPromptContext | null) => void;
   isSearchOpen: boolean;
   setIsSearchOpen: (open: boolean) => void;
   reportModalData: { isOpen: boolean; contentType: string; contentId: string; title: string } | null;
@@ -59,9 +72,10 @@ const NavigationContext = createContext<NavigationContextType | undefined>(undef
 
 export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentPage, setCurrentPage] = useState<PageId>('landing');
-  const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>('cse-301');
+  const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>('PCC-CS301');
   const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
   const [viewedUserId, setViewedUserId] = useState<string | null>(null);
+  const [aiPromptData, setAiPromptData] = useState<AIPromptContext | null>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [reportModalData, setReportModalData] = useState<{ isOpen: boolean; contentType: string; contentId: string; title: string } | null>(null);
 
@@ -70,6 +84,9 @@ export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       if (params.subjectId) setSelectedSubjectId(params.subjectId);
       if (params.communityId) setSelectedCommunityId(params.communityId);
       if (params.userId) setViewedUserId(params.userId);
+      if (params.prompt || params.aiContext) {
+        setAiPromptData(params.aiContext || { prompt: params.prompt });
+      }
     }
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -94,11 +111,13 @@ export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         setSelectedCommunityId,
         viewedUserId,
         setViewedUserId,
+        aiPromptData,
+        setAiPromptData,
         isSearchOpen,
         setIsSearchOpen,
         reportModalData,
         openReportModal,
-        closeReportModal
+        closeReportModal,
       }}
     >
       {children}
@@ -106,8 +125,10 @@ export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   );
 };
 
-export const useNavigation = (): NavigationContextType => {
+export const useNavigation = () => {
   const context = useContext(NavigationContext);
-  if (!context) throw new Error('useNavigation must be used within a NavigationProvider');
+  if (!context) {
+    throw new Error('useNavigation must be used within a NavigationProvider');
+  }
   return context;
 };
