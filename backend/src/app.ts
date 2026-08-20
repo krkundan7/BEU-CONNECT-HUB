@@ -15,14 +15,20 @@ import { HTTP_STATUS } from './config/constants.js';
 export const createApp = (): Express => {
   const app = express();
 
-  // Configure standard security headers with Cross-Origin Resource Policy set to 'cross-origin' to permit frontend embedding of uploaded documents and media
+  /* NOV-COMMENT-1: Helmet Security Headers & Cross-Origin Resource Policy
+   * Configures standard HTTP response headers to harden the server against clickjacking, MIME-sniffing, and XSS attacks.
+   * Explicitly sets Cross-Origin-Resource-Policy to 'cross-origin' so frontend Single Page Applications (running on Vite/port 5173
+   * or production CDNs) can directly fetch and render uploaded PDF notes, question papers, and student avatars from '/uploads'. */
   app.use(
     helmet({
       crossOriginResourcePolicy: { policy: 'cross-origin' },
     })
   );
 
-  // Dynamic CORS resolution supporting comma-separated origin whitelists, wildcard matchers, and mobile/curl clients without an Origin header
+  /* NOV-COMMENT-2: Dynamic CORS Whitelist Resolution & Origin Sanitization
+   * Dynamically inspects the incoming request 'Origin' header against the configured CORS_ORIGIN whitelist array.
+   * Allows requests without an Origin header (e.g. mobile applications, health probes, automated curl scripts) while
+   * validating browser origins to enforce secure cross-origin resource sharing and credentials propagation. */
   app.use(
     cors({
       origin: (origin, callback) => {
@@ -74,7 +80,10 @@ export const createApp = (): Express => {
   // Master API Routes
   app.use(env.API_PREFIX, apiRouter);
 
-  // Terminal 404 handler catching all unrouted API paths before delegating uncaught exceptions to central error middleware
+  /* NOV-COMMENT-3: Terminal Unmatched Route Handler (404 Fallback)
+   * Catches any HTTP requests directed to nonexistent endpoints or invalid methods under the API namespace.
+   * Formats a standardized JSend error response with HTTP 404 status and 'ROUTE_NOT_FOUND' code before delegating
+   * uncaught runtime exceptions to the downstream centralized error handler. */
   app.use((req: Request, res: Response) => {
     return ResponseFormatter.error(
       res,

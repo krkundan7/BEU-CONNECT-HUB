@@ -1,5 +1,9 @@
 import { z } from 'zod';
 
+/**
+ * Previous Year Question (PYQ) upload schema asserting valid BEU examination years,
+ * valid subject foreign key references, and authenticated file storage URLs.
+ */
 export const createPYQSchema = z.object({
   body: z.object({
     subjectId: z.string().uuid(),
@@ -10,6 +14,10 @@ export const createPYQSchema = z.object({
   }),
 });
 
+/* NOV-COMMENT-19: Handwritten Notes Syllabus Indexing & Format Constraints
+ * Validates uploaded student revision notes against syllabus structure constraints:
+ * limits 'unitNumber' between 1 and 10 to align with university syllabus modules, restricts file types to
+ * verified document enums ('pdf', 'image', 'doc'), and enforces clean title length boundaries (3-150 chars). */
 export const createNoteSchema = z.object({
   body: z.object({
     subjectId: z.string(),
@@ -22,6 +30,9 @@ export const createNoteSchema = z.object({
   }),
 });
 
+/**
+ * Curated video lecture schema validating YouTube/CDN video URLs and optional metadata tags.
+ */
 export const createStudyVideoSchema = z.object({
   body: z.object({
     subjectId: z.string().uuid(),
@@ -35,6 +46,9 @@ export const createStudyVideoSchema = z.object({
   }),
 });
 
+/**
+ * AI academic tutor message schema accepting conversational queries and multimodal document attachments (images/PDF data URIs).
+ */
 export const aiChatSchema = z.object({
   body: z.object({
     conversationId: z.string().uuid().optional(),
@@ -48,6 +62,9 @@ export const aiChatSchema = z.object({
   }),
 });
 
+/**
+ * AI PYQ pattern analyzer input schema requiring subject name and optional semester/branch context.
+ */
 export const aiAnalyzePYQSchema = z.object({
   body: z.object({
     subjectId: z.string().optional(),
@@ -57,6 +74,9 @@ export const aiAnalyzePYQSchema = z.object({
   }),
 });
 
+/**
+ * AI Study Plan generation schema validating exam date targets, daily available study hours (1-16h), and preparation baseline.
+ */
 export const createStudyPlanSchema = z.object({
   body: z.object({
     title: z.string().min(3).max(150),

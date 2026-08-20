@@ -42,11 +42,11 @@ describe('BEU Connect Hub - Official Syllabus & Academic Service', () => {
       const regulations = await AcademicService.getRegulations();
       expect(regulations.length).toBeGreaterThanOrEqual(2);
 
-      const regCodes = regulations.map(r => r.code);
+      const regCodes = regulations.map((r: any) => r.code);
       expect(regCodes).toContain('REG_2026');
       expect(regCodes).toContain('REG_2018');
 
-      const reg2026 = regulations.find(r => r.code === 'REG_2026');
+      const reg2026 = regulations.find((r: any) => r.code === 'REG_2026');
       expect(reg2026?.effectiveFromYear).toBe(2026);
       expect(reg2026?.officialDocumentUrl).toContain('UG%20Regulation_05.04.2026.pdf');
     });
@@ -55,7 +55,7 @@ describe('BEU Connect Hub - Official Syllabus & Academic Service', () => {
       const sessions = await AcademicService.getSessions();
       expect(sessions.length).toBeGreaterThanOrEqual(3);
 
-      const sessionNames = sessions.map(s => s.name);
+      const sessionNames = sessions.map((s: any) => s.name);
       expect(sessionNames).toContain('2026-2027');
       expect(sessionNames).toContain('2025-2026');
     });
@@ -77,7 +77,7 @@ describe('BEU Connect Hub - Official Syllabus & Academic Service', () => {
       });
 
       expect(subjects.length).toBeGreaterThanOrEqual(1);
-      const dsa = subjects.find(s => s.code === 'PCC-CS301');
+      const dsa = subjects.find((s: any) => s.code === 'PCC-CS301');
       expect(dsa).toBeDefined();
       expect(dsa?.name).toBe('Data Structures and Algorithms');
       expect(dsa?.credits).toBe(4.0);

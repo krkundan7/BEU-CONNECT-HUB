@@ -5,7 +5,10 @@ import {
   BEU_OFFICIAL_SUBJECTS,
 } from '../data/beuOfficialCurriculum.js';
 
-// BEU-COMMENT-10: Automated syllabus data integrity validator checking relationship completeness and uniqueness
+/* NOV-COMMENT-50: Automated Curriculum Hierarchy & Relationship Integrity Test Suite
+ * Asserts structural invariants on the official Bihar Engineering University academic curriculum data.
+ * Validates that all 34 engineering disciplines exist without ID/code collisions, asserts that official BEU document URLs are intact,
+ * and validates that subject modules strictly conform to the 5-unit syllabus architecture with zero orphan topics. */
 describe('BEU Official Syllabus Data Integrity & Hierarchy Validation', () => {
   test('Branch Validation: 0 missing, 0 duplicates, all official codes verified', () => {
     expect(BEU_OFFICIAL_BRANCHES.length).toBeGreaterThanOrEqual(34);

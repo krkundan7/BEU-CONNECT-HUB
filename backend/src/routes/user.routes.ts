@@ -6,6 +6,11 @@ import { upload } from '../middleware/upload.middleware.js';
 import { updateProfileSchema, addSkillSchema, achievementSchema } from '../validators/user.validator.js';
 import { uuidParamSchema } from '../validators/common.validator.js';
 
+/**
+ * Student Profile & Social Graph Routes (`/api/users`)
+ * Handles authenticated profile modifications, multipart avatar uploads,
+ * skill/achievement inventories, and campus peer follow relationships.
+ */
 const router = Router();
 
 // Current Authenticated User Actions
@@ -17,7 +22,7 @@ router.delete('/me/skills/:skillId', requireAuth, UserController.removeSkill);
 router.post('/me/achievements', requireAuth, validate(achievementSchema), UserController.addAchievement);
 router.delete('/achievements/:id', requireAuth, UserController.deleteAchievement);
 
-// Public / User specific Profile & Follows
+// Public / User specific Profile & Peer Follow Graph
 router.get('/:id', validate(uuidParamSchema), UserController.getUserById);
 router.post('/:id/follow', requireAuth, validate(uuidParamSchema), UserController.toggleFollow);
 router.delete('/:id/follow', requireAuth, validate(uuidParamSchema), UserController.toggleFollow);

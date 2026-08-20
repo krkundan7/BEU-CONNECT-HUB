@@ -2,6 +2,11 @@ import { Request, Response, NextFunction } from 'express';
 import { AIChatService } from '../services/ai.service.js';
 import { ResponseFormatter } from '../utils/apiResponse.js';
 
+/**
+ * AI Assistant & Syllabus Intelligence Controller
+ * Relays student queries, multimodal attachments, and PYQ pattern analysis requests
+ * to the underlying LLM provider/deterministic knowledge engine.
+ */
 export class AIController {
   /**
    * AI tutoring endpoint receiving student questions and optional image/PDF attachments, invoking LLM inference with curriculum system prompt.
@@ -28,10 +33,11 @@ export class AIController {
     }
   }
 
+  // Retrieves previous AI tutoring chat sessions for the authenticated student
   static async getConversations(req: Request, res: Response, next: NextFunction) {
     try {
       const convs = await AIChatService.getUserAIConversations(req.user!.id);
-      return ResponseFormatter.success(res, convs);
+      return ResponseFormatter.success(res, convs, 'User AI conversations retrieved');
     } catch (error) {
       next(error);
     }

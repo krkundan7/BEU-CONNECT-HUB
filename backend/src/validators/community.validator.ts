@@ -1,5 +1,10 @@
 import { z } from 'zod';
 
+/**
+ * Community hub creation schema asserting name/description boundaries,
+ * campus category classifications (COLLEGE, BRANCH, SEMESTER, INTEREST, CAREER),
+ * and privacy settings for campus-gated clubs.
+ */
 export const createCommunitySchema = z.object({
   body: z.object({
     name: z.string().min(3).max(100),
@@ -12,6 +17,9 @@ export const createCommunitySchema = z.object({
   }),
 });
 
+/**
+ * Community metadata update schema allowing leaders to edit guidelines, icons, and banner art.
+ */
 export const updateCommunitySchema = z.object({
   body: z.object({
     description: z.string().min(10).max(1000).optional(),
@@ -21,6 +29,9 @@ export const updateCommunitySchema = z.object({
   }),
 });
 
+/**
+ * Community-scoped discussion thread schema validating topic title and body content.
+ */
 export const createCommunityPostSchema = z.object({
   body: z.object({
     title: z.string().min(3).max(200),

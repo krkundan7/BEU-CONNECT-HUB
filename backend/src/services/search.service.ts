@@ -1,5 +1,8 @@
 import prisma from '../config/prisma.js';
 
+/* NOV-COMMENT-39: Federated Cross-Domain Parallel Search Orchestrator
+ * Executes concurrent asynchronous queries across Users, Subjects, Clubs, Notes, PYQs, Opportunities, and Projects using 'Promise.all'.
+ * Employs case-insensitive ILIKE pattern matchers and limits results per domain to maximize responsiveness and mitigate server latency. */
 export class SearchService {
   static async globalSearch(query: string, limit: number = 5) {
     if (!query || query.trim().length === 0) {

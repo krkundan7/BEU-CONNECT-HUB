@@ -3,10 +3,15 @@ import { AppError } from '../utils/AppError.js';
 import { PostType, Visibility, BookmarkItemType, Role } from '@prisma/client';
 import { PaginationQuery, PaginatedResult } from '../types/index.js';
 
+/**
+ * Campus Social Feed Service
+ * Manages post life cycle, rich media associations, paginated queries with viewer reactions,
+ * authorization barriers for content deletion, like toggling, and threaded commentary.
+ */
 export class PostService {
-  /**
-   * Publishes a campus feed update with optional media attachments and awards 10 gamification contribution karma points.
-   */
+  /* NOV-COMMENT-34: Relational Post Creation & Gamification Reward Attribution
+   * Persists campus feed updates while creating nested child 'Media' records for uploaded images/documents.
+   * Atomically increments the author's 'contributionPoints' by +10 karma points to encourage peer academic sharing. */
   static async createPost(authorId: string, data: { content: string; type?: PostType; visibility?: Visibility; mediaUrls?: string[] }) {
     const post = await prisma.post.create({
       data: {
@@ -110,6 +115,7 @@ export class PostService {
     };
   }
 
+  // Retrieves post details with nested comments and like reaction check
   static async getPostById(postId: string, currentUserId?: string) {
     const post = await prisma.post.findUnique({
       where: { id: postId },
@@ -156,6 +162,7 @@ export class PostService {
     };
   }
 
+  // Deletes post with author check or moderator/admin override
   static async deletePost(postId: string, userId: string, userRole: Role) {
     const post = await prisma.post.findUnique({ where: { id: postId } });
     if (!post) throw AppError.notFound('Post not found');
@@ -168,6 +175,10 @@ export class PostService {
     return true;
   }
 
+  /* NOV-COMMENT-35: Atomic Like/Unlike Toggling & Post Author Notification Dispatch
+   * Utilizes the compound unique index 'postId_userId' on the 'Like' model to determine current reaction state.
+   * Atomically destroys or creates the like entity, and conditionally dispatches an in-app notification to the post author
+   * if the reactor is not the original author (preventing self-notification spam). */
   static async toggleLike(postId: string, userId: string) {
     const existing = await prisma.like.findUnique({
       where: { postId_userId: { postId, userId } },
@@ -199,6 +210,7 @@ export class PostService {
     return { isLiked: true };
   }
 
+  // Creates top-level or threaded comment and alerts the post author
   static async addComment(postId: string, authorId: string, content: string, parentId?: string) {
     const comment = await prisma.comment.create({
       data: {
@@ -235,6 +247,7 @@ export class PostService {
     return comment;
   }
 
+  // Toggles polymorphic bookmark record using compound unique index `userId_itemType_itemId`
   static async toggleBookmark(userId: string, itemType: BookmarkItemType, itemId: string) {
     const existing = await prisma.bookmark.findUnique({
       where: {
@@ -254,6 +267,7 @@ export class PostService {
     return { isBookmarked: true };
   }
 
+  // Retrieves list of bookmarks for the student
   static async getBookmarks(userId: string, itemType?: BookmarkItemType) {
     return prisma.bookmark.findMany({
       where: {

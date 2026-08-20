@@ -1,5 +1,9 @@
 import { z } from 'zod';
 
+/**
+ * Student project collaboration post schema enforcing team sizing bounds (2-10 students),
+ * mandatory technical skill tags, repository links, and live demonstration URLs.
+ */
 export const createProjectSchema = z.object({
   body: z.object({
     title: z.string().min(3).max(150),
@@ -12,6 +16,10 @@ export const createProjectSchema = z.object({
   }),
 });
 
+/**
+ * Project lifecycle update schema enabling owners to advance project status
+ * through defined milestones (IDEA, LOOKING_FOR_TEAM, IN_PROGRESS, COMPLETED).
+ */
 export const updateProjectSchema = z.object({
   body: z.object({
     title: z.string().min(3).max(150).optional(),
@@ -22,6 +30,9 @@ export const updateProjectSchema = z.object({
   }),
 });
 
+/**
+ * Senior student / alumni mentor profile registration schema capturing expertise domains and concurrent mentee slot capacity (1-20).
+ */
 export const mentorProfileSchema = z.object({
   body: z.object({
     bio: z.string().min(10).max(1000),
@@ -32,6 +43,9 @@ export const mentorProfileSchema = z.object({
   }),
 });
 
+/**
+ * 1-on-1 mentorship session request schema asserting clear academic/career discussion topics and introductory context.
+ */
 export const mentorshipRequestSchema = z.object({
   body: z.object({
     topic: z.string().min(3).max(150),

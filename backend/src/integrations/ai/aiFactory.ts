@@ -4,11 +4,10 @@ import { aiService as geminiService } from './geminiAI.service.js';
 import { env } from '../../config/env.js';
 import { Logger } from '../../utils/logger.js';
 
-/**
- * Modular AI Provider Resolver
- * Dynamically resolves the active AI Service implementation based on environment configuration.
- * Allows seamless switching of LLM providers (OpenRouter, Gemini, etc.) and models without frontend alterations.
- */
+/* NOV-COMMENT-26: Dynamic AI Provider Factory & LLM Gateway Abstraction
+ * Implements the Factory design pattern conforming to the common 'IAIService' interface.
+ * Reads 'env.AI_PROVIDER' to dynamically instantiate either the OpenRouter multi-model gateway or direct Google Gemini SDK,
+ * allowing instant provider failover and zero-downtime model upgrades without changing client-side code. */
 export const getAIService = (): IAIService => {
   const provider = (env.AI_PROVIDER || 'openrouter').toLowerCase();
 

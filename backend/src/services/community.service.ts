@@ -3,9 +3,9 @@ import { AppError } from '../utils/AppError.js';
 import { CommunityCategory, CommunityMemberRole, Role } from '@prisma/client';
 
 export class CommunityService {
-  /**
-   * Provisions a new student community guild, generating URL-safe slug identifiers and assigning the creator as initial OWNER.
-   */
+  /* NOV-COMMENT-36: Student Guild Provisioning & Founder Attribution
+   * Generates URL-safe slugs from club names, asserts global name uniqueness, and instantiates the community record.
+   * Atomically enlists the creator in 'CommunityMember' table with 'OWNER' role privileges to anchor administrative governance. */
   static async createCommunity(creatorId: string, data: {
     name: string;
     description: string;
@@ -68,7 +68,7 @@ export class CommunityService {
       },
     });
 
-    return list.map(c => ({
+    return list.map((c: any) => ({
       ...c,
       membersCount: c._count.members,
       postsCount: c._count.posts,
@@ -105,8 +105,8 @@ export class CommunityService {
       throw AppError.notFound('Community not found');
     }
 
-    const isMember = currentUserId ? community.members.some(m => m.userId === currentUserId) : false;
-    const userRole = currentUserId ? community.members.find(m => m.userId === currentUserId)?.role : null;
+    const isMember = currentUserId ? community.members.some((m: any) => m.userId === currentUserId) : false;
+    const userRole = currentUserId ? community.members.find((m: any) => m.userId === currentUserId)?.role : null;
 
     return {
       ...community,
@@ -117,9 +117,9 @@ export class CommunityService {
     };
   }
 
-  /**
-   * Toggles community membership state, preventing OWNER members from abandoning communities without ownership transfer.
-   */
+  /* NOV-COMMENT-37: Community Membership State Machine & Owner Protection
+   * Manages joining and leaving community hubs through the compound unique key 'communityId_userId'.
+   * Enforces business constraint preventing the community creator/OWNER from deserting the club without explicit ownership transfer. */
   static async toggleJoinCommunity(communityId: string, userId: string) {
     const existing = await prisma.communityMember.findUnique({
       where: { communityId_userId: { communityId, userId } },

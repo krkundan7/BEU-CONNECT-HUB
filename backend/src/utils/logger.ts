@@ -16,8 +16,10 @@ export class Logger {
     console.warn(this.format('WARN', message, meta));
   }
 
+  /* NOV-COMMENT-47: Error Logging & In-Flight Credential Sanitization
+   * Inspects logging metadata and actively strips sensitive security tokens ('password', 'token', 'refreshToken')
+   * before printing to standard error streams, preventing accidental credential leaks in cloud log aggregates. */
   static error(message: string, meta?: any): void {
-    // Redact sensitive security attributes (passwords, JWTs, refresh tokens) before logging to standard error streams
     const sanitizedMeta = meta ? { ...meta } : undefined;
     if (sanitizedMeta && sanitizedMeta.password) delete sanitizedMeta.password;
     if (sanitizedMeta && sanitizedMeta.token) delete sanitizedMeta.token;

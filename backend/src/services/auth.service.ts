@@ -5,10 +5,11 @@ import { AppError } from '../utils/AppError.js';
 import { Role, VerificationStatus } from '@prisma/client';
 
 export class AuthService {
-  /**
-   * Registers a new student account, dynamically provisioning missing College/Branch/Semester records,
-   * hashing passwords with bcrypt, queuing a pending academic verification record, and issuing initial tokens.
-   */
+  /* NOV-COMMENT-8: Atomic Student Provisioning & Verification Ingestion
+   * Validates uniqueness of student email and BEU registration number.
+   * Dynamically resolves or creates missing College, Branch, and Semester relational parent entities.
+   * Hashes plain text passwords with bcrypt cost factor 12, creates a default interest profile,
+   * generates an initial PENDING verification request, and issues initial access + refresh token credentials. */
   static async register(data: {
     name: string;
     email: string;
@@ -147,9 +148,10 @@ export class AuthService {
     };
   }
 
-  /**
-   * Authenticates student credentials against stored bcrypt password hashes and issues fresh JWT access/refresh token pairs.
-   */
+  /* NOV-COMMENT-9: Credential Authentication & Dual-Token Provisioning
+   * Queries user record by case-insensitive normalized email including college, branch, and semester links.
+   * Compares plain password with bcrypt hash using constant-time evaluation to thwart timing attacks.
+   * Issues short-lived access token JWT encoding claims (id, role, verificationStatus) alongside a 7-day refresh token. */
   static async login(email: string, password: string) {
     const user = await prisma.user.findUnique({
       where: { email: email.toLowerCase() },
@@ -203,10 +205,10 @@ export class AuthService {
     };
   }
 
-  /**
-   * Implements strict Single-Use Refresh Token Rotation (RTR), revoking the submitted token
-   * and issuing a brand new token pair to guard against token theft and replay attacks.
-   */
+  /* NOV-COMMENT-10: Single-Use Refresh Token Rotation (RTR) Mechanism
+   * Computes SHA-256 hash of incoming plaintext refresh token for indexed lookup against `RefreshToken` table.
+   * Validates expiration date and ensures `revokedAt` is null. Immediately stamps `revokedAt = NOW()` to invalidate the used token
+   * and issues a fresh token pair. If a revoked token is re-used, this pattern detects token compromise and aborts session renewal. */
   static async refreshToken(rawRefreshToken: string) {
     const tokenHash = TokenUtils.hashToken(rawRefreshToken);
 

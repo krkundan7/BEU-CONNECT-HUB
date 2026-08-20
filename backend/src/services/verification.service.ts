@@ -67,6 +67,9 @@ export class VerificationService {
     });
   }
 
+  /* NOV-COMMENT-40: Atomic Student Verification State Transition & Audit Trail
+   * Approves student BEU identity credentials, binding 'reviewedBy' admin UUID and review timestamps.
+   * Atomically upgrades User status to 'VERIFIED' and dispatches a celebratory in-app notification to the student account. */
   static async approveVerification(adminId: string, verificationId: string, adminNote?: string) {
     const verification = await prisma.verification.findUnique({ where: { id: verificationId } });
     if (!verification) {

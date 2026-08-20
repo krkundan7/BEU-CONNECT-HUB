@@ -1,9 +1,9 @@
 import { HTTP_STATUS, ERROR_CODES } from '../config/constants.js';
 
-/**
- * Base operational application error class capturing HTTP status codes, structured error identifiers,
- * restoring custom prototype chains across transpiled TypeScript targets, and capturing V8 stack traces.
- */
+/* NOV-COMMENT-46: Operational AppError Hierarchy & Prototype Restoration
+ * Extends the native JavaScript Error class with HTTP status codes, machine-readable domain error codes, and operational flags.
+ * Explicitly executes 'Object.setPrototypeOf(this, new.target.prototype)' to maintain correct 'instanceof' checks across ES5/ES6 transpilation targets,
+ * and calls 'Error.captureStackTrace' to provide clean debugging traces without polluting the call site. */
 export class AppError extends Error {
   public readonly statusCode: number;
   public readonly code: string;

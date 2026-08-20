@@ -33,9 +33,10 @@ export class SocketServer {
     this.setupEventHandlers();
   }
 
-  /**
-   * Socket.IO connection authentication middleware validating JWT bearer tokens supplied in handshake auth or headers.
-   */
+  /* NOV-COMMENT-31: WebSocket Handshake JWT Authentication Barrier
+   * Intercepts new Socket.IO transport handshakes before connection establishment.
+   * Extracts JWT tokens from 'socket.handshake.auth.token' or HTTP Authorization headers.
+   * Verifies the cryptographic token signature, rejects unauthenticated socket handshakes, and binds user payload to the socket instance. */
   private setupAuthMiddleware() {
     this.io.use((socket: AuthenticatedSocket, next) => {
       try {
@@ -66,7 +67,10 @@ export class SocketServer {
       // Broadcast presence
       this.io.emit('user_status', { userId: user.id, status: 'ONLINE' });
 
-      // Join isolated conversation room to scope message fan-out strictly to active participants
+      /* NOV-COMMENT-32: Isolated Conversation Room Multiplexing & Fan-out
+       * Subscribes client sockets to private conversation rooms named 'conversation_${id}'.
+       * Limits real-time message fan-out and updates strictly to enrolled conversation participants,
+       * preventing cross-tenant message leaks across campus peer groups. */
       socket.on('join_conversation', (conversationId: string) => {
         socket.join(`conversation_${conversationId}`);
         Logger.debug(`Socket ${socket.id} joined room conversation_${conversationId}`);
@@ -91,7 +95,9 @@ export class SocketServer {
         }
       });
 
-      // Broadcast typing indicator to conversation peers excluding the sending client socket
+      /* NOV-COMMENT-33: Real-Time Presence & Client-Excluded Typing Relays
+       * Employs 'socket.to(...)' rather than 'this.io.to(...)' to broadcast typing events to peers while excluding the typing author.
+       * Maintains an in-memory 'onlineUsers' map (userId -> socketId) and triggers 'user_status' OFFLINE events upon socket disconnect. */
       socket.on('typing_start', (conversationId: string) => {
         socket.to(`conversation_${conversationId}`).emit('user_typing', {
           conversationId,

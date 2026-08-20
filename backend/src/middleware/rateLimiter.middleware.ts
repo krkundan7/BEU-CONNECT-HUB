@@ -22,10 +22,10 @@ export const globalLimiter = rateLimit({
   },
 });
 
-/**
- * Strict rate limiter capping authentication attempts (login/register/password-reset) to 20 requests per 15 minutes
- * to mitigate credential stuffing and password brute-force vectors.
- */
+/* NOV-COMMENT-16: Auth Endpoint Brute-Force & Credential Stuffing Throttling
+ * Implements a strict sliding-window rate limit allowing a maximum of 20 authentication attempts per 15 minutes per client IP.
+ * Thwarts automated dictionary and credential-stuffing attacks on login/registration routes, returning standard 429 Too Many Requests
+ * with standardized 'Retry-After' headers and 'RATE_LIMIT_EXCEEDED' error code envelopes. */
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 20, // max 20 attempts

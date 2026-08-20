@@ -4,6 +4,10 @@ import { ResponseFormatter } from '../utils/apiResponse.js';
 import { Logger } from '../utils/logger.js';
 import { HTTP_STATUS } from '../config/constants.js';
 
+/* NOV-COMMENT-48: Centralized Error Translation & Stack Trace Suppression
+ * Intercepts all unhandled exceptions thrown across Express middleware, controllers, and services.
+ * Distinguishes between intentional operational 'AppError' instances and database ORM exceptions (e.g. Prisma P2002 duplicate keys, P2025 missing records).
+ * Formats standardized JSON error envelopes and strictly suppresses internal stack traces in production to prevent technical information leaks. */
 export const errorHandler = (
   err: any,
   req: Request,

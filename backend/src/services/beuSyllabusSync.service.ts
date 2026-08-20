@@ -11,10 +11,10 @@ import { AppError } from '../utils/AppError.js';
 import { SyllabusStatus, BranchCategory, SubjectType, SubjectCategory } from '@prisma/client';
 
 export class BEUSyllabusSyncService {
-  /**
-   * Synchronizes the complete official Bihar Engineering University curriculum hierarchy into PostgreSQL,
-   * performing transactional deduplication across Sessions, Regulations, Branches, Semesters, Subjects, Units, Topics, and SubTopics.
-   */
+  /* NOV-COMMENT-24: Idempotent University Syllabus Synchronizer & Audit Stamping
+   * Iterates across the canonical 34 BEU Engineering branches, 8 semesters, and curriculum regulations.
+   * Performs idempotent upserts on Subjects, Units, Topics, and SubTopics using compound relational keys.
+   * On completion, creates an immutable 'AdminAction' audit record linking the syncing administrator UUID to the summary metrics. */
   static async syncAllFromOfficialSource(adminUserId?: string) {
     Logger.info('🔄 Starting BEU Official Syllabus Synchronization...');
     const stats = {

@@ -22,9 +22,10 @@ export class OpenRouterAIService implements IAIService {
     this.baseUrl = (env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1').replace(/\/+$/, '');
   }
 
-  /**
-   * Generates academic responses using OpenRouter LLM gateway with offline deterministic fallback.
-   */
+  /* NOV-COMMENT-27: Academic Query Classification & Multi-Tier AI Fallback
+   * Analyzes incoming student prompts through 'QueryClassifier' to identify subject domain and research requirements.
+   * Dispatches queries to OpenRouter with a conservative temperature of 0.2 to enforce factual precision.
+   * If remote API calls fail or timeout, transparently falls back to the deterministic local 'BEUKnowledgeEngine' without throwing errors. */
   async generateAcademicResponse(messages: AIChatMessage[]): Promise<string> {
     const latestMsg = messages[messages.length - 1];
     const latestUserMessage = latestMsg?.content || '';
@@ -59,9 +60,10 @@ export class OpenRouterAIService implements IAIService {
     return BEUKnowledgeEngine.generateAcademicResponse(latestUserMessage);
   }
 
-  /**
-   * Dispatches chat completion request to OpenRouter REST API with multimodal attachment support.
-   */
+  /* NOV-COMMENT-28: Multimodal Message Assembly & BEU System Prompt Injection
+   * Formats chat history with the authoritative 18-section 'BEU_MASTER_SYSTEM_PROMPT'.
+   * Detects base64 data URLs for diagrams, numerical formulas, or question paper snapshots,
+   * structuring them into OpenAI-compatible multimodal content objects ('image_url') for visual reasoning. */
   private async callOpenRouter(messages: AIChatMessage[]): Promise<string | null> {
     const endpoint = `${this.baseUrl}/chat/completions`;
 

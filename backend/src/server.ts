@@ -19,10 +19,10 @@ server.listen(env.PORT, () => {
   Logger.info(`⚡ Socket.IO real-time engine active`);
 });
 
-/**
- * Two-phase graceful shutdown handler to stop accepting incoming HTTP/WebSocket connections,
- * wait for in-flight requests to complete, and cleanly terminate the Prisma connection pool.
- */
+/* NOV-COMMENT-4: Two-Phase Process Graceful Shutdown & Connection Drain
+ * Intercepts POSIX process signals (SIGTERM from container runners/Kubernetes, SIGINT from manual terminal interrupts).
+ * Phase 1: Halts the Node.js HTTP and WebSocket server from accepting new client sockets, allowing in-flight requests to complete.
+ * Phase 2: Explicitly disconnects and drains the active PostgreSQL PrismaClient connection pool to prevent hanging sockets or zombie database processes. */
 const handleShutdown = async (signal: string) => {
   Logger.info(`Received ${signal}. Shutting down gracefully...`);
   server.close(async () => {

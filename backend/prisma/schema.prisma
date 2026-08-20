@@ -1,3 +1,9 @@
+// NOV-COMMENT-49: Five-Tier Academic Hierarchy & Relational Integrity Schema
+// Defines the canonical database schema for Bihar Engineering University Connect Hub.
+// Models the 5-tier academic hierarchy: Branch -> Semester -> Subject -> SubjectUnit -> Topic -> SubTopic.
+// Enforces relational foreign keys, cascade deletes, composite unique indexes (e.g. subjectId_unitNumber, userId_topicId),
+// and indexed lookups on student credentials, refresh tokens, solved PYQs, and handwritten study notes.
+
 generator client {
   provider = "prisma-client-js"
 }

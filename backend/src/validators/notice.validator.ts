@@ -2,6 +2,11 @@ import { z } from 'zod';
 
 const urlSchema = z.string().trim().url({ message: 'Must be a valid URL with http:// or https://' });
 
+/**
+ * University administrative circular & exam notice validation schema.
+ * Enforces verified source citations, notice category tagging (EXAM, RESULT, ADMISSION, SCHOLARSHIP),
+ * urgency flags, and optional circular PDF/application URLs.
+ */
 export const createNoticeSchema = z.object({
   body: z.object({
     title: z.string().min(5).max(250),
@@ -25,6 +30,10 @@ export const createNoticeSchema = z.object({
 
 export { createOpportunitySchema, updateOpportunitySchema, queryOpportunitySchema } from './opportunity.validator.js';
 
+/**
+ * Community moderation report schema capturing violation reasons (SPAM, HARASSMENT, MISINFORMATION, COPYRIGHT)
+ * and target polymorphic entity identifiers for administrative review.
+ */
 export const createReportSchema = z.object({
   body: z.object({
     targetType: z.string().min(2),

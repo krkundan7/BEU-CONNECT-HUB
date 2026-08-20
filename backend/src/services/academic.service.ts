@@ -87,10 +87,10 @@ export class AcademicService {
     ];
   }
 
-  /**
-   * Queries subjects filtered dynamically by branch, semester, regulation, and case-insensitive search terms,
-   * returning nested unit/topic structures and resource counts.
-   */
+  /* NOV-COMMENT-21: Multi-Facet Curriculum Querying & Fallback Offline Resilience
+   * Dynamically filters subjects across branch codes, semester numbers, and regulation versions with relational unit/topic hydration.
+   * If the PostgreSQL connection pool is temporarily offline, seamlessly falls back to the deterministic in-memory BEU static curriculum,
+   * guaranteeing continuous offline syllabus availability for university students. */
   static async getSubjects(filters?: {
     branchId?: string;
     branchCode?: string;
@@ -186,9 +186,10 @@ export class AcademicService {
     }));
   }
 
-  /**
-   * Resolves deep subject details including unit outlines, subtopics, exam priorities, and personalized user progress mappings.
-   */
+  /* NOV-COMMENT-22: Five-Tier Deep Relational Hydration & Personalized User Progress
+   * Traverses the 5-tier academic hierarchy: Branch -> Semester -> Subject -> Unit -> Topic.
+   * Hydrates child subtopics, solved PYQs, approved handwritten notes, and embeds viewer-specific
+   * 'TopicProgress' completion records when an authenticated user context is provided. */
   static async getSubjectById(subjectIdOrCode: string, userId?: string) {
     // BEU-COMMENT-5: Five-tier hierarchical traversal resolving Branch -> Semester -> Subject -> Unit -> Topic
     try {
@@ -394,15 +395,15 @@ export class AcademicService {
         orderBy: { updatedAt: 'desc' },
       });
 
-      const completed = progressRecords.filter(p => p.status === 'COMPLETED').length;
-      const inProgress = progressRecords.filter(p => p.status === 'IN_PROGRESS').length;
-      const revisionRequired = progressRecords.filter(p => p.status === 'REVISION_REQUIRED').length;
+      const completed = progressRecords.filter((p: any) => p.status === 'COMPLETED').length;
+      const inProgress = progressRecords.filter((p: any) => p.status === 'IN_PROGRESS').length;
+      const revisionRequired = progressRecords.filter((p: any) => p.status === 'REVISION_REQUIRED').length;
       const totalTracked = progressRecords.length;
 
       // Subject-wise progress summary
       const subjectProgressMap: Record<string, { total: number; completed: number; inProgress: number }> = {};
 
-      progressRecords.forEach(p => {
+      progressRecords.forEach((p: any) => {
         const subCode = p.topic?.unit?.subject?.code || 'UNKNOWN';
         if (!subjectProgressMap[subCode]) {
           subjectProgressMap[subCode] = { total: 0, completed: 0, inProgress: 0 };
@@ -438,9 +439,10 @@ export class AcademicService {
     }
   }
 
-  /**
-   * Update individual topic study status (NOT_STARTED, IN_PROGRESS, COMPLETED, REVISION_REQUIRED)
-   */
+  /* NOV-COMMENT-23: Atomic Topic Mastery & Study State Upsert
+   * Upserts the composite record on unique constraint 'userId_topicId'.
+   * Sets percentage to 100% and stamps 'completedAt' timestamp on status = 'COMPLETED',
+   * recording revision flags and custom study notes for adaptive exam preparation. */
   static async updateTopicProgress(
     userId: string,
     topicId: string,

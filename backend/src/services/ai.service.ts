@@ -51,7 +51,7 @@ export class AIChatService {
       take: 10,
     });
 
-    const aiInput: AIChatMessage[] = history.map(h => ({
+    const aiInput: AIChatMessage[] = history.map((h: any) => ({
       role: h.role.toLowerCase() as 'user' | 'assistant' | 'system',
       content: h.content,
     }));
@@ -79,9 +79,10 @@ export class AIChatService {
     };
   }
 
-  /**
-   * Dispatches subject-level queries to the BEU pattern analyzer to generate 16-point PYQ intelligence reports.
-   */
+  /* NOV-COMMENT-30: 16-Point PYQ Frequency & Pattern Intelligence Engine
+   * Generates a structured academic trends report mapping topic recurrence across past 5+ years of BEU exams.
+   * Calculates unit-wise mark distributions, numerical vs theoretical split ratios, and repeated question probabilities
+   * while injecting statutory disclaimer envelopes to guarantee ethical AI examination assistance. */
   static async analyzePYQ(subjectName: string, branch?: string, semester?: number) {
     const analysis = await aiService.analyzePYQPatterns(subjectName, branch, semester, []);
     return analysis;

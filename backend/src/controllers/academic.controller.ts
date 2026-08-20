@@ -2,7 +2,13 @@ import { Request, Response, NextFunction } from 'express';
 import { AcademicService } from '../services/academic.service.js';
 import { ResponseFormatter } from '../utils/apiResponse.js';
 
+/**
+ * Academic Controller
+ * Orchestrates HTTP requests for university curriculum entities (sessions, regulations, branches, semesters, subjects),
+ * handles query string parameter coercion, and interfaces with the AcademicService persistence layer.
+ */
 export class AcademicController {
+  // Retrieves list of academic session cohorts
   static async getSessions(req: Request, res: Response, next: NextFunction) {
     try {
       const sessions = await AcademicService.getSessions();
@@ -12,6 +18,7 @@ export class AcademicController {
     }
   }
 
+  // Retrieves curriculum regulation versions (e.g. R26, AICTE Model)
   static async getRegulations(req: Request, res: Response, next: NextFunction) {
     try {
       const regulations = await AcademicService.getRegulations();
@@ -21,6 +28,7 @@ export class AcademicController {
     }
   }
 
+  // Retrieves all 34 official engineering branch disciplines
   static async getBranches(req: Request, res: Response, next: NextFunction) {
     try {
       const branches = await AcademicService.getBranches();
@@ -30,6 +38,7 @@ export class AcademicController {
     }
   }
 
+  // Retrieves standard 8 semester progression tiers
   static async getSemesters(req: Request, res: Response, next: NextFunction) {
     try {
       const semesters = await AcademicService.getSemesters();
@@ -39,9 +48,9 @@ export class AcademicController {
     }
   }
 
-  /**
-   * Dispatches filtered subject searches across branches, semesters, and curriculum regulations with query parameter coercion.
-   */
+  /* NOV-COMMENT-41: Controller Query Unpacking & Type Coercion for Subjects
+   * Parses and casts stringified URL query parameters (branchCode, semesterNumber, regulationCode)
+   * into typed filter DTOs before dispatching to the academic service layer. */
   static async getSubjects(req: Request, res: Response, next: NextFunction) {
     try {
       const subjects = await AcademicService.getSubjects({
@@ -59,6 +68,7 @@ export class AcademicController {
     }
   }
 
+  // Retrieves complete subject syllabus tree including units, topics, and user completion flags
   static async getSubjectById(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = (req as any).user?.id;
@@ -85,6 +95,7 @@ export class AcademicController {
     }
   }
 
+  // Calculates user overall curriculum completion percentage across enrolled branch/semester
   static async getUserProgress(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = (req as any).user?.id || 'demo-user-id';
@@ -99,6 +110,7 @@ export class AcademicController {
     }
   }
 
+  // Updates completion status and revision notes for a specific syllabus topic
   static async updateTopicProgress(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = (req as any).user?.id || 'demo-user-id';
@@ -116,6 +128,7 @@ export class AcademicController {
     }
   }
 
+  // Generates prioritized topic study suggestions based on exam weightage and uncompleted items
   static async getRecommendations(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = (req as any).user?.id || 'demo-user-id';

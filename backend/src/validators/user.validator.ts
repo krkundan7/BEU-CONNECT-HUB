@@ -1,5 +1,9 @@
 import { z } from 'zod';
 
+/**
+ * User profile update schema validating bio length constraints, avatar URLs,
+ * and optional external social profile links (GitHub, LinkedIn, Portfolio).
+ */
 export const updateProfileSchema = z.object({
   body: z.object({
     name: z.string().min(2).max(100).optional(),
@@ -13,6 +17,10 @@ export const updateProfileSchema = z.object({
   }),
 });
 
+/**
+ * Student skill addition schema accepting either pre-existing skill UUIDs or ad-hoc custom skill names
+ * along with standardized proficiency gradations (BEGINNER, INTERMEDIATE, EXPERT).
+ */
 export const addSkillSchema = z.object({
   body: z.object({
     skillId: z.string().uuid().optional(),
@@ -21,6 +29,9 @@ export const addSkillSchema = z.object({
   }),
 });
 
+/**
+ * Student achievement & certification schema validating event titles, descriptions, and certificate URLs.
+ */
 export const achievementSchema = z.object({
   body: z.object({
     title: z.string().min(2).max(150),
@@ -30,6 +41,9 @@ export const achievementSchema = z.object({
   }),
 });
 
+/**
+ * University student identity verification submission schema requiring college name, registration number, and optional ID card document proof.
+ */
 export const verificationSubmitSchema = z.object({
   body: z.object({
     collegeName: z.string().min(2),

@@ -2,6 +2,10 @@ import { z } from 'zod';
 
 const urlSchema = z.string().trim().url({ message: 'Must be a valid URL with http:// or https://' });
 
+/**
+ * Opportunity citation schema asserting verifiable source URLs, issuing entity names,
+ * and provenance classification (primary portal, direct application link, official circular).
+ */
 export const opportunitySourceSchema = z.object({
   name: z.string().min(2, 'Source name is required'),
   url: urlSchema,
@@ -9,6 +13,10 @@ export const opportunitySourceSchema = z.object({
   type: z.enum(['primary', 'application', 'reference', 'circular']).optional().default('primary'),
 });
 
+/**
+ * Career & Hackathon opportunity creation schema enforcing mandatory deadlines,
+ * organization names, stipend/prize descriptions, and category classifications (INTERNSHIP, HACKATHON, SCHOLARSHIP, JOB).
+ */
 export const createOpportunitySchema = z.object({
   body: z.object({
     title: z.string().min(3, 'Title is required').max(200),
@@ -30,6 +38,9 @@ export const createOpportunitySchema = z.object({
   }),
 });
 
+/**
+ * Opportunity patch schema requiring valid route UUID and permitting partial body updates.
+ */
 export const updateOpportunitySchema = z.object({
   params: z.object({
     id: z.string().uuid(),
@@ -37,6 +48,9 @@ export const updateOpportunitySchema = z.object({
   body: createOpportunitySchema.shape.body.partial(),
 });
 
+/**
+ * Opportunity search and filter query schema coercing boolean URL string parameters into typed booleans.
+ */
 export const queryOpportunitySchema = z.object({
   query: z.object({
     category: z.enum(['INTERNSHIP', 'HACKATHON', 'WORKSHOP', 'COMPETITION', 'SCHOLARSHIP', 'JOB', 'CAREER_EVENT']).optional(),

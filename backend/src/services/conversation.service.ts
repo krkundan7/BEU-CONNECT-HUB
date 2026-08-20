@@ -80,8 +80,8 @@ export class ConversationService {
       },
     });
 
-    return list.map(c => {
-      const otherMember = c.members.find(m => m.userId !== userId)?.user;
+    return list.map((c: any) => {
+      const otherMember = c.members.find((m: any) => m.userId !== userId)?.user;
       return {
         id: c.id,
         isGroup: c.isGroup,

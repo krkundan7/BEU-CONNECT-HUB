@@ -123,10 +123,10 @@ export class ProjectService {
     return project;
   }
 
-  /**
-   * Computes matchmaking compatibility scores between project requirements and student candidate skill profiles,
-   * factoring in skill coverage ratios and department affinity bonuses.
-   */
+  /* NOV-COMMENT-38: Algorithmic Teammate Matching & Skill Overlap Scoring
+   * Extracts project required tech stack tags and matches against candidate student skill inventories.
+   * Computes mathematical skill coverage percentage, awards a 15% departmental synergy bonus for aligned engineering branches,
+   * and returns candidate recommendations sorted descending by overall match score. */
   static async findMatchesForProject(projectId: string) {
     const project = await prisma.project.findUnique({
       where: { id: projectId },

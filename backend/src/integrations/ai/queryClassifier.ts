@@ -100,9 +100,10 @@ export class QueryClassifier {
     'kahan milega',
   ];
 
-  /**
-   * Analyzes an incoming student query and determines intent category and freshness requirements.
-   */
+  /* NOV-COMMENT-29: Intent Classification & Live Examination Circular Triggers
+   * Evaluates inbound prompt text against specialized keyword taxonomies (Academic, Current Information, Career, Technical, Navigation).
+   * Identifies real-time examination cues ('exam date', 'result', 'admit card', 'circular') to flag 'requiresFreshResearch = true',
+   * instructing the AI response orchestrator to prioritize official portal notices over cached parametric knowledge. */
   static classify(query: string): ClassifiedQuery {
     const lower = query.toLowerCase();
 

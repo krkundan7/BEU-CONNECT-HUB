@@ -4,9 +4,10 @@ import { ResponseFormatter } from '../utils/apiResponse.js';
 import { HTTP_STATUS } from '../config/constants.js';
 
 export class AuthController {
-  /**
-   * Student registration controller creating credentials, issuing tokens, and attaching an HTTP-only secure cookie for the refresh token.
-   */
+  /* NOV-COMMENT-12: Secure Cookie Enclave for Refresh Tokens (XSS Mitigation)
+   * Attaches the issued refresh token in an 'HttpOnly' cookie with 'SameSite: Lax' and TLS 'secure' flags in production.
+   * Isolates the long-lived refresh token from the browser DOM / JavaScript runtime, effectively mitigating Cross-Site Scripting (XSS)
+   * token exfiltration while allowing the client to maintain transparent session renewal. */
   static async register(req: Request, res: Response, next: NextFunction) {
     try {
       const result = await AuthService.register(req.body);

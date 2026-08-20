@@ -20,10 +20,10 @@ export class TokenUtils {
     });
   }
 
-  /**
-   * Generates a high-entropy CSPRNG random refresh token string and computes its SHA-256 digest
-   * so the plaintext token is provided to the client while only the hash is persisted in the database.
-   */
+  /* NOV-COMMENT-11: Cryptographic CSPRNG Token Generation & One-Way SHA-256 Hashing
+   * Generates a 40-byte cryptographically secure pseudorandom number generator (CSPRNG) hex string.
+   * Derives a deterministic SHA-256 hash: the plaintext is sent exclusively to the client over secure cookies,
+   * while the backend stores only the digest, protecting user sessions against complete compromise in case of read-only database leaks. */
   static generateRefreshToken(): { token: string; hash: string } {
     const token = crypto.randomBytes(40).toString('hex');
     const hash = crypto.createHash('sha256').update(token).digest('hex');
