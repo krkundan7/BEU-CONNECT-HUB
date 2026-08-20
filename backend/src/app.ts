@@ -50,9 +50,9 @@ export const createApp = (): Express => {
     app.use(morgan('dev'));
   }
 
-  // Request body parsing with strict 10MB payload size limits to guard against memory exhaustion and body-based DoS attacks
-  app.use(express.json({ limit: '10mb' }));
-  app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+  // Request body parsing with 50MB payload size limits to support multimodal base64 image and PDF attachments
+  app.use(express.json({ limit: '50mb' }));
+  app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
   // Static File Serving for Local Uploads
   app.use('/uploads', express.static(path.resolve(process.cwd(), env.UPLOAD_DIR)));

@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import multer from 'multer';
 import { AppError } from '../utils/AppError.js';
 import { ResponseFormatter } from '../utils/apiResponse.js';
 import { Logger } from '../utils/logger.js';
@@ -6,8 +7,8 @@ import { HTTP_STATUS } from '../config/constants.js';
 
 /* NOV-COMMENT-48: Centralized Error Translation & Stack Trace Suppression
  * Intercepts all unhandled exceptions thrown across Express middleware, controllers, and services.
- * Distinguishes between intentional operational 'AppError' instances and database ORM exceptions (e.g. Prisma P2002 duplicate keys, P2025 missing records).
- * Formats standardized JSON error envelopes and strictly suppresses internal stack traces in production to prevent technical information leaks. */
+ * Distinguishes between intentional operational 'AppError' instances, Multer multipart errors, and database ORM exceptions.
+ * Formats standardized JSON error envelopes and strictly suppresses internal stack traces in production. */
 export const errorHandler = (
   err: any,
   req: Request,
@@ -27,7 +28,41 @@ export const errorHandler = (
     return ResponseFormatter.error(res, err.message, err.statusCode, err.code, err.details);
   }
 
-  // Intercept Prisma P2002 unique constraint violations and extract offending column target names into user-friendly 409 Conflict messages
+  // Intercept Multer file upload errors (e.g. LIMIT_FILE_SIZE, LIMIT_UNEXPECTED_FILE)
+  if (err instanceof multer.MulterError) {
+    let message = `File upload error: ${err.message}`;
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      message = 'File size limit exceeded. Maximum allowed file size is 25MB.';
+    } else if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+      message = `Unexpected upload field "${err.field}". Please attach your file using field "file", "image", "document", or "avatar".`;
+    }
+
+    Logger.warn(`Multer Upload Error: ${message}`, {
+      code: err.code,
+      field: err.field,
+      path: req.originalUrl,
+    });
+
+    return ResponseFormatter.error(
+      res,
+      message,
+      HTTP_STATUS.BAD_REQUEST,
+      'FILE_UPLOAD_ERROR',
+      { multerCode: err.code, field: err.field }
+    );
+  }
+
+  // Intercept PayloadTooLargeError from body-parser
+  if (err.type === 'entity.too.large' || err.status === 413) {
+    return ResponseFormatter.error(
+      res,
+      'Request payload too large. Please upload smaller attachments (under 25MB).',
+      HTTP_STATUS.BAD_REQUEST,
+      'PAYLOAD_TOO_LARGE'
+    );
+  }
+
+  // Intercept Prisma P2002 unique constraint violations
   if (err.code === 'P2002') {
     const fields = err.meta?.target ? (err.meta.target as string[]).join(', ') : 'field';
     return ResponseFormatter.error(

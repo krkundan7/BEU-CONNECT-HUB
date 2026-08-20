@@ -8,6 +8,7 @@ export interface UploadResult {
 
 export interface IStorageService {
   uploadFile(file: Express.Multer.File, folder?: string): Promise<UploadResult>;
+  uploadBase64?(base64DataUrl: string, originalName?: string, folder?: string): Promise<UploadResult>;
   deleteFile(fileKey: string): Promise<boolean>;
   getPublicUrl(fileKey: string): string;
 }

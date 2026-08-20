@@ -20,6 +20,7 @@ import reportRoutes from './report.routes.js';
 import adminRoutes from './admin.routes.js';
 import adminSyllabusRoutes from './adminSyllabus.routes.js';
 import searchRoutes from './search.routes.js';
+import uploadRoutes from './upload.routes.js';
 
 /**
  * Master API router multiplexing 21 specialized domain sub-routers into a unified modular hierarchy under `/api`.
@@ -49,6 +50,7 @@ router.use('/reports', reportRoutes);
 router.use('/admin/syllabus', adminSyllabusRoutes);
 router.use('/admin', adminRoutes);
 router.use('/search', searchRoutes);
+router.use('/upload', uploadRoutes);
 
 
 export default router;

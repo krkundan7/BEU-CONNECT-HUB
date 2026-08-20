@@ -37,9 +37,31 @@ export const ERROR_CODES = {
  * to prevent executable payloads and arbitrary binary ingestion.
  */
 export const ALLOWED_MIME_TYPES = {
-  IMAGES: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
-  DOCUMENTS: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
-  VIDEOS: ['video/mp4', 'video/webm'],
+  IMAGES: [
+    'image/jpeg',
+    'image/jpg',
+    'image/png',
+    'image/webp',
+    'image/gif',
+    'image/svg+xml',
+    'image/bmp',
+    'image/heic',
+    'image/heif',
+    'image/tiff',
+  ],
+  DOCUMENTS: [
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/vnd.ms-powerpoint',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    'text/plain',
+    'text/csv',
+    'application/json',
+  ],
+  VIDEOS: ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-matroska', 'video/avi'],
 };
 
 /* NOV-COMMENT-7: Domain Error Segregation & Statutory AI Academic Disclaimers

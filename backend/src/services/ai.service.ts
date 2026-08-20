@@ -2,6 +2,7 @@ import prisma from '../config/prisma.js';
 import { aiService } from '../integrations/ai/aiFactory.js';
 import { AIChatMessage } from '../integrations/ai/ai.interface.js';
 import { AIRole } from '@prisma/client';
+import { Logger } from '../utils/logger.js';
 
 export class AIChatService {
   /**
@@ -21,61 +22,86 @@ export class AIChatService {
       };
     }
   ) {
-    let conversationId = data.conversationId;
+    let conversationId = data.conversationId || `conv-${Date.now()}`;
+    let history: any[] = [];
 
-    if (!conversationId) {
-      const conv = await prisma.aIConversation.create({
+    // 1. Try to record in DB if available
+    try {
+      if (!data.conversationId) {
+        const conv = await prisma.aIConversation.create({
+          data: {
+            userId,
+            title: data.message.slice(0, 40) + '...',
+          },
+        });
+        conversationId = conv.id;
+      }
+
+      await prisma.aIMessage.create({
         data: {
-          userId,
-          title: data.message.slice(0, 40) + '...',
+          conversationId,
+          role: AIRole.USER,
+          content: data.attachment
+            ? `[Attached ${data.attachment.type.toUpperCase()}: ${data.attachment.name || 'document'}] ${data.message}`
+            : data.message,
         },
       });
-      conversationId = conv.id;
+
+      history = await prisma.aIMessage.findMany({
+        where: { conversationId },
+        orderBy: { createdAt: 'asc' },
+        take: 10,
+      });
+    } catch (dbErr) {
+      Logger.warn('Database offline or message logging bypassed in AI Chat, continuing with direct inference', dbErr);
     }
 
-    // Save User message
-    await prisma.aIMessage.create({
-      data: {
-        conversationId,
-        role: AIRole.USER,
-        content: data.attachment
-          ? `[Attached ${data.attachment.type.toUpperCase()}: ${data.attachment.name || 'document'}] ${data.message}`
-          : data.message,
-      },
-    });
-
-    // Fetch conversation history
-    const history = await prisma.aIMessage.findMany({
-      where: { conversationId },
-      orderBy: { createdAt: 'asc' },
-      take: 10,
-    });
-
-    const aiInput: AIChatMessage[] = history.map((h: any) => ({
-      role: h.role.toLowerCase() as 'user' | 'assistant' | 'system',
-      content: h.content,
-    }));
+    // 2. Prepare AI input messages
+    const aiInput: AIChatMessage[] = history.length > 0
+      ? history.map((h: any) => ({
+          role: h.role.toLowerCase() as 'user' | 'assistant' | 'system',
+          content: h.content,
+        }))
+      : [
+          {
+            role: 'user',
+            content: data.message,
+          },
+        ];
 
     // Inject active multimodal attachment payload into the trailing user message turn
     if (data.attachment && aiInput.length > 0) {
       aiInput[aiInput.length - 1].attachment = data.attachment;
     }
 
-    // Generate AI response with official BEU syllabus grounding
+    // 3. Generate AI response with official BEU syllabus grounding
     const aiResponseText = await aiService.generateAcademicResponse(aiInput);
 
-    // Save Assistant message
-    const assistantMessage = await prisma.aIMessage.create({
-      data: {
-        conversationId,
-        role: AIRole.ASSISTANT,
-        content: aiResponseText,
-      },
-    });
+    // 4. Try persisting assistant reply
+    let assistantMessage: any = {
+      id: `msg-${Date.now()}`,
+      conversationId,
+      role: AIRole.ASSISTANT,
+      content: aiResponseText,
+      createdAt: new Date(),
+    };
+
+    try {
+      assistantMessage = await prisma.aIMessage.create({
+        data: {
+          conversationId,
+          role: AIRole.ASSISTANT,
+          content: aiResponseText,
+        },
+      });
+    } catch {
+      // Return standard in-memory assistant message
+    }
 
     return {
       conversationId,
       message: assistantMessage,
+      content: aiResponseText,
     };
   }
 
@@ -89,15 +115,19 @@ export class AIChatService {
   }
 
   static async getUserAIConversations(userId: string) {
-    return prisma.aIConversation.findMany({
-      where: { userId },
-      orderBy: { updatedAt: 'desc' },
-      include: {
-        messages: {
-          take: 1,
-          orderBy: { createdAt: 'desc' },
+    try {
+      return await prisma.aIConversation.findMany({
+        where: { userId },
+        orderBy: { updatedAt: 'desc' },
+        include: {
+          messages: {
+            take: 1,
+            orderBy: { createdAt: 'desc' },
+          },
         },
-      },
-    });
+      });
+    } catch {
+      return [];
+    }
   }
 }

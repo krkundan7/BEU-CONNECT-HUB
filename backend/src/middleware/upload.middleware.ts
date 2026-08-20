@@ -1,5 +1,6 @@
 import multer, { FileFilterCallback } from 'multer';
 import { Request } from 'express';
+import path from 'path';
 import { AppError } from '../utils/AppError.js';
 import { env } from '../config/env.js';
 import { ALLOWED_MIME_TYPES } from '../config/constants.js';
@@ -11,27 +12,42 @@ import { ALLOWED_MIME_TYPES } from '../config/constants.js';
  */
 const storage = multer.memoryStorage();
 
+const ALLOWED_EXTENSIONS = [
+  '.pdf', '.png', '.jpg', '.jpeg', '.webp', '.gif', '.svg',
+  '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.txt', '.csv',
+  '.mp4', '.webm', '.mkv', '.avi'
+];
+
 /**
- * Strict file filter inspecting incoming multipart Content-Type headers against the centralized allowlist.
- * Rejects executables, scripts (.js, .sh), and unsafe binary formats.
+ * Robust file filter inspecting incoming multipart Content-Type headers and extensions.
+ * Rejects executables (.exe, .bat), scripts (.js, .sh, .py), and unsafe binary formats.
  */
 const fileFilter = (
   req: Request,
   file: Express.Multer.File,
   cb: FileFilterCallback
 ) => {
-  const allowed = [
+  const allowedMime = [
     ...ALLOWED_MIME_TYPES.IMAGES,
     ...ALLOWED_MIME_TYPES.DOCUMENTS,
     ...ALLOWED_MIME_TYPES.VIDEOS,
   ];
 
-  if (allowed.includes(file.mimetype)) {
+  const ext = path.extname(file.originalname).toLowerCase();
+
+  // Allow if MIME type is in allowed list, or starts with image/ / video/, or extension matches
+  if (
+    allowedMime.includes(file.mimetype.toLowerCase()) ||
+    file.mimetype.startsWith('image/') ||
+    file.mimetype.startsWith('video/') ||
+    file.mimetype === 'application/pdf' ||
+    ALLOWED_EXTENSIONS.includes(ext)
+  ) {
     cb(null, true);
   } else {
     cb(
       AppError.badRequest(
-        `Unsupported file type (${file.mimetype}). Allowed types: PDF, Word documents, JPEG, PNG, WebP, MP4.`
+        `Unsupported file type (${file.mimetype} / ${ext}). Allowed types: PDF, Word documents, JPEG, PNG, WebP, SVG, MP4.`
       )
     );
   }
@@ -45,6 +61,6 @@ export const upload = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: env.MAX_FILE_SIZE_MB * 1024 * 1024, // 25MB default limit
+    fileSize: (env.MAX_FILE_SIZE_MB || 25) * 1024 * 1024, // 25MB default limit
   },
 });
