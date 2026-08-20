@@ -166,7 +166,7 @@ export const ProfilePage: React.FC = () => {
                 </a>
               )}
               <span className="text-slate-400">•</span>
-              <span className="font-semibold text-navy-900">★ {targetUser.contributionPoints} Karma Pts</span>
+              <span className="font-semibold text-navy-900">★ {targetUser.contributionPoints} Remarks Pts</span>
               <span className="text-slate-400">•</span>
               <span><strong>{targetUser.followers.length}</strong> Followers</span>
               <span><strong>{targetUser.following.length}</strong> Following</span>

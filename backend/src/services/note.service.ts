@@ -25,7 +25,7 @@ export class NoteService {
       },
     });
 
-    // Reward Karma points (+50)
+    // Reward Remarks points (+50)
     await prisma.user.update({
       where: { id: uploadedById },
       data: { contributionPoints: { increment: 50 } },

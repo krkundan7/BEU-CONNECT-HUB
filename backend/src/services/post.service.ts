@@ -11,7 +11,7 @@ import { PaginationQuery, PaginatedResult } from '../types/index.js';
 export class PostService {
   /* NOV-COMMENT-34: Relational Post Creation & Gamification Reward Attribution
    * Persists campus feed updates while creating nested child 'Media' records for uploaded images/documents.
-   * Atomically increments the author's 'contributionPoints' by +10 karma points to encourage peer academic sharing. */
+   * Atomically increments the author's 'contributionPoints' by +10 remarks points to encourage peer academic sharing. */
   static async createPost(authorId: string, data: { content: string; type?: PostType; visibility?: Visibility; mediaUrls?: string[] }) {
     const post = await prisma.post.create({
       data: {
@@ -40,7 +40,7 @@ export class PostService {
       },
     });
 
-    // Reward Karma points (+10)
+    // Reward Remarks points (+10)
     await prisma.user.update({
       where: { id: authorId },
       data: { contributionPoints: { increment: 10 } },

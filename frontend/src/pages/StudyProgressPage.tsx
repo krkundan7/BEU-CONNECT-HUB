@@ -61,7 +61,7 @@ export const StudyProgressPage: React.FC = () => {
 
         <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-subtle space-y-1 text-center">
           <p className="text-3xl font-extrabold text-purple-600">780</p>
-          <p className="text-xs font-bold text-beu-dark">Karma Contribution Pts</p>
+          <p className="text-xs font-bold text-beu-dark">Remarks Contribution Pts</p>
           <p className="text-[10px] text-slate-400">🥇 Top Contributor</p>
         </div>
       </div>

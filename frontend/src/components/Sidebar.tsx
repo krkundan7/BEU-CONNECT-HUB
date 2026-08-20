@@ -117,7 +117,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             </div>
 
             <div className="mt-3 pt-2.5 border-t border-navy-700/80 flex items-center justify-between text-[11px]">
-              <span className="text-slate-300">Karma Points:</span>
+              <span className="text-slate-300">Remarks Points:</span>
               <span className="font-bold text-amber-300">★ {currentUser.contributionPoints} pts</span>
             </div>
           </div>

@@ -37,7 +37,7 @@ export const MentorshipPage: React.FC = () => {
   const [cardExpiry, setCardExpiry] = useState('12/28');
   const [cardCvv, setCardCvv] = useState('742');
   const [selectedBank, setSelectedBank] = useState('State Bank of India (SBI)');
-  const [useKarmaPoints, setUseKarmaPoints] = useState(false);
+  const [useRemarksPoints, setUseRemarksPoints] = useState(false);
 
   // Completed Booking Details
   const [completedBooking, setCompletedBooking] = useState<MentorshipRequest | null>(null);
@@ -65,7 +65,7 @@ export const MentorshipPage: React.FC = () => {
     setSelectedMentor(mentor);
     setBookingStep('details');
     setStudentMessage('');
-    setUseKarmaPoints(false);
+    setUseRemarksPoints(false);
   };
 
   const handleProceedToPayment = (e: React.FormEvent) => {
@@ -83,7 +83,7 @@ export const MentorshipPage: React.FC = () => {
     setBookingStep('processing');
 
     setTimeout(() => {
-      const discount = useKarmaPoints ? 50 : 0;
+      const discount = useRemarksPoints ? 50 : 0;
       const finalAmount = Math.max(0, selectedMentor.hourlyRate - discount);
       const bookingId = `BEU-SES-${Date.now().toString().slice(-6)}`;
       const txnId = `TXN-${paymentMethod}-${Date.now().toString().slice(-8)}`;
@@ -618,11 +618,11 @@ export const MentorshipPage: React.FC = () => {
                   </div>
                 )}
 
-                {/* Karma Points Discount toggle */}
+                {/* Remarks Points Discount toggle */}
                 <div
-                  onClick={() => setUseKarmaPoints(!useKarmaPoints)}
+                  onClick={() => setUseRemarksPoints(!useRemarksPoints)}
                   className={`p-3.5 rounded-2xl border flex items-center justify-between cursor-pointer transition-all ${
-                    useKarmaPoints
+                    useRemarksPoints
                       ? 'bg-amber-50 border-amber-300 text-amber-950'
                       : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
                   }`}
@@ -630,13 +630,13 @@ export const MentorshipPage: React.FC = () => {
                   <div className="flex items-center gap-2">
                     <Coins className="w-5 h-5 text-amber-600" />
                     <div>
-                      <p className="font-bold text-xs">Redeem 100 BEU Karma Coins</p>
+                      <p className="font-bold text-xs">Redeem 100 BEU Remarks Points</p>
                       <p className="text-[11px] text-slate-500">Get instant ₹50 discount using your contribution points</p>
                     </div>
                   </div>
                   <input
                     type="checkbox"
-                    checked={useKarmaPoints}
+                    checked={useRemarksPoints}
                     onChange={() => {}}
                     className="w-4 h-4 text-emerald-600 rounded cursor-pointer"
                   />
@@ -652,16 +652,16 @@ export const MentorshipPage: React.FC = () => {
                     <span>Student Welfare / Platform Fee:</span>
                     <span className="text-emerald-400 font-bold">₹0 (Free)</span>
                   </div>
-                  {useKarmaPoints && (
+                  {useRemarksPoints && (
                     <div className="flex justify-between text-amber-300 text-xs">
-                      <span>Karma Points Discount:</span>
+                      <span>Remarks Points Discount:</span>
                       <span className="font-bold">-₹50</span>
                     </div>
                   )}
                   <div className="pt-2 border-t border-slate-700 flex justify-between items-center text-sm font-black">
                     <span>Total Amount Payable:</span>
                     <span className="text-emerald-400 text-base">
-                      ₹{Math.max(0, selectedMentor.hourlyRate - (useKarmaPoints ? 50 : 0))}
+                      ₹{Math.max(0, selectedMentor.hourlyRate - (useRemarksPoints ? 50 : 0))}
                     </span>
                   </div>
                 </div>
@@ -679,7 +679,7 @@ export const MentorshipPage: React.FC = () => {
                 >
                   <Lock className="w-4 h-4" />
                   <span>
-                    Pay ₹{Math.max(0, selectedMentor.hourlyRate - (useKarmaPoints ? 50 : 0))} & Confirm Booking
+                    Pay ₹{Math.max(0, selectedMentor.hourlyRate - (useRemarksPoints ? 50 : 0))} & Confirm Booking
                   </span>
                 </button>
               </div>

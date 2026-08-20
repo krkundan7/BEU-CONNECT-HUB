@@ -4,7 +4,7 @@ import { ResponseFormatter } from '../utils/apiResponse.js';
 
 /**
  * Handwritten Study Notes & Video Lectures Controller
- * Manages crowd-sourced handwritten notes uploads with student karma point rewards,
+ * Manages crowd-sourced handwritten notes uploads with student remarks point rewards,
  * unit-wise note indexing, and curated video tutorial listings.
  */
 export class NoteController {
@@ -12,7 +12,7 @@ export class NoteController {
   static async createNote(req: Request, res: Response, next: NextFunction) {
     try {
       const note = await NoteService.createNote(req.user!.id, req.body);
-      return ResponseFormatter.created(res, note, 'Study note published (+50 Karma Points)');
+      return ResponseFormatter.created(res, note, 'Study note published (+50 Remarks Points)');
     } catch (error) {
       next(error);
     }
