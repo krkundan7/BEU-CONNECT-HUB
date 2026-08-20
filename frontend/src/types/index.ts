@@ -645,6 +645,45 @@ export interface KnowledgeNode {
   aiSummary: string;
 }
 
+export type GoalCategoryType =
+  | 'job'
+  | 'placement'
+  | 'software_dev'
+  | 'ai_ml'
+  | 'web_dev'
+  | 'app_dev'
+  | 'ui_ux'
+  | 'data_science'
+  | 'cyber_security'
+  | 'startup'
+  | 'hackathon'
+  | 'higher_studies'
+  | 'gate'
+  | 'freelancing'
+  | 'abroad'
+  | 'career'
+  | 'academic'
+  | 'skill'
+  | 'project'
+  | 'custom';
+
+export type SkillLevelType = 'beginner' | 'basic' | 'intermediate' | 'advanced';
+
+export interface GoalPracticeDrill {
+  title: string;
+  platform: string;
+  url?: string;
+  description?: string;
+}
+
+export interface GoalProjectIdea {
+  title: string;
+  description: string;
+  techStack: string[];
+  features?: string[];
+  acceptanceCriteria?: string;
+}
+
 export interface GoalTask {
   id: string;
   title: string;
@@ -665,27 +704,45 @@ export interface GoalResource {
   estimatedTime: string;
 }
 
+export interface DailyActionTask {
+  id: string;
+  dayNumber: number;
+  dayLabel: string; // e.g. "Day 1 - Mon"
+  title: string;
+  description: string;
+  durationMinutes: number;
+  category: 'learn' | 'practice' | 'project' | 'revision';
+  completed: boolean;
+}
+
+export interface DailyActionWeek {
+  weekNumber: number;
+  weekTheme: string;
+  days: DailyActionTask[];
+}
+
 export interface GoalMilestone {
   id: string;
   phaseNumber: number;
   title: string;
   timeframe: string;
   whyThisStep: string;
+  whatToLearn?: string[];
+  whatToDo?: string;
   status: 'completed' | 'in_progress' | 'upcoming';
   tasks: GoalTask[];
   recommendedResources: GoalResource[];
-  projectIdea?: {
-    title: string;
-    description: string;
-    techStack: string[];
-  };
+  practiceDrills?: GoalPracticeDrill[];
+  projectIdea?: GoalProjectIdea;
+  completionCriteria?: string[];
+  estimatedHours?: number;
 }
 
 export interface GoalMap {
   id: string;
   userId: string;
   goalTitle: string;
-  category: 'career' | 'academic' | 'skill' | 'project' | 'custom';
+  category: GoalCategoryType | string;
   targetOutcome: string;
   targetDeadline: string;
   createdAt: string;
@@ -694,24 +751,40 @@ export interface GoalMap {
   studentProfile: {
     branch: string;
     semester: number;
-    currentLevel: 'beginner' | 'intermediate' | 'advanced';
+    college?: string;
+    academicLevel?: string;
+    cgpaRange?: string;
+    backlogStatus?: string;
+    favouriteSubjects?: string[];
+    weakSubjects?: string[];
+    currentLevel: SkillLevelType | string;
     existingSkills: string[];
+    skillRatings?: Record<string, SkillLevelType>;
     hoursDaily: number;
+    hoursWeekend?: number;
+    learningPace?: 'Fast' | 'Balanced' | 'Flexible';
     learningPreference: string[];
+    goalSpecificAnswers?: Record<string, any>;
   };
   gapAnalysis: {
+    currentPositionSummary?: string;
+    targetPositionSummary?: string;
     alreadyLearned: string[];
     inProgress: string[];
     skillGap: string[];
+    missingSkills?: string[];
     highPriority: string[];
     mediumPriority: string[];
+    prerequisitesNeeded?: string[];
   };
   beuAcademicContext?: {
     relevantSubjects: string[];
     highYieldUnits: string[];
     examPatternFocus: string;
+    curriculumBridgeNote?: string;
   };
   milestones: GoalMilestone[];
+  dailySchedule?: DailyActionWeek[];
   healthCheck: {
     status: 'ON_TRACK' | 'SLIGHTLY_BEHIND' | 'NEEDS_ADJUSTMENT';
     summary: string;

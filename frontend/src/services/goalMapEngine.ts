@@ -1,874 +1,1029 @@
-import { GoalMap, GoalMilestone, GoalTask, GoalResource } from '../types';
+import {
+  GoalMap, GoalMilestone, GoalTask, GoalResource,
+  GoalCategoryType, SkillLevelType, DailyActionWeek, DailyActionTask
+} from '../types';
 
 export interface GoalPreset {
   id: string;
+  category: GoalCategoryType;
   title: string;
-  category: 'career' | 'academic' | 'skill' | 'project' | 'custom';
   icon: string;
   tagline: string;
   defaultDeadline: string;
   targetOutcome: string;
   defaultSkillsNeeded: string[];
+  benchmarkSkills: Record<string, SkillLevelType>;
   beuContextNote: string;
+}
+
+export interface GoalSpecificQuestion {
+  id: string;
+  question: string;
+  type: 'select' | 'multiselect' | 'text';
+  options?: string[];
+  placeholder?: string;
+  helperText?: string;
 }
 
 export const GOAL_PRESETS: GoalPreset[] = [
   {
-    id: 'full-stack-dev',
-    title: 'Full-Stack Software Developer',
-    category: 'career',
+    id: 'software_dev',
+    category: 'software_dev',
+    title: 'Software Development Engineer (SDE)',
     icon: '💻',
-    tagline: 'MERN / Next.js, DSA, System Design & Paid Internship in 6-8 Months',
+    tagline: 'MERN / Next.js / Java, DSA (LeetCode 150+), System Design & Tier-1 SDE Roles',
     defaultDeadline: '6 Months',
-    targetOutcome: 'Crack off-campus/on-campus SDE roles with 2 production projects & strong DSA',
-    defaultSkillsNeeded: ['JavaScript / TypeScript', 'React.js', 'Node.js & Express', 'MongoDB / PostgreSQL', 'DSA (LeetCode 150+)', 'Git & CI/CD', 'REST & GraphQL APIs'],
-    beuContextNote: 'Aligns with BEU CS301 (Data Structures), CS401 (DBMS), and CS501 (Web Technologies)'
+    targetOutcome: 'Crack Product & Core SDE roles with 2 production capstone projects and strong problem solving',
+    defaultSkillsNeeded: ['JavaScript / TypeScript', 'React / Next.js', 'Node.js & Express', 'PostgreSQL & MongoDB', 'DSA in C++ or Java', 'Git & CI/CD', 'REST & GraphQL APIs'],
+    benchmarkSkills: {
+      'Programming': 'advanced',
+      'DSA': 'advanced',
+      'Web Development': 'intermediate',
+      'Databases': 'intermediate',
+      'Git & GitHub': 'intermediate',
+      'System Design': 'basic',
+    },
+    beuContextNote: 'Directly reinforces BEU CS301 (Data Structures), CS401 (DBMS), and CS501 (Operating Systems & Web Technologies).'
   },
   {
-    id: 'gate-exam',
-    title: 'GATE 2026 / 2027 Top Ranker (AIR < 500)',
-    category: 'academic',
-    icon: '🎯',
-    tagline: 'PSU Recruitment & Direct M.Tech Admission at IITs/IISc',
-    defaultDeadline: '1 Year',
-    targetOutcome: 'Master core engineering subjects, solve 15 years PYQs, score 65+ marks in GATE',
-    defaultSkillsNeeded: ['Engineering Mathematics', 'Discrete Mathematics', 'Theory of Computation', 'Computer Architecture', 'Operating Systems', 'Compiler Design', 'PYQ Solving Speed'],
-    beuContextNote: 'BEU End-Sem standard theory covers 70% of GATE syllabus foundations'
-  },
-  {
-    id: 'ai-ml-engineer',
+    id: 'ai_ml',
+    category: 'ai_ml',
     title: 'AI / ML & Data Science Engineer',
-    category: 'career',
     icon: '🤖',
-    tagline: 'Deep Learning, LLMs, PyTorch, Computer Vision & Kaggle Competitions',
+    tagline: 'Deep Learning, PyTorch, LLM RAG Systems, Computer Vision & Kaggle Competitions',
     defaultDeadline: '6 Months',
-    targetOutcome: 'Build portfolio of deployed AI microservices, RAG pipelines, and ML models',
-    defaultSkillsNeeded: ['Python / NumPy / Pandas', 'Scikit-Learn', 'PyTorch / TensorFlow', 'Vector DBs & RAG', 'Maths: Linear Algebra & Probability', 'FastAPI Deployment'],
-    beuContextNote: 'Directly builds on BEU PCC-AIML courses and numerical statistics'
+    targetOutcome: 'Build a portfolio of deployed AI microservices, fine-tuned LLMs, and computer vision pipelines',
+    defaultSkillsNeeded: ['Python & NumPy / Pandas', 'Linear Algebra & Statistics', 'Scikit-Learn', 'PyTorch / TensorFlow', 'Vector DBs (Pinecone/Chroma) & LangChain', 'FastAPI & Docker Deployment'],
+    benchmarkSkills: {
+      'Python': 'advanced',
+      'Mathematics & Stats': 'intermediate',
+      'Machine Learning': 'advanced',
+      'Deep Learning & LLMs': 'intermediate',
+      'APIs & Deployment': 'intermediate',
+    },
+    beuContextNote: 'Builds upon BEU PCC-AIML courses, discrete mathematics, and numerical optimization.'
   },
   {
-    id: 'beu-semester-cgpa',
-    title: 'BEU Semester 8.5+ CGPA & 14-Mark Mastery',
-    category: 'academic',
-    icon: '📚',
-    tagline: 'High-Yield Unit Strategy, 14-Mark Derivations & Repeat PYQs',
+    id: 'placement',
+    category: 'placement',
+    title: 'On-Campus Placement & Dream Offer',
+    icon: '🏢',
+    tagline: 'Aptitude, Core Technical Subjects, 150+ DSA LeetCode & Mock HR/Technical Interviews',
     defaultDeadline: '3 Months',
-    targetOutcome: 'Score University Distinction (8.5+ SGPA) with zero backlogs',
-    defaultSkillsNeeded: ['Compulsory Q1 Speed', '14-Mark Answer Presentation', 'Circuit & Block Diagrams', 'Past 5-Year PYQs (2020-2024)', 'Lab Practical Vivas'],
-    beuContextNote: 'Focuses on 80%+ pattern repeat rate of BEU Units 2, 3, and 4'
+    targetOutcome: 'Clear on-campus placement tests (TCS Digital, Infosys SP, Cognizant, Wipro) & Day-1 Dream companies',
+    defaultSkillsNeeded: ['Quantitative Aptitude & Logical Reasoning', 'C / C++ / Java Fundamentals', 'DSA (Arrays, Strings, Trees, Graphs)', 'OS, DBMS & CN Core Theory', 'Resume & Interview Speaking'],
+    benchmarkSkills: {
+      'Aptitude & Reasoning': 'advanced',
+      'Core Programming': 'intermediate',
+      'DSA': 'intermediate',
+      'Core CS Subjects': 'advanced',
+      'Communication': 'intermediate',
+    },
+    beuContextNote: 'Aligns 100% with BEU core academic syllabus exams and mandatory college placement training modules.'
   },
   {
-    id: 'govt-bpsc-ae',
-    title: 'BPSC AE & Govt Assistant Engineer Exam',
-    category: 'career',
-    icon: '🏛️',
-    tagline: 'State Govt Engineering Services (WRD, RWD, BCD Bihar)',
+    id: 'gate',
+    category: 'gate',
+    title: 'GATE 2027 Top Ranker (AIR < 500)',
+    icon: '📚',
+    tagline: 'PSU Recruitment (IOCL, NTPC, ONGC, BARC) & Direct M.Tech Admission at IITs/IISc',
     defaultDeadline: '1 Year',
-    targetOutcome: 'Crack Prelims & Mains technical and General Studies for Bihar State Services',
-    defaultSkillsNeeded: ['Core Branch Engineering Depth', 'General Studies & Bihar GK', 'Previous 10-Year BPSC AE Papers', 'Standard Engineering Codes (IS / IRC)'],
-    beuContextNote: 'BEU syllabus matches 90% of BPSC Assistant Engineer syllabus requirements'
+    targetOutcome: 'Master core engineering subjects, solve 15 years PYQs, and score 70+ marks in GATE',
+    defaultSkillsNeeded: ['Engineering Mathematics & Calculus', 'Discrete Mathematics', 'Theory of Computation (TOC)', 'Computer Architecture (COA)', 'Operating Systems', 'Compiler Design', 'PYQ Speed Drills'],
+    benchmarkSkills: {
+      'Engineering Mathematics': 'advanced',
+      'Core Subject Theory': 'advanced',
+      'Formula Derivations': 'advanced',
+      'PYQ Problem Solving': 'advanced',
+    },
+    beuContextNote: 'BEU End-Sem theoretical depth and university derivations cover 75% of GATE foundation topics.'
   },
   {
-    id: 'cybersecurity-analyst',
+    id: 'web_dev',
+    category: 'web_dev',
+    title: 'Full-Stack Web Developer',
+    icon: '🌐',
+    tagline: 'Modern React, TypeScript, Node.js, Next.js 14, TailwindCSS & Real-time WebSockets',
+    defaultDeadline: '6 Months',
+    targetOutcome: 'Develop and deploy scalable SaaS applications with authentication, payment gateways, and databases',
+    defaultSkillsNeeded: ['HTML5, CSS3, Modern JavaScript (ES6+)', 'TypeScript', 'React.js & State Management', 'Node.js, Express & REST APIs', 'PostgreSQL / Prisma ORM', 'Docker & Cloud Deployment'],
+    benchmarkSkills: {
+      'HTML/CSS/JS': 'advanced',
+      'React/Frontend': 'advanced',
+      'Backend/APIs': 'intermediate',
+      'Databases': 'intermediate',
+      'Git & CI/CD': 'intermediate',
+    },
+    beuContextNote: 'Complements BEU CS501 (Web Technologies & Software Engineering lab courses).'
+  },
+  {
+    id: 'app_dev',
+    category: 'app_dev',
+    title: 'Cross-Platform Mobile App Developer',
+    icon: '📱',
+    tagline: 'Flutter / React Native, State Management, Firebase, Native APIs & Play Store Publishing',
+    defaultDeadline: '6 Months',
+    targetOutcome: 'Build and publish 2 production mobile apps with push notifications and local offline caching',
+    defaultSkillsNeeded: ['Flutter & Dart / React Native', 'Mobile UI Components & Animations', 'State Management (Riverpod / Redux / Bloc)', 'Firebase & REST API Integration', 'Play Store Deployment'],
+    benchmarkSkills: {
+      'Mobile Framework': 'advanced',
+      'Programming Logic': 'intermediate',
+      'API Integration': 'intermediate',
+      'App Architecture': 'intermediate',
+    },
+    beuContextNote: 'Useful for college mini-projects, final year Capstone projects, and mobile hackathon prototypes.'
+  },
+  {
+    id: 'ui_ux',
+    category: 'ui_ux',
+    title: 'UI/UX & Product Designer',
+    icon: '🎨',
+    tagline: 'Figma Mastery, Design Systems, Wireframing, User Research & Dribbble/Behance Portfolio',
+    defaultDeadline: '3 Months',
+    targetOutcome: 'Craft 3 comprehensive case studies with user research, persona creation, and interactive Figma prototypes',
+    defaultSkillsNeeded: ['Figma / Auto-layout / Components', 'Typography, Grids & Color Theory', 'User Research & Journey Mapping', 'Wireframing & High-Fidelity Prototyping', 'Design System Architecture'],
+    benchmarkSkills: {
+      'Figma & Tools': 'advanced',
+      'UX Research': 'intermediate',
+      'Visual Design': 'advanced',
+      'Design Systems': 'intermediate',
+    },
+    beuContextNote: 'Directly boosts front-end development coursework, hackathon submissions, and freelance readiness.'
+  },
+  {
+    id: 'data_science',
+    category: 'data_science',
+    title: 'Data Analyst & Business Intelligence',
+    icon: '📊',
+    tagline: 'Advanced SQL, Python, PowerBI / Tableau, Statistical Analysis & Executive Dashboards',
+    defaultDeadline: '4 Months',
+    targetOutcome: 'Analyze large-scale real-world datasets, generate actionable business insights, and build interactive dashboards',
+    defaultSkillsNeeded: ['Advanced SQL (Window Functions, CTEs)', 'Python (Pandas, Seaborn, Matplotlib)', 'PowerBI / Tableau Dashboarding', 'Exploratory Data Analysis (EDA)', 'Business Metrics & Storytelling'],
+    benchmarkSkills: {
+      'SQL': 'advanced',
+      'Python Data Analytics': 'intermediate',
+      'PowerBI/Tableau': 'advanced',
+      'Statistics': 'intermediate',
+    },
+    beuContextNote: 'Bridges BEU engineering data courses with corporate analytics and business problem solving.'
+  },
+  {
+    id: 'cyber_security',
+    category: 'cyber_security',
     title: 'Cybersecurity Analyst & Ethical Hacker',
-    category: 'skill',
-    icon: '🛡️',
-    tagline: 'Network Security, Bug Bounty, SOC Operations & CEH Prep',
+    icon: '🔐',
+    tagline: 'Network Security, Linux, OWASP Top 10, Bug Bounty, SOC Operations & CEH Prep',
     defaultDeadline: '6 Months',
-    targetOutcome: 'Earn security certifications, solve TryHackMe/HackTheBox, and secure junior SOC roles',
-    defaultSkillsNeeded: ['Networking (OSI, TCP/IP, Wireshark)', 'Linux Administration', 'Web Application Pentesting (OWASP Top 10)', 'Burp Suite', 'Python Scripting for SecOps'],
-    beuContextNote: 'Complements BEU Cyber Security elective and computer networks'
+    targetOutcome: 'Earn industry security certifications, solve TryHackMe/HackTheBox rooms, and secure junior SOC roles',
+    defaultSkillsNeeded: ['Linux CLI & Bash Scripting', 'Networking (OSI, TCP/IP, Wireshark)', 'Web Application Pentesting (Burp Suite)', 'Vulnerability Assessment (Nessus/Nmap)', 'Security Operations (SIEM basics)'],
+    benchmarkSkills: {
+      'Linux & Networking': 'advanced',
+      'Web Security / OWASP': 'intermediate',
+      'Ethical Hacking Tools': 'intermediate',
+      'Scripting (Python/Bash)': 'intermediate',
+    },
+    beuContextNote: 'Complements BEU Cyber Security electives and university networking lab assignments.'
   },
   {
-    id: 'tech-startup',
-    title: 'Build a Tech Startup / AI Product',
-    category: 'project',
+    id: 'startup',
+    category: 'startup',
+    title: 'Tech Founder & Startup Builder',
     icon: '🚀',
-    tagline: 'From Idea to MVP, Smart India Hackathon & Bihar Startup Grant (₹10L)',
+    tagline: 'From Idea to MVP, Smart India Hackathon & Bihar Startup Grant (₹10 Lakhs)',
     defaultDeadline: '6 Months',
-    targetOutcome: 'Launch functional SaaS MVP, acquire first 100 users, and apply for Bihar Startup Policy seed fund',
-    defaultSkillsNeeded: ['Rapid MVP Prototyping (Next.js/Supabase)', 'User Research & Problem Validation', 'Pitch Deck & Business Model Canvas', 'System Architecture', 'Product Analytics'],
-    beuContextNote: 'Eligible for Department of Industries Bihar Startup seed funding up to ₹10 Lakhs'
+    targetOutcome: 'Launch a functional MVP, acquire first 100 users, and apply for Bihar Startup Policy seed funding',
+    defaultSkillsNeeded: ['Rapid MVP Prototyping (Next.js/Supabase/Firebase)', 'Customer Discovery & Validation', 'Pitch Deck & Business Model Canvas', 'System Architecture & Scalability', 'Growth & Go-To-Market Strategy'],
+    benchmarkSkills: {
+      'Product Development': 'intermediate',
+      'Problem Validation': 'advanced',
+      'Pitch & Presentation': 'advanced',
+      'Execution Speed': 'advanced',
+    },
+    beuContextNote: 'Qualifies for Department of Industries, Bihar Government startup seed grant support up to ₹10 Lakhs.'
+  },
+  {
+    id: 'hackathon',
+    category: 'hackathon',
+    title: 'National Hackathon Champion (SIH / Tejas)',
+    icon: '🏆',
+    tagline: 'Rapid 36-Hr Prototyping, Idea Validation, Tech Stack Mastery & Winning Pitch Decks',
+    defaultDeadline: '3 Months',
+    targetOutcome: 'Qualify and win top-3 podium finishes in Smart India Hackathon (SIH) and state innovation contests',
+    defaultSkillsNeeded: ['Rapid Full-Stack Prototyping', 'AI API Integration (OpenAI/Gemini/HuggingFace)', 'GitHub Collaboration & Branch Workflows', 'Cloud / Vercel Rapid Deployment', 'Pitch Deck & 3-Minute Demo Delivery'],
+    benchmarkSkills: {
+      'Rapid Prototyping': 'advanced',
+      'AI & API Integrations': 'intermediate',
+      'Team Git Workflow': 'intermediate',
+      'Presentation & Pitching': 'advanced',
+    },
+    beuContextNote: 'Supported by BEU university innovation cells and Department of Science, Technology and Technical Education.'
+  },
+  {
+    id: 'higher_studies',
+    category: 'higher_studies',
+    title: 'Higher Studies (M.Tech IITs / MS in Top Universities)',
+    icon: '🎓',
+    tagline: 'GATE High Percentile, Research Paper Publishing, SOP & IIT/IISc Admissions',
+    defaultDeadline: '1 Year',
+    targetOutcome: 'Gain admission to Premier IITs, NITs or top international graduate engineering programs with fellowship',
+    defaultSkillsNeeded: ['Core Engineering Rigor', 'Research Methodology & Technical Writing', 'Statement of Purpose (SOP) & Letter of Recommendations', 'GATE / Entrance Examination Score', 'Academic CGPA Maintenance (8.0+)'],
+    benchmarkSkills: {
+      'Academic CGPA': 'advanced',
+      'Core Technical Rigor': 'advanced',
+      'Research & Paper Writing': 'intermediate',
+      'Standardized Exam Prep': 'advanced',
+    },
+    beuContextNote: 'High BEU CGPA (8.0+) provides a competitive edge for direct interviews and MHRD stipends (₹12,400/mo).'
+  },
+  {
+    id: 'freelancing',
+    category: 'freelancing',
+    title: 'Freelance Developer & Tech Consultant',
+    icon: '💰',
+    tagline: 'Upwork / Fiverr Client Acquisition, High-Ticket Web/Mobile Projects & Portfolio',
+    defaultDeadline: '4 Months',
+    targetOutcome: 'Earn steady freelance income ($500–$2000/mo) while studying through verified freelance contracts',
+    defaultSkillsNeeded: ['Full-Stack Web or Mobile Development', 'Client Communication & English Fluency', 'Upwork Proposal Writing & Cold Outreach', 'Project Scoping & Contract Delivery', 'Stripe / PayPal Invoicing'],
+    benchmarkSkills: {
+      'Technical Delivery': 'intermediate',
+      'English & Negotiation': 'advanced',
+      'Proposal Writing': 'advanced',
+      'Portfolio & Proof of Work': 'advanced',
+    },
+    beuContextNote: 'Allows students to become financially independent while maintaining high semester academic standing.'
+  },
+  {
+    id: 'abroad',
+    category: 'abroad',
+    title: 'Abroad Studies & Global Tech Career',
+    icon: '🌍',
+    tagline: 'GRE / TOEFL / IELTS, Germany/US/UK Admissions, Global SDE Applications & Visa Guidance',
+    defaultDeadline: '1 Year',
+    targetOutcome: 'Receive master’s admit with scholarship or direct international software engineering job offer',
+    defaultSkillsNeeded: ['GRE & TOEFL / IELTS Preparation', 'Global Resume Formatting', 'International Tech Problem Solving', 'Document Verification & WES Evaluation', 'Visa & Financial Sponsorship Planning'],
+    benchmarkSkills: {
+      'English Fluency (IELTS/TOEFL)': 'advanced',
+      'Standardized Test Prep': 'advanced',
+      'Technical Depth': 'intermediate',
+      'Application Strategy': 'advanced',
+    },
+    beuContextNote: 'BEU degree verification and official transcripts are recognized globally via AICTE/UGC accreditation.'
+  },
+  {
+    id: 'job',
+    category: 'job',
+    title: 'Core Industry Engineering Job',
+    icon: '💼',
+    tagline: 'Core Mechanical, Civil, Electrical, ECE & Automation Company Recruitment',
+    defaultDeadline: '6 Months',
+    targetOutcome: 'Secure core technical engineering roles in leading industrial manufacturing, energy, and infrastructure giants',
+    defaultSkillsNeeded: ['Core Branch Fundamentals (Strength of Materials, Thermodynamics, Circuit Theory)', 'Industry Software (AutoCAD, MATLAB, SolidWorks, Revit, PLC/SCADA)', 'Technical Drawing & Standards', 'Site & Lab Practical Knowledge', 'Technical HR Interview Prep'],
+    benchmarkSkills: {
+      'Core Branch Theory': 'advanced',
+      'Industry CAD/Simulation Tools': 'intermediate',
+      'Practical Lab Concepts': 'intermediate',
+      'Communication': 'intermediate',
+    },
+    beuContextNote: 'Reinforces mandatory 5th/7th semester BEU industrial summer training and PSU internship viva evaluations.'
+  },
+  {
+    id: 'custom',
+    category: 'custom',
+    title: 'Custom Personalized Engineering Goal',
+    icon: '🎯',
+    tagline: 'Tailor-made roadmap for your unique interdisciplinary passion or specialized target',
+    defaultDeadline: '6 Months',
+    targetOutcome: 'Achieve your self-defined target through dynamic AI-grounded milestones and continuous tracking',
+    defaultSkillsNeeded: ['Core Fundamentals', 'Domain-Specific Tools', 'Continuous Practice', 'Portfolio Demonstrations', 'Evaluation Benchmarks'],
+    benchmarkSkills: {
+      'Foundations': 'intermediate',
+      'Specialization': 'intermediate',
+      'Consistency': 'advanced',
+    },
+    beuContextNote: 'Customized in harmony with your current semester BEU course load.'
   }
 ];
 
-export const GoalMapEngine = {
+export class GoalMapEngine {
+  /* BEU-GOALMAP-1: 16-Category Dynamic Adaptive Questionnaire Engine
+   * Generates context-aware multiple choice and input questions dynamically tailored to the student's chosen goal.
+   * Ensures Software Dev, AI/ML, GATE, BPSC, Startup, and Hackathon paths receive custom targeted assessment prompts. */
+  static getGoalSpecificQuestions(category: string, goalTitle?: string): GoalSpecificQuestion[] {
+    const cat = (category || '').toLowerCase();
+
+    if (cat.includes('software') || cat.includes('web') || cat.includes('app')) {
+      return [
+        {
+          id: 'primary_lang',
+          question: 'Kaunsi programming language me strong banna chahte ho?',
+          type: 'select',
+          options: ['JavaScript / TypeScript', 'C++ (DSA Heavy)', 'Java (Enterprise & DSA)', 'Python', 'Go / Rust', 'Flutter (Dart)'],
+        },
+        {
+          id: 'dsa_level',
+          question: 'DSA (Data Structures & Algorithms) me abhi aapka comfort level kya hai?',
+          type: 'select',
+          options: ['Beginner (Basics of Arrays/Loops)', 'Basic (Can solve Easy LeetCode)', 'Intermediate (Trees, Graphs, DP basics)', 'Advanced (150+ LeetCode solved)'],
+        },
+        {
+          id: 'target_companies',
+          question: 'Aapka target kis type ki companies me hai?',
+          type: 'select',
+          options: ['Top Product Companies (MAANG / Tier-1)', 'Fast-Growing Startups (Fintech/SaaS)', 'Service / Mass Recruiters (TCS/Infosys/Wipro)', 'Remote International Companies'],
+        },
+        {
+          id: 'projects_done',
+          question: 'Abhi tak kitne real-world projects bana kar GitHub par deploy kiye hain?',
+          type: 'select',
+          options: ['0 (Sirf tutorial dekhe hain)', '1-2 Mini Projects', '3-5 Good Projects', '5+ Deployed Full-Stack Apps'],
+        }
+      ];
+    }
+
+    if (cat.includes('ai') || cat.includes('data')) {
+      return [
+        {
+          id: 'math_background',
+          question: 'Mathematics & Statistics (Linear Algebra, Probability, Calculus) me kitna comfort hai?',
+          type: 'select',
+          options: ['Weak (Need simple step-by-step guidance)', 'Average (Passed college exams)', 'Strong (Comfortable with formulas & vectors)'],
+        },
+        {
+          id: 'python_stack',
+          question: 'Python Data ecosystem me kya kya aata hai?',
+          type: 'multiselect',
+          options: ['NumPy & Pandas', 'Matplotlib / Seaborn', 'Scikit-Learn (ML)', 'PyTorch / TensorFlow (Deep Learning)', 'LangChain / Vector DBs (LLMs)', 'None yet'],
+        },
+        {
+          id: 'ai_focus',
+          question: 'AI me aapka main interest kisme hai?',
+          type: 'select',
+          options: ['Generative AI & LLM Applications (RAG/Agents)', 'Computer Vision (CV/Image processing)', 'Data Analytics & Business Intelligence (SQL/PowerBI)', 'Research & Foundation Models'],
+        },
+        {
+          id: 'kaggle_exp',
+          question: 'Kaggle ya real datasets par hands-on kaam kiya hai?',
+          type: 'select',
+          options: ['Nahi, bilkul fresh start hai', 'Haan, basic datasets explore kiye hain', 'Competitions me participate kiya hai'],
+        }
+      ];
+    }
+
+    if (cat.includes('gate') || cat.includes('higher')) {
+      return [
+        {
+          id: 'gate_attempt',
+          question: 'GATE exam kab attempt karne ka target hai?',
+          type: 'select',
+          options: ['GATE 2027 (Pre-Final / Final Year)', 'GATE 2028', 'Direct Higher Studies (MS Abroad)'],
+        },
+        {
+          id: 'coaching_status',
+          question: 'Aapki preparation ka mode kya hai?',
+          type: 'select',
+          options: ['Self-Study with Standard Textbooks & NPTEL', 'Online Coaching (PW / Made Easy / Unacademy)', 'College Lectures + PYQ Solving'],
+        },
+        {
+          id: 'pyq_status',
+          question: 'Past 10 Years GATE PYQs solve kiye hain?',
+          type: 'select',
+          options: ['Not started yet', '1-2 Subjects completed', '5+ Subjects completed with short notes'],
+        },
+        {
+          id: 'target_outcome',
+          question: 'Primary Target kya hai?',
+          type: 'select',
+          options: ['PSU Job (IOCL, NTPC, ONGC, BARC)', 'M.Tech / MS at IIT Bombay / IISc / IIT Delhi', 'State Engineering Assistant Engineer'],
+        }
+      ];
+    }
+
+    if (cat.includes('hackathon')) {
+      return [
+        {
+          id: 'team_status',
+          question: 'Hackathon team ready hai ya solo part lena hai?',
+          type: 'select',
+          options: ['Team of 4-6 members ready', 'Looking for teammates in college', 'Solo developer'],
+        },
+        {
+          id: 'idea_stage',
+          question: 'Problem statement ya project idea ready hai?',
+          type: 'select',
+          options: ['Idea already finalized & validated', 'Brainstorming 2-3 unique concepts', 'Need AI idea recommendations'],
+        },
+        {
+          id: 'speed_prototyping',
+          question: '36 hours me working prototype build karne ka experience hai?',
+          type: 'select',
+          options: ['First time participating', '1-2 Hackathons attended', 'Won state/national level hackathon before'],
+        },
+        {
+          id: 'presentation_skill',
+          question: 'Jury ke samne 3-minute pitch & live demo presentation level:',
+          type: 'select',
+          options: ['Need training on pitch deck & speaking', 'Moderate (Can explain tech stack)', 'Confident & persuasive speaker'],
+        }
+      ];
+    }
+
+    if (cat.includes('startup')) {
+      return [
+        {
+          id: 'startup_stage',
+          question: 'Aapka startup idea abhi kis stage par hai?',
+          type: 'select',
+          options: ['Idea Stage (Validating problem)', 'MVP Built (Basic prototype working)', 'Early Traction (Have initial users/testing)', 'Looking for Co-founder'],
+        },
+        {
+          id: 'bihar_startup_grant',
+          question: 'Bihar Government Startup Policy (₹10 Lakhs Seed Grant) ke baare me jante hain?',
+          type: 'select',
+          options: ['Haan, apply karna chahte hain', 'Pata hai par documentation help chahiye', 'First time sun rahe hain'],
+        },
+        {
+          id: 'domain_area',
+          question: 'Target Sector kya hai?',
+          type: 'select',
+          options: ['Agritech & Rural Innovation', 'EdTech & Student Platforms', 'AI SaaS & B2B Software', 'Clean Energy / Drone Tech / Robotics'],
+        }
+      ];
+    }
+
+    // Default / Custom Questions
+    return [
+      {
+        id: 'primary_challenge',
+        question: 'Is goal ko achieve karne me sabse bada challenge kya lagta hai?',
+        type: 'select',
+        options: ['Lack of structured step-by-step guidance', 'Time management with college semester exams', 'Lack of practical project exposure', 'Doubt resolution & mentorship'],
+      },
+      {
+        id: 'portfolio_status',
+        question: 'Aapka current proof of work (GitHub / Portfolio / Resume) ready hai?',
+        type: 'select',
+        options: ['Nahi, bilkul start se banana hai', 'Basic resume hai par projects weak hain', 'Ready hai, optimize karna hai'],
+      },
+      {
+        id: 'target_milestone',
+        question: 'Agle 30 dino me sabse pehla major milestone kya hona chahiye?',
+        type: 'text',
+        placeholder: 'e.g. Master C++ DSA fundamentals, or build my first responsive web project',
+      }
+    ];
+  }
+
+  /* BEU-GOALMAP-2: Multi-Dimensional Student Skill Gap Analyzer
+   * Compares student-assessed proficiency against target role benchmarks to pinpoint exact missing competencies.
+   * Classifies skills into high priority, medium priority, and prerequisite engineering dependencies. */
+  static analyzeSkillGaps(params: {
+    category: string;
+    existingSkills: string[];
+    skillRatings?: Record<string, SkillLevelType>;
+    currentLevel: SkillLevelType | string;
+    hoursDaily: number;
+  }) {
+    const preset = GOAL_PRESETS.find(p => p.category === params.category) || GOAL_PRESETS[0];
+    const userSkillsUpper = params.existingSkills.map(s => s.trim().toLowerCase());
+
+    const alreadyLearned: string[] = [];
+    const inProgress: string[] = [];
+    const missingSkills: string[] = [];
+
+    preset.defaultSkillsNeeded.forEach(skill => {
+      const isKnown = userSkillsUpper.some(us => skill.toLowerCase().includes(us) || us.includes(skill.toLowerCase().split(' ')[0]));
+      if (isKnown) {
+        alreadyLearned.push(skill);
+      } else {
+        missingSkills.push(skill);
+      }
+    });
+
+    // If missingSkills is empty, ensure high-yield skills are represented
+    if (missingSkills.length === 0) {
+      missingSkills.push(...preset.defaultSkillsNeeded.slice(2));
+    }
+
+    const highPriority = missingSkills.slice(0, 3);
+    const mediumPriority = missingSkills.slice(3);
+
+    const currentPositionSummary = alreadyLearned.length > 0
+      ? `Aapke paas ${alreadyLearned.slice(0, 3).join(', ')} ki foundation hai (Level: ${params.currentLevel.toUpperCase()}).`
+      : `Aap abhi bilkul fresh start par hain (Level: ${params.currentLevel.toUpperCase()}).`;
+
+    const targetPositionSummary = `Goal "${preset.title}" achieve karne ke liye ${missingSkills.length} core competencies master karni hain.`;
+
+    const prerequisitesNeeded = [
+      'Git & GitHub Version Control',
+      'Daily 1-2 hours dedicated practical coding habit',
+      'Core problem decomposition logic'
+    ];
+
+    return {
+      currentPositionSummary,
+      targetPositionSummary,
+      alreadyLearned,
+      inProgress,
+      skillGap: missingSkills,
+      missingSkills,
+      highPriority,
+      mediumPriority,
+      prerequisitesNeeded,
+    };
+  }
+
+  /* BEU-GOALMAP-3: Calibrated Day-by-Day Daily Action Schedule Synthesizer
+   * Produces a personalized Day 1 - Day 14 schedule answering 'Aaj Mujhe Kya Karna Hai?'.
+   * Formats task durations strictly according to the student's daily available study slots (30m, 1h, 2h, 3h+). */
+  static generateDailyActionSchedule(hoursDaily: number, category: string): DailyActionWeek[] {
+    const durationMinutes = hoursDaily <= 0.5 ? 30 : hoursDaily <= 1 ? 60 : hoursDaily <= 2 ? 120 : 180;
+    const cat = category.toLowerCase();
+
+    let week1Theme = 'Foundation & Environment Setup';
+    let week1Tasks = [
+      { day: 1, label: 'Day 1 - Mon', title: 'Setup Development Environment & Git Repository', desc: 'Install VS Code, Git, Node.js or C++ compiler. Initialize first GitHub repository.', cat: 'learn' as const },
+      { day: 2, label: 'Day 2 - Tue', title: 'Syntax Fundamentals & Variable Structures', desc: 'Practice basic syntax, data types, and standard input/output formatting.', cat: 'learn' as const },
+      { day: 3, label: 'Day 3 - Wed', title: 'Conditionals, Loops & Control Flow Drill', desc: 'Solve 5 logic puzzles utilizing if-else statements and while/for loops.', cat: 'practice' as const },
+      { day: 4, label: 'Day 4 - Thu', title: 'Functions, Modularity & Memory Models', desc: 'Understand pass-by-value vs pass-by-reference and modular code separation.', cat: 'learn' as const },
+      { day: 5, label: 'Day 5 - Fri', title: 'Arrays, Strings & Basic Traversal', desc: 'Solve 4 array traversal and string manipulation problems on LeetCode/HackerRank.', cat: 'practice' as const },
+      { day: 6, label: 'Day 6 - Sat', title: 'Mini Console Project Implementation', desc: 'Build a CLI-based interactive calculator, to-do tracker, or formula solver from scratch.', cat: 'project' as const },
+      { day: 7, label: 'Day 7 - Sun', title: 'Week 1 Review, Git Commit & Revision', desc: 'Push code to GitHub with proper README.md and revise weak conceptual points.', cat: 'revision' as const },
+    ];
+
+    let week2Theme = 'Core Problem Solving & Architecture';
+    let week2Tasks = [
+      { day: 8, label: 'Day 8 - Mon', title: 'Data Structures Foundations (Time & Space Complexity)', desc: 'Calculate Big-O time and space complexity on loops and standard sorting.', cat: 'learn' as const },
+      { day: 9, label: 'Day 9 - Tue', title: 'Two-Pointer & Sliding Window Technique', desc: 'Solve 3 medium difficulty subarray and string matching coding problems.', cat: 'practice' as const },
+      { day: 10, label: 'Day 10 - Wed', title: 'Object-Oriented Design & Clean Code Principles', desc: 'Implement encapsulation, inheritance, and modular interfaces.', cat: 'learn' as const },
+      { day: 11, label: 'Day 11 - Thu', title: 'Hashing, HashMaps & Frequency Counters', desc: 'Solve Two-Sum, Group Anagrams, and frequency count challenges.', cat: 'practice' as const },
+      { day: 12, label: 'Day 12 - Fri', title: 'Connecting Front & Back Components', desc: 'Write your first API query or file I/O operations with error handling.', cat: 'learn' as const },
+      { day: 13, label: 'Day 13 - Sat', title: 'Mini Application Milestone Build', desc: 'Combine data structures with a working UI or automated script demonstration.', cat: 'project' as const },
+      { day: 14, label: 'Day 14 - Sun', title: 'Mock Test Drill & Progress Assessment', desc: 'Take a timed 60-minute coding assessment and update GoalMap progress.', cat: 'revision' as const },
+    ];
+
+    if (cat.includes('gate') || cat.includes('higher')) {
+      week1Theme = 'Engineering Maths & Subject Foundations';
+      week1Tasks = [
+        { day: 1, label: 'Day 1 - Mon', title: 'Linear Algebra: Matrices, Determinants & Rank', desc: 'Study matrix properties and compute rank using row-echelon reduction.', cat: 'learn' as const },
+        { day: 2, label: 'Day 2 - Tue', title: 'Eigenvalues & Eigenvectors Derivations', desc: 'Derive characteristic polynomials and solve 5 standard GATE PYQs.', cat: 'practice' as const },
+        { day: 3, label: 'Day 3 - Wed', title: 'Calculus: Limits, Continuity & Differentiability', desc: 'Master L-Hopital rule, Mean Value Theorems, and directional derivatives.', cat: 'learn' as const },
+        { day: 4, label: 'Day 4 - Thu', title: 'Integration & Maximum/Minimum Optimization', desc: 'Solve 6 optimization and definite integration previous GATE questions.', cat: 'practice' as const },
+        { day: 5, label: 'Day 5 - Fri', title: 'Core Technical Subject Unit 1 Deep Dive', desc: 'Study core definitions, state transition diagrams, and architectural blocks.', cat: 'learn' as const },
+        { day: 6, label: 'Day 6 - Sat', title: 'Unit 1 PYQ 10-Year Comprehensive Solver', desc: 'Solve 15 multiple choice and numerical answer type questions without calculator.', cat: 'practice' as const },
+        { day: 7, label: 'Day 7 - Sun', title: 'Formula Handbook & Weekly Short Notes', desc: 'Compile 2-page concise revision sheet for quick weekly recall.', cat: 'revision' as const },
+      ];
+    }
+
+    return [
+      {
+        weekNumber: 1,
+        weekTheme: week1Theme,
+        days: week1Tasks.map((t, idx) => ({
+          id: `task-w1-d${t.day}`,
+          dayNumber: t.day,
+          dayLabel: t.label,
+          title: t.title,
+          description: t.desc,
+          durationMinutes,
+          category: t.cat,
+          completed: false,
+        })),
+      },
+      {
+        weekNumber: 2,
+        weekTheme: week2Theme,
+        days: week2Tasks.map((t, idx) => ({
+          id: `task-w2-d${t.day}`,
+          dayNumber: t.day,
+          dayLabel: t.label,
+          title: t.title,
+          description: t.desc,
+          durationMinutes,
+          category: t.cat,
+          completed: false,
+        })),
+      }
+    ];
+  }
+
   /**
-   * Generates a fully personalized GoalMap based on student input
+   * Generates a fully personalized, multi-phase GoalMap based on student profile.
    */
-  generateGoalMap: (params: {
+  static generatePersonalizedGoalMap(params: {
     userId: string;
     goalTitle: string;
-    category: 'career' | 'academic' | 'skill' | 'project' | 'custom';
-    targetOutcome: string;
-    targetDeadline: string;
+    category: GoalCategoryType | string;
+    targetOutcome?: string;
+    targetDeadline?: string;
     branch: string;
     semester: number;
-    currentLevel: 'beginner' | 'intermediate' | 'advanced';
+    college?: string;
+    academicLevel?: string;
+    cgpaRange?: string;
+    backlogStatus?: string;
+    favouriteSubjects?: string[];
+    weakSubjects?: string[];
+    currentLevel: SkillLevelType | string;
     existingSkills: string[];
+    skillRatings?: Record<string, SkillLevelType>;
     hoursDaily: number;
-    learningPreference: string[];
-  }): GoalMap => {
+    hoursWeekend?: number;
+    learningPace?: 'Fast' | 'Balanced' | 'Flexible';
+    learningPreference?: string[];
+    goalSpecificAnswers?: Record<string, any>;
+  }): GoalMap {
     const {
       userId, goalTitle, category, targetOutcome, targetDeadline,
-      branch, semester, currentLevel, existingSkills, hoursDaily, learningPreference
+      branch, semester, currentLevel, existingSkills, hoursDaily
     } = params;
 
-    const lowerGoal = goalTitle.toLowerCase();
-    const isFullStack = lowerGoal.includes('full') || lowerGoal.includes('web') || lowerGoal.includes('software') || lowerGoal.includes('frontend') || lowerGoal.includes('backend') || lowerGoal.includes('mern');
-    const isGate = lowerGoal.includes('gate') || lowerGoal.includes('psu') || lowerGoal.includes('m.tech') || lowerGoal.includes('iit');
-    const isAIML = lowerGoal.includes('ai') || lowerGoal.includes('ml') || lowerGoal.includes('data') || lowerGoal.includes('machine learning') || lowerGoal.includes('deep learning');
-    const isBEUSem = lowerGoal.includes('cgpa') || lowerGoal.includes('semester') || lowerGoal.includes('exam') || lowerGoal.includes('sgpa') || lowerGoal.includes('university');
-    const isGovt = lowerGoal.includes('bpsc') || lowerGoal.includes('ae') || lowerGoal.includes('govt') || lowerGoal.includes('assistant engineer') || lowerGoal.includes('ssc');
-    const isCybersecurity = lowerGoal.includes('cyber') || lowerGoal.includes('security') || lowerGoal.includes('hack') || lowerGoal.includes('pentest') || lowerGoal.includes('soc');
-    const isStartup = lowerGoal.includes('startup') || lowerGoal.includes('business') || lowerGoal.includes('product') || lowerGoal.includes('saas') || lowerGoal.includes('hackathon') || lowerGoal.includes('sih');
+    const preset = GOAL_PRESETS.find(p => p.category === category || p.title.toLowerCase() === goalTitle.toLowerCase()) || GOAL_PRESETS[0];
 
-    // 1. GAP ANALYSIS
-    const allRequiredSkills = isFullStack
-      ? ['JavaScript Fundamentals', 'Git & GitHub', 'React.js & Hooks', 'Node.js & Express', 'MongoDB & SQL', 'Data Structures (Arrays/Trees/Graphs)', 'REST APIs & JWT Auth', 'Docker Basics', 'System Design Basics', 'Resume & Mock Interviews']
-      : isGate
-      ? ['Engg Mathematics', 'Discrete Maths', 'Digital Logic', 'Data Structures & Algorithms', 'Operating Systems', 'DBMS & SQL', 'Theory of Computation', 'Computer Networks', 'Compiler Design', '15 Years PYQ Solving']
-      : isAIML
-      ? ['Python & OOP', 'NumPy & Pandas Analysis', 'Linear Algebra & Calculus', 'Scikit-Learn ML Models', 'Deep Learning & PyTorch', 'NLP & Transformer Models', 'FastAPI Deployment', 'Vector DB & RAG Pipelines']
-      : isGovt
-      ? ['Core Branch Fundamentals', 'Strength of Materials / Circuits', 'Fluid Mechanics / Power Systems', 'Bihar Special GK & Current Affairs', 'BPSC AE Previous Papers', 'Standard Design Codes']
-      : isBEUSem
-      ? ['Unit 1 Concepts (2 Marks Compulsory)', 'Unit 2 Theoretical Models & Tables', 'Unit 3 High-Yield 14-Mark Derivations', 'Unit 4 High-Yield Algorithms/Circuits', 'Unit 5 Numerical Problem Sets', 'Past 5-Year PYQs Review']
-      : isCybersecurity
-      ? ['Linux Administration', 'Computer Networks (TCP/IP, OSI)', 'OWASP Top 10 Web Vulnerabilities', 'Burp Suite & Nmap', 'SOC Incident Analysis & Log Monitoring', 'TryHackMe Practice']
-      : isStartup
-      ? ['Problem Discovery & User Interviews', 'Full-Stack MVP Prototyping', 'Database Architecture & Auth', 'Pitch Deck & Business Model Canvas', 'Bihar Startup Grant ₹10L Application', 'Early User Onboarding']
-      : ['Fundamental Theory & Terminology', 'Applied Technical Skills', 'Practical Implementation & Drills', 'Capstone Project & Documentation', 'Assessment & Final Outcome Delivery'];
+    const finalTitle = goalTitle.trim() || preset.title;
+    const finalOutcome = targetOutcome?.trim() || preset.targetOutcome;
+    const finalDeadline = targetDeadline?.trim() || preset.defaultDeadline;
 
-    const alreadyLearned = existingSkills.filter(s =>
-      allRequiredSkills.some(req => req.toLowerCase().includes(s.toLowerCase()))
-    );
+    // 1. Skill Gap Analysis
+    const gapAnalysis = this.analyzeSkillGaps({
+      category: preset.category,
+      existingSkills,
+      skillRatings: params.skillRatings,
+      currentLevel,
+      hoursDaily,
+    });
 
-    const skillGap = allRequiredSkills.filter(req =>
-      !alreadyLearned.some(al => al.toLowerCase() === req.toLowerCase())
-    );
+    // 2. BEU Academic Curriculum Synergy
+    const beuAcademicContext = this.deriveBEUSynergy(branch, semester, finalTitle);
 
-    const highPriority = skillGap.slice(0, Math.ceil(skillGap.length * 0.4));
-    const mediumPriority = skillGap.slice(Math.ceil(skillGap.length * 0.4));
+    // 3. Dependency-Ordered Milestones
+    const milestones = this.generateMilestones(preset.category, finalTitle, hoursDaily, finalDeadline);
 
-    // 2. MILESTONES & TIME-BASED ROADMAP GENERATION
-    let milestones: GoalMilestone[] = [];
+    // 4. Daily Action Schedule
+    const dailySchedule = this.generateDailyActionSchedule(hoursDaily, preset.category);
 
-    if (isFullStack) {
-      milestones = [
+    return {
+      id: `goalmap-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`,
+      userId,
+      goalTitle: finalTitle,
+      category: preset.category,
+      targetOutcome: finalOutcome,
+      targetDeadline: finalDeadline,
+      createdAt: new Date().toISOString(),
+      progressPercent: 0,
+      streakDays: 1,
+      studentProfile: {
+        branch: branch || 'CSE',
+        semester: semester || 3,
+        college: params.college || 'Government Engineering College',
+        academicLevel: params.academicLevel || 'B.Tech Undergrad',
+        cgpaRange: params.cgpaRange || '7.5 - 8.5',
+        backlogStatus: params.backlogStatus || '0 Backlogs',
+        favouriteSubjects: params.favouriteSubjects || ['Data Structures', 'Operating Systems'],
+        weakSubjects: params.weakSubjects || ['Engineering Mathematics'],
+        currentLevel: currentLevel || 'basic',
+        existingSkills: existingSkills || ['C/C++', 'HTML/CSS'],
+        skillRatings: params.skillRatings || {},
+        hoursDaily: hoursDaily || 2,
+        hoursWeekend: params.hoursWeekend || 4,
+        learningPace: params.learningPace || 'Balanced',
+        learningPreference: params.learningPreference || ['Hands-on Projects', 'Video Tutorials', 'Practice Drills'],
+        goalSpecificAnswers: params.goalSpecificAnswers || {},
+      },
+      gapAnalysis,
+      beuAcademicContext,
+      milestones,
+      dailySchedule,
+      healthCheck: {
+        status: 'ON_TRACK',
+        summary: `Personalized ${finalDeadline} timeline generated successfully. Calibrated for ${hoursDaily} hrs/day at ${params.learningPace || 'Balanced'} pace.`,
+        suggestions: [
+          'Complete Week 1 Day 1 setup task to begin your active study streak.',
+          'Solve the recommended LeetCode/practice drills in Phase 1 before jumping to projects.',
+          `Leverage your current Semester ${semester} subjects (${beuAcademicContext.relevantSubjects.slice(0, 2).join(', ')}) for mutual theory and career leverage.`
+        ],
+      },
+    };
+  }
+
+  /* BEU-GOALMAP-4: Semester-Aware BEU Academic & Industry Curriculum Synergy Bridge
+   * Maps student's enrolled semester university subjects directly to their professional goal.
+   * Empowers students to balance end-term 14-mark derivations with real-world project portfolios. */
+  private static deriveBEUSynergy(branch: string, semester: number, goalTitle: string) {
+    const sem = Number(semester) || 3;
+    let relevantSubjects = ['Data Structures & Algorithms (CS301)', 'Discrete Mathematics (MA301)', 'Digital Electronics (EC301)'];
+    let highYieldUnits = ['Unit 2: Linear Data Structures', 'Unit 3: Non-Linear Trees & Graphs', 'Unit 4: Sorting & Dynamic Programming'];
+    let examPatternFocus = 'BEU Compulsory 7-mark theoretical proofs & 14-mark algorithm implementations with complexity derivations.';
+
+    if (sem === 1 || sem === 2) {
+      relevantSubjects = ['Programming for Problem Solving (CS101)', 'Engineering Mathematics I & II', 'Basic Electrical Engineering'];
+      highYieldUnits = ['Unit 3: Pointers & Dynamic Memory', 'Unit 4: Arrays & Structures in C', 'Unit 5: File Operations'];
+      examPatternFocus = 'Fundamentals of C syntax, pointer arithmetic, and linear search/bubble sort flowcharts.';
+    } else if (sem === 4) {
+      relevantSubjects = ['Design & Analysis of Algorithms (CS401)', 'Database Management Systems (CS402)', 'Computer Organization (CS403)'];
+      highYieldUnits = ['Unit 2: Greedy & Dynamic Programming', 'Unit 3: SQL Normalization (3NF/BCNF)', 'Unit 4: Transaction & Concurrency'];
+      examPatternFocus = 'DBMS ER-to-Relational conversion, B-Trees index derivations, and recurrence relation solutions.';
+    } else if (sem === 5 || sem === 6) {
+      relevantSubjects = ['Operating Systems (CS501)', 'Computer Networks (CS502)', 'Web Technologies & Software Engineering'];
+      highYieldUnits = ['Unit 2: Process Synchronization & Semaphores', 'Unit 3: Deadlock Detection & Avoidance', 'Unit 4: TCP/IP Subnetting & Routing'];
+      examPatternFocus = 'Banker Algorithm, Paging memory translation numericals, and TCP handshake sequence diagrams.';
+    } else if (sem >= 7) {
+      relevantSubjects = ['Cloud Computing & AI Elective', 'Industrial Summer Training Viva', 'Final Year Major Capstone Project'];
+      highYieldUnits = ['Unit 1: Microservices Architecture', 'Unit 3: Model Deployment & CI/CD', 'Unit 5: Capstone System Defense'];
+      examPatternFocus = 'Industry project demonstration, viva-voce technical defense, and production architecture defense.';
+    }
+
+    return {
+      relevantSubjects,
+      highYieldUnits,
+      examPatternFocus,
+      curriculumBridgeNote: `BEU Semester ${sem} syllabus directly covers the foundations needed for ${goalTitle}. Master university derivations during the week to score high SGPA while building hands-on projects on weekends.`
+    };
+  }
+
+  /* BEU-GOALMAP-5: Dependency-Ordered Milestone & Project Architecture Synthesizer
+   * Constructs strict sequential phases (Foundation -> Specialization -> Full Stack/Core -> Scale -> Placement).
+   * Bundles full what-to-learn, why-this-step, practice drills, capstone specifications, and verifiable criteria. */
+  private static generateMilestones(category: string, goalTitle: string, hoursDaily: number, deadline: string): GoalMilestone[] {
+    const cat = category.toLowerCase();
+
+    if (cat.includes('gate') || cat.includes('higher')) {
+      return [
         {
-          id: 'ms-fs-1',
+          id: 'ms-gate-1',
           phaseNumber: 1,
-          title: 'Phase 1: Core Programming, DSA Foundations & Git',
-          timeframe: 'Month 1 (Weeks 1-4)',
-          whyThisStep: 'Solid programming logic in JavaScript/C++ and version control are non-negotiable prerequisites before building full-stack systems.',
+          title: 'Phase 1: Engineering Mathematics & Discrete Structures',
+          timeframe: 'Month 1 - 2',
+          whyThisStep: 'Mathematics carries a guaranteed 15 marks in GATE and forms the logical foundation for Algorithm complexity and TOC.',
+          whatToLearn: ['Linear Algebra (Eigenvalues, Rank)', 'Calculus & Optimization', 'Probability & Distributions', 'Discrete Math (Set theory, Graphs, Logic)'],
+          whatToDo: 'Study standard definitions, solve 100 past GATE math problems, and write short formula cards for daily morning recall.',
           status: 'in_progress',
+          estimatedHours: 60,
           tasks: [
-            { id: 't-fs-1-1', title: 'Master JavaScript ES6+ (Promises, Async/Await, Closures, Array methods)', description: 'Write 15 JS coding drills on closures, event loop, and DOM manipulation.', estimatedHours: 12, priority: 'HIGH', completed: true, category: 'learn' },
-            { id: 't-fs-1-2', title: 'Master Git Branching, Pull Requests & GitHub Workflow', description: 'Create a GitHub profile, initialize repositories with clear README, license, and .gitignore.', estimatedHours: 6, priority: 'HIGH', completed: true, category: 'practice' },
-            { id: 't-fs-1-3', title: 'Solve 30 Easy-Medium LeetCode Array & String Questions', description: 'Focus on Two-Pointer technique, Sliding Window, and HashMaps.', estimatedHours: 20, priority: 'HIGH', completed: false, category: 'practice' },
-            { id: 't-fs-1-4', title: 'Build Project 1: Interactive Browser Dashboard / Task Manager', description: 'Pure Vanilla JS + LocalStorage with responsive CSS layout.', estimatedHours: 14, priority: 'MEDIUM', completed: false, category: 'project' }
+            { id: 't-g1-1', title: 'Complete Linear Algebra matrix ranks & eigenvalues', description: 'Solve standard characteristic equation derivations.', estimatedHours: 12, priority: 'HIGH', completed: false, category: 'learn' },
+            { id: 't-g1-2', title: 'Master Discrete Graph Theory & Propositional Logic', description: 'Truth tables, Euler graphs, and recurrence relations.', estimatedHours: 14, priority: 'HIGH', completed: false, category: 'learn' },
+            { id: 't-g1-3', title: 'Solve 15-Year GATE Math PYQs', description: 'Untimed accuracy drill followed by 30-min timed test.', estimatedHours: 16, priority: 'HIGH', completed: false, category: 'practice' },
           ],
           recommendedResources: [
-            { id: 'r-fs-1-1', title: 'JavaScript.info (Modern JavaScript Tutorial)', type: 'doc', url: 'https://javascript.info', whyUseful: 'The gold standard comprehensive JS deep dive.', difficulty: 'Beginner', estimatedTime: '2 weeks' },
-            { id: 'r-fs-1-2', title: 'Namaste JavaScript by Akshay Saini (YouTube)', type: 'video', url: 'https://youtube.com', whyUseful: 'Best visual breakdown of JS execution context and event loops.', difficulty: 'Beginner', estimatedTime: '10 hours' },
-            { id: 'r-fs-1-3', title: 'NeetCode 150 - Arrays & Hashing', type: 'practice', url: 'https://neetcode.io', whyUseful: 'Curated list of must-solve interview coding problems.', difficulty: 'Intermediate', estimatedTime: '15 hours' }
+            { id: 'r-g1', title: 'NPTEL Discrete Mathematics by Prof. Sudarshan', type: 'video', url: 'https://nptel.ac.in/courses/106106094', whyUseful: 'Most authoritative IIT video series for GATE logic concepts.', difficulty: 'Intermediate', estimatedTime: '20 Hours' },
+            { id: 'r-g2', title: 'GATE Overflow Previous Year Solved Questions', type: 'practice', url: 'https://gateoverflow.in/', whyUseful: 'Community peer-reviewed answer keys for tricky ambiguous MCQs.', difficulty: 'Advanced', estimatedTime: '15 Hours' },
           ],
-          projectIdea: {
-            title: 'Personal Developer Dashboard with Weather & Task Sync',
-            description: 'A modular productivity widget board built with vanilla TypeScript and OpenWeather API.',
-            techStack: ['HTML5', 'Vanilla CSS', 'TypeScript', 'LocalStorage', 'REST API']
-          }
+          practiceDrills: [
+            { title: 'Probability Distributions & Bayes Theorem Drill', platform: 'GATE Overflow', url: 'https://gateoverflow.in' },
+            { title: 'Graph Theory & Tree Properties Quiz', platform: 'GeeksforGeeks GATE', url: 'https://practice.geeksforgeeks.org' }
+          ],
+          completionCriteria: ['Score > 80% on 30-question Engineering Mathematics sectional test', 'All 15 years GATE Math questions solved with clear handwritten notes'],
         },
         {
-          id: 'ms-fs-2',
+          id: 'ms-gate-2',
           phaseNumber: 2,
-          title: 'Phase 2: Modern Frontend Engineering with React & Tailwind',
-          timeframe: 'Month 2 (Weeks 5-8)',
-          whyThisStep: 'React powers 70%+ of modern tech companies in India. Mastering state management and component architecture creates job-ready UI skills.',
+          title: 'Phase 2: Core Data Structures, Algorithms & TOC',
+          timeframe: 'Month 3 - 4',
+          whyThisStep: 'Algorithms, Data Structures and Theory of Computation contribute ~25 marks of predictable, highly scoring questions.',
+          whatToLearn: ['Asymptotic Analysis & Recurrences', 'Trees, Heaps & Graph Traversals', 'Dynamic Programming & Greedy Approaches', 'DFA/NFA, Regular Expressions & Turing Machines'],
+          whatToDo: 'Derive space-time complexity bounds, draw finite automata for all language subsets, and practice edge cases.',
           status: 'upcoming',
+          estimatedHours: 80,
           tasks: [
-            { id: 't-fs-2-1', title: 'Understand React Lifecycle, State, Props & Core Hooks (useState, useEffect, useMemo)', description: 'Build component tree with clean separation of concerns.', estimatedHours: 18, priority: 'HIGH', completed: false, category: 'learn' },
-            { id: 't-fs-2-2', title: 'Master TailwindCSS / CSS Design System & Responsive Layouts', description: 'Design mobile-first interfaces with dark mode support.', estimatedHours: 10, priority: 'HIGH', completed: false, category: 'practice' },
-            { id: 't-fs-2-3', title: 'State Management with Zustand or Redux Toolkit', description: 'Manage global auth state, cart state, and notifications across pages.', estimatedHours: 12, priority: 'MEDIUM', completed: false, category: 'learn' },
-            { id: 't-fs-2-4', title: 'Build Project 2: College Campus Marketplace / Community Forum', description: 'Fully responsive UI with filter bar, search, and dynamic mock data.', estimatedHours: 25, priority: 'HIGH', completed: false, category: 'project' }
+            { id: 't-g2-1', title: 'Master Regular Expressions & DFA Minimization', description: 'Myhill-Nerode theorem and pumping lemma applications.', estimatedHours: 18, priority: 'HIGH', completed: false, category: 'learn' },
+            { id: 't-g2-2', title: 'Solve 100 Algorithm & Tree Traversal PYQs', description: 'Binary Search Trees, AVL rotations, and Dijkstra shortest paths.', estimatedHours: 22, priority: 'HIGH', completed: false, category: 'practice' },
           ],
           recommendedResources: [
-            { id: 'r-fs-2-1', title: 'React Official Documentation (react.dev)', type: 'doc', url: 'https://react.dev', whyUseful: 'Interactive and hands-on modern functional component guidance.', difficulty: 'Intermediate', estimatedTime: '2 weeks' },
-            { id: 'r-fs-2-2', title: 'Full Stack Open - Part 1 & 2 (University of Helsinki)', type: 'practice', url: 'https://fullstackopen.com', whyUseful: 'World-class academic full-stack curriculum.', difficulty: 'Intermediate', estimatedTime: '20 hours' }
+            { id: 'r-g3', title: 'Introduction to Algorithms (CLRS)', type: 'doc', url: 'https://mitpress.mit.edu/9780262046305/introduction-to-algorithms/', whyUseful: 'Gold standard reference for formal complexity proofs.', difficulty: 'Advanced', estimatedTime: '30 Hours' }
           ],
-          projectIdea: {
-            title: 'BEU Student Peer Tutoring & Notes Exchange Platform',
-            description: 'Responsive React app with subject filters, PDF note previewer, and mentor booking UI.',
-            techStack: ['React 18', 'TailwindCSS', 'Lucide Icons', 'Zustand']
-          }
+          completionCriteria: ['Zero errors on DFA state minimization and closure property tables'],
         },
         {
-          id: 'ms-fs-3',
+          id: 'ms-gate-3',
           phaseNumber: 3,
-          title: 'Phase 3: Backend Microservices, Node.js & Databases (SQL + NoSQL)',
-          timeframe: 'Month 3 (Weeks 9-12)',
-          whyThisStep: 'Real-world developers must architect reliable APIs, enforce authentication security, and optimize database queries.',
+          title: 'Phase 3: Full Syllabus Mock Tests & Speed Calibration',
+          timeframe: 'Month 5 - 6',
+          whyThisStep: 'Converting knowledge into top 500 AIR requires 3-hour exam endurance, accuracy under negative marking, and virtual calculator mastery.',
+          whatToLearn: ['Virtual Calculator Speed', 'Negative Marking Avoidance', 'Multi-Subject Synthesis', 'Revision of 120 Formula Short Notes'],
+          whatToDo: 'Take 10 full-length 65-question computer-based mock tests, analyze error logs, and eliminate weak topic clusters.',
           status: 'upcoming',
+          estimatedHours: 70,
           tasks: [
-            { id: 't-fs-3-1', title: 'Build RESTful APIs with Node.js, Express & TypeScript', description: 'Implement MVC pattern with input validation (Zod) and error handling middleware.', estimatedHours: 18, priority: 'HIGH', completed: false, category: 'learn' },
-            { id: 't-fs-3-2', title: 'Implement JWT Authentication, Password Hashing (bcrypt) & Role-Based Access Control', description: 'Secure endpoints for student vs mentor vs admin.', estimatedHours: 14, priority: 'HIGH', completed: false, category: 'practice' },
-            { id: 't-fs-3-3', title: 'Database Design with PostgreSQL (Prisma ORM) & MongoDB', description: 'Write complex schema relations, foreign keys, indexing, and aggregation pipelines.', estimatedHours: 16, priority: 'HIGH', completed: false, category: 'practice' },
-            { id: 't-fs-3-4', title: 'BEU Syllabus Alignment Check: Revise DBMS (CS401) Normalization', description: 'Connect academic 1NF/2NF/3NF/BCNF principles directly to production DB design.', estimatedHours: 8, priority: 'MEDIUM', completed: false, category: 'beu_prep' }
+            { id: 't-g3-1', title: 'Full Length CBT Mock Test 1 to 5', description: 'Simulate 09:30 AM to 12:30 PM real exam conditions.', estimatedHours: 25, priority: 'HIGH', completed: false, category: 'practice' },
+            { id: 't-g3-2', title: 'Error Log & Mistake Notebook Revision', description: 'Categorize silly calculation mistakes vs conceptual gaps.', estimatedHours: 15, priority: 'HIGH', completed: false, category: 'beu_prep' },
           ],
           recommendedResources: [
-            { id: 'r-fs-3-1', title: 'Prisma ORM Official Guides', type: 'doc', url: 'https://prisma.io/docs', whyUseful: 'Type-safe database modeling with automatic migrations.', difficulty: 'Intermediate', estimatedTime: '1 week' },
-            { id: 'r-fs-3-2', title: 'Hussein Nasser Backend Engineering (YouTube)', type: 'video', url: 'https://youtube.com', whyUseful: 'Deep dive into database indexing, TCP, and connection pools.', difficulty: 'Advanced', estimatedTime: '12 hours' }
-          ]
-        },
-        {
-          id: 'ms-fs-4',
-          phaseNumber: 4,
-          title: 'Phase 4: Full-Stack Integration, WebSockets & Production Capstone',
-          timeframe: 'Month 4 (Weeks 13-16)',
-          whyThisStep: 'Recruiters look for end-to-end full-stack projects that solve real problems with real-time features like chat or live notifications.',
-          status: 'upcoming',
-          tasks: [
-            { id: 't-fs-4-1', title: 'Connect Frontend & Backend with Axios Interceptors & TanStack Query', description: 'Handle loading spinners, error toasts, and cache invalidation.', estimatedHours: 15, priority: 'HIGH', completed: false, category: 'practice' },
-            { id: 't-fs-4-2', title: 'Implement Real-time Communication using Socket.io or WebSockets', description: 'Build direct 1-on-1 instant messaging and notifications.', estimatedHours: 14, priority: 'HIGH', completed: false, category: 'learn' },
-            { id: 't-fs-4-3', title: 'Build Major Capstone: Real-Time Collaborative Academic Workspace', description: 'Multi-user study group with real-time chat, shared whiteboard, and file sharing.', estimatedHours: 35, priority: 'HIGH', completed: false, category: 'project' },
-            { id: 't-fs-4-4', title: 'Dockerize Frontend and Backend with docker-compose', description: 'Create production Dockerfile and deploy on Render / Vercel / Railway.', estimatedHours: 10, priority: 'MEDIUM', completed: false, category: 'practice' }
+            { id: 'r-g4', title: 'Official GATE Test Series Simulator', type: 'practice', url: 'https://gate.iitk.ac.in', whyUseful: 'Exact UI and virtual calculator simulation.', difficulty: 'Advanced', estimatedTime: '20 Hours' }
           ],
-          recommendedResources: [
-            { id: 'r-fs-4-1', title: 'Socket.io Official Chat Application Tutorial', type: 'doc', url: 'https://socket.io', whyUseful: 'Step-by-step WebSocket event handling.', difficulty: 'Intermediate', estimatedTime: '6 hours' },
-            { id: 'r-fs-4-2', title: 'Docker for Beginners by Nana (YouTube)', type: 'video', url: 'https://youtube.com', whyUseful: 'Clear visual introduction to containers and compose files.', difficulty: 'Beginner', estimatedTime: '4 hours' }
-          ],
-          projectIdea: {
-            title: 'BEU Live Study Room & Peer Doubt Solver',
-            description: 'Full-stack platform with real-time whiteboard, Socket.io rooms, and AI doubt assistant.',
-            techStack: ['React', 'Node.js', 'Socket.io', 'PostgreSQL', 'Prisma', 'Docker']
-          }
-        },
-        {
-          id: 'ms-fs-5',
-          phaseNumber: 5,
-          title: 'Phase 5: DSA Problem Solving & Off-Campus Internship Preparation',
-          timeframe: 'Month 5 (Weeks 17-20)',
-          whyThisStep: 'DSA clears coding rounds; system design and core CS fundamentals clear technical interview rounds.',
-          status: 'upcoming',
-          tasks: [
-            { id: 't-fs-5-1', title: 'Solve 60+ Medium DSA Problems (Trees, Graphs, DSU, Dynamic Programming)', description: 'Master BFS, DFS, Dijkstra, Tree Traversals, and 0/1 Knapsack variations.', estimatedHours: 35, priority: 'HIGH', completed: false, category: 'practice' },
-            { id: 't-fs-5-2', title: 'Master Core CS Fundamentals for Interviews (OS, DBMS, CN)', description: 'Revise Paging, Virtual Memory, ACID properties, Indexing, and TCP Handshake.', estimatedHours: 15, priority: 'HIGH', completed: false, category: 'beu_prep' },
-            { id: 't-fs-5-3', title: 'Format Single-Page ATS-Friendly Tech Resume (Overleaf / LaTeX)', description: 'Highlight GitHub live links, metrics (e.g. "reduced latency by 35%"), and tech stack.', estimatedHours: 6, priority: 'HIGH', completed: false, category: 'learn' },
-            { id: 't-fs-5-4', title: 'Optimize LinkedIn Profile & Connect with 50+ BEU Alumni in Tech', description: 'Reach out for referrals with customized polite message pitches.', estimatedHours: 8, priority: 'MEDIUM', completed: false, category: 'practice' }
-          ],
-          recommendedResources: [
-            { id: 'r-fs-5-1', title: 'Striver SDE Sheet (Take U Forward)', type: 'practice', url: 'https://takeuforward.org', whyUseful: 'Most popular curated DSA sheet for product-based company rounds in India.', difficulty: 'Advanced', estimatedTime: '4 weeks' },
-            { id: 'r-fs-5-2', title: 'Gate Smashers Operating Systems Playlist', type: 'video', url: 'https://youtube.com', whyUseful: 'Quickest way to ace OS interview questions.', difficulty: 'Intermediate', estimatedTime: '10 hours' }
-          ]
-        },
-        {
-          id: 'ms-fs-6',
-          phaseNumber: 6,
-          title: 'Phase 6: Mock Technical Interviews & Job Applications',
-          timeframe: 'Month 6 (Weeks 21-24)',
-          whyThisStep: 'Mock interview practice builds live communication confidence and eliminates exam anxiety.',
-          status: 'upcoming',
-          tasks: [
-            { id: 't-fs-6-1', title: 'Conduct 3 Peer Mock Technical Interviews on BEU Senior Mentor Platform', description: 'Simulate live coding, explain approach before writing code, and handle edge cases.', estimatedHours: 10, priority: 'HIGH', completed: false, category: 'practice' },
-            { id: 't-fs-6-2', title: 'Apply to 15+ Target Startups & Tier-1 Tech Companies via Referrals', description: 'Apply via Wellfound (AngelList), Instahyre, CutShort, and LinkedIn Jobs.', estimatedHours: 15, priority: 'HIGH', completed: false, category: 'practice' },
-            { id: 't-fs-6-3', title: 'Prepare Behavioral & HR Questions (STAR Method)', description: 'Prepare 4 stories: Leadership, Conflict resolution, Greatest technical failure, Hackathon win.', estimatedHours: 8, priority: 'MEDIUM', completed: false, category: 'learn' }
-          ],
-          recommendedResources: [
-            { id: 'r-fs-6-1', title: 'Pramp / Interviewing.io Free Peer Mock Interviews', type: 'practice', url: 'https://pramp.com', whyUseful: 'Real live video mock coding with peer engineering students.', difficulty: 'Advanced', estimatedTime: '1 week' }
-          ]
+          completionCriteria: ['Consistently scoring 65+ marks across 5 consecutive national mock tests'],
         }
       ];
-    } else if (isGate) {
-      milestones = [
-        {
-          id: 'ms-gt-1',
-          phaseNumber: 1,
-          title: 'Phase 1: Engineering Mathematics & Discrete Structures (15 Marks)',
-          timeframe: 'Months 1-2',
-          whyThisStep: 'Mathematics has 100% scoring certainty in GATE and forms the foundation for algorithms and theoretical computer science.',
-          status: 'in_progress',
-          tasks: [
-            { id: 't-gt-1-1', title: 'Linear Algebra: Matrices, Eigenvalues, Cayley-Hamilton Theorem', description: 'Solve 50 GATE standard problems on matrix rank and diagonalization.', estimatedHours: 20, priority: 'HIGH', completed: true, category: 'learn' },
-            { id: 't-gt-1-2', title: 'Discrete Mathematics: Propositional Logic, Sets & Graph Theory', description: 'Master Planar graphs, Euler formula, and recurrence relations.', estimatedHours: 25, priority: 'HIGH', completed: false, category: 'practice' },
-            { id: 't-gt-1-3', title: 'Solve Past 10 Years GATE Math PYQs', description: 'Time each question under 2 minutes.', estimatedHours: 15, priority: 'HIGH', completed: false, category: 'practice' }
-          ],
-          recommendedResources: [
-            { id: 'r-gt-1-1', title: 'NPTEL Discrete Mathematics by Prof. Sudarshan Iyengar', type: 'video', url: 'https://nptel.ac.in', whyUseful: 'Official IIT video series with mathematical rigor.', difficulty: 'Intermediate', estimatedTime: '3 weeks' }
-          ]
-        },
-        {
-          id: 'ms-gt-2',
-          phaseNumber: 2,
-          title: 'Phase 2: Core Data Structures, Algorithms & Theory of Computation',
-          timeframe: 'Months 3-5',
-          whyThisStep: 'Algorithms and TOC carry 20+ marks and are high-yield conceptual subjects with strict boundary conditions.',
-          status: 'upcoming',
-          tasks: [
-            { id: 't-gt-2-1', title: 'Theory of Computation: DFA, NFA, Regular Expressions & Pumping Lemma', description: 'Design minimal state DFAs and solve closure property questions.', estimatedHours: 25, priority: 'HIGH', completed: false, category: 'learn' },
-            { id: 't-gt-2-2', title: 'Algorithms: Asymptotic Analysis, Greedy, DP & Graph Traversal', description: 'Master Bellman-Ford, Floyd-Warshall, and Master Theorem cases.', estimatedHours: 30, priority: 'HIGH', completed: false, category: 'practice' }
-          ],
-          recommendedResources: [
-            { id: 'r-gt-2-1', title: 'Gate Overflow (Community Solved GATE Papers)', type: 'practice', url: 'https://gateoverflow.in', whyUseful: 'Verified step-by-step discussion on all previous GATE questions.', difficulty: 'Advanced', estimatedTime: 'Ongoing' }
-          ]
-        },
-        {
-          id: 'ms-gt-3',
-          phaseNumber: 3,
-          title: 'Phase 3: Operating Systems, DBMS & Computer Architecture',
-          timeframe: 'Months 6-8',
-          whyThisStep: 'System subjects require deep understanding of hardware memory hierarchies, virtual memory, and SQL transaction ACID properties.',
-          status: 'upcoming',
-          tasks: [
-            { id: 't-gt-3-1', title: 'Operating Systems: Synchronization (Semaphores), Paging, Deadlocks', description: 'Solve classical dining philosopher and banker algorithm problems.', estimatedHours: 25, priority: 'HIGH', completed: false, category: 'learn' },
-            { id: 't-gt-3-2', title: 'DBMS: Transactions, Serializability, Normalization & SQL Queries', description: 'Master Conflict serializability and B+ Tree order calculations.', estimatedHours: 20, priority: 'HIGH', completed: false, category: 'practice' }
-          ],
-          recommendedResources: [
-            { id: 'r-gt-3-1', title: 'Silberschatz Operating System Concepts Book', type: 'doc', url: 'https://os-book.com', whyUseful: 'Standard recommended text for GATE OS.', difficulty: 'Intermediate', estimatedTime: '2 weeks' }
-          ]
-        },
-        {
-          id: 'ms-gt-4',
-          phaseNumber: 4,
-          title: 'Phase 4: Full-Length Test Series & Subject Revision Cycles',
-          timeframe: 'Months 9-12',
-          whyThisStep: 'Virtual calculator practice, negative marking control, and timed mock tests determine the final AIR ranking.',
-          status: 'upcoming',
-          tasks: [
-            { id: 't-gt-4-1', title: 'Attempt 20 Full-Length Mock Exams under Strict 3-Hour Exam Conditions', description: 'Target 70+ raw score and analyze mistakes on the same day.', estimatedHours: 60, priority: 'HIGH', completed: false, category: 'practice' },
-            { id: 't-gt-4-2', title: 'Create Formula Short Notes for Final 30-Day Revision', description: 'Consolidate 12 subjects into a 40-page high-yield cheat book.', estimatedHours: 20, priority: 'HIGH', completed: false, category: 'beu_prep' }
-          ],
-          recommendedResources: [
-            { id: 'r-gt-4-1', title: 'Made Easy / ACE Online Test Series Portal', type: 'practice', url: 'https://onlinetestseriesmadeeasy.in', whyUseful: 'Real exam UI simulation with national percentiles.', difficulty: 'Advanced', estimatedTime: '2 months' }
-          ]
-        }
-      ];
-    } else if (isAIML) {
-      milestones = [
+    }
+
+    if (cat.includes('ai') || cat.includes('data')) {
+      return [
         {
           id: 'ms-ai-1',
           phaseNumber: 1,
-          title: 'Phase 1: Python Data Stack & Mathematical Foundations',
-          timeframe: 'Month 1 (Weeks 1-4)',
-          whyThisStep: 'Machine learning relies directly on Linear Algebra, Matrix transformations, Calculus gradients, and vector math.',
+          title: 'Phase 1: Python Data Science Foundations & Vector Math',
+          timeframe: 'Month 1',
+          whyThisStep: 'High-performance computing in PyTorch and Pandas depends on vectorization and matrix dot products rather than slow Python loops.',
+          whatToLearn: ['Python 3 Modern Features & OOP', 'NumPy Multi-dimensional Arrays & Broadcasting', 'Pandas DataFrames, Merging & GroupBy', 'Matplotlib & Seaborn Visualizations'],
+          whatToDo: 'Write clean vectorized numerical scripts and perform Exploratory Data Analysis (EDA) on real Kaggle datasets.',
           status: 'in_progress',
+          estimatedHours: 50,
           tasks: [
-            { id: 't-ai-1-1', title: 'Master Python OOP, Generators, Decorators & Type Hinting', description: 'Build structured clean Python modules.', estimatedHours: 12, priority: 'HIGH', completed: true, category: 'learn' },
-            { id: 't-ai-1-2', title: 'NumPy Vectorization, Broadcasting & Pandas Data Wrangling', description: 'Manipulate 100k+ row datasets, clean missing data and merge tables.', estimatedHours: 16, priority: 'HIGH', completed: false, category: 'practice' },
-            { id: 't-ai-1-3', title: 'Revise Linear Algebra (Eigenvalues, Dot Products) & Calculus Gradients', description: 'Understand cost functions and gradient descent derivation.', estimatedHours: 14, priority: 'HIGH', completed: false, category: 'learn' }
+            { id: 't-ai1-1', title: 'NumPy 100 Exercises & Vectorized Matrix Multiplications', description: 'Eliminate Python for-loops using array broadcasting.', estimatedHours: 10, priority: 'HIGH', completed: false, category: 'practice' },
+            { id: 't-ai1-2', title: 'Kaggle Titanic / Housing EDA & Cleaning Pipeline', description: 'Handle missing values, categorical encoding, and feature correlation.', estimatedHours: 14, priority: 'HIGH', completed: false, category: 'project' },
           ],
           recommendedResources: [
-            { id: 'r-ai-1-1', title: '3Blue1Brown - Essence of Linear Algebra', type: 'video', url: 'https://3blue1brown.com', whyUseful: 'Best geometric intuition for matrices and vectors.', difficulty: 'Beginner', estimatedTime: '6 hours' },
-            { id: 'r-ai-1-2', title: 'Kaggle Python & Pandas Micro-Courses', type: 'practice', url: 'https://kaggle.com/learn', whyUseful: 'Interactive browser coding exercises with instant grading.', difficulty: 'Beginner', estimatedTime: '8 hours' }
+            { id: 'r-ai1', title: 'Python Data Science Handbook by Jake VanderPlas', type: 'doc', url: 'https://jakevdp.github.io/PythonDataScienceHandbook/', whyUseful: 'Complete free handbook covering NumPy, Pandas, Matplotlib, and Scikit-Learn.', difficulty: 'Beginner', estimatedTime: '15 Hours' }
           ],
           projectIdea: {
-            title: 'BEU Student Academic Performance & Exam Grade Predictor',
-            description: 'Exploratory Data Analysis and statistical correlation tool predicting semester SGPA based on internal marks.',
-            techStack: ['Python', 'Pandas', 'Matplotlib', 'Seaborn', 'Jupyter Notebook']
-          }
+            title: 'Automated Bihar Engineering Admission Trends EDA',
+            description: 'Download historical BCECE cutoffs and generate interactive statistical charts comparing opening and closing ranks.',
+            techStack: ['Python', 'Pandas', 'Seaborn', 'Jupyter Notebook'],
+            acceptanceCriteria: 'Generates clean markdown summary report with 5 visual correlation heatmaps.'
+          },
+          completionCriteria: ['Successfully clean and transform a raw 50,000-row CSV dataset without memory bottlenecks'],
         },
         {
           id: 'ms-ai-2',
           phaseNumber: 2,
-          title: 'Phase 2: Classical Machine Learning & Scikit-Learn Pipelines',
-          timeframe: 'Month 2 (Weeks 5-8)',
-          whyThisStep: 'Before neural networks, 80% of corporate data science problems are solved with robust tabular models.',
+          title: 'Phase 2: Machine Learning & Scikit-Learn Deep Dive',
+          timeframe: 'Month 2 - 3',
+          whyThisStep: 'Classical ML provides the intuition for loss functions, bias-variance tradeoff, regularization, and model evaluation metrics.',
+          whatToLearn: ['Linear & Logistic Regression', 'Decision Trees, Random Forests & XGBoost', 'Model Evaluation (Precision, Recall, ROC-AUC, F1-Score)', 'Cross-Validation & Hyperparameter Tuning (GridSearch)'],
+          whatToDo: 'Implement algorithms from scratch, tune hyperparameter grids, and submit predictions to competitive benchmarks.',
           status: 'upcoming',
+          estimatedHours: 65,
           tasks: [
-            { id: 't-ai-2-1', title: 'Master Supervised Learning (Linear/Logistic Regression, Decision Trees, Random Forests, XGBoost)', description: 'Tune hyperparameters with GridSearch and cross-validation.', estimatedHours: 20, priority: 'HIGH', completed: false, category: 'learn' },
-            { id: 't-ai-2-2', title: 'Master Model Evaluation Metrics (Confusion Matrix, Precision/Recall, ROC-AUC, F1)', description: 'Understand trade-offs in imbalanced datasets.', estimatedHours: 12, priority: 'HIGH', completed: false, category: 'practice' },
-            { id: 't-ai-2-3', title: 'Build Project: End-to-End Bihar Crop Yield & Weather Risk Prediction', description: 'Train XGBoost model and save pickle pipeline.', estimatedHours: 18, priority: 'HIGH', completed: false, category: 'project' }
+            { id: 't-ai2-1', title: 'Implement Gradient Descent & Logistic Regression from scratch', description: 'Code the forward pass, cross-entropy loss, and gradient update.', estimatedHours: 12, priority: 'HIGH', completed: false, category: 'learn' },
+            { id: 't-ai2-2', title: 'Train XGBoost Model on Structured Tabular Data', description: 'Feature engineering, target encoding, and Optuna tuning.', estimatedHours: 16, priority: 'HIGH', completed: false, category: 'project' },
           ],
           recommendedResources: [
-            { id: 'r-ai-2-1', title: 'Scikit-Learn Official User Guide', type: 'doc', url: 'https://scikit-learn.org', whyUseful: 'Clean API design patterns and mathematical background.', difficulty: 'Intermediate', estimatedTime: '2 weeks' }
-          ]
+            { id: 'r-ai2', title: 'Coursera Machine Learning Specialization by Andrew Ng', type: 'video', url: 'https://www.coursera.org/specializations/machine-learning-introduction', whyUseful: 'World-renowned intuitive explanations of machine learning mechanics.', difficulty: 'Intermediate', estimatedTime: '25 Hours' }
+          ],
+          completionCriteria: ['Achieve Top 20% validation score on a Kaggle tabular competition dataset'],
         },
         {
           id: 'ms-ai-3',
           phaseNumber: 3,
-          title: 'Phase 3: Deep Learning, Neural Networks & PyTorch',
-          timeframe: 'Month 3 (Weeks 9-12)',
-          whyThisStep: 'Deep learning is essential for computer vision, natural language understanding, and generative AI.',
+          title: 'Phase 3: Deep Learning, LLMs & Production AI Deployment',
+          timeframe: 'Month 4 - 6',
+          whyThisStep: 'Modern industry AI roles demand LLM integration, Vector DBs, Retrieval-Augmented Generation (RAG), and FastAPI microservices.',
+          whatToLearn: ['PyTorch Neural Networks & Tensors', 'Transformers & Attention Mechanisms', 'LangChain / LlamaIndex & Vector Embeddings', 'FastAPI, Docker & HuggingFace Spaces Deployment'],
+          whatToDo: 'Build a production RAG application that reads academic syllabus PDFs and answers queries with verified citations.',
           status: 'upcoming',
+          estimatedHours: 85,
           tasks: [
-            { id: 't-ai-3-1', title: 'Build Multi-Layer Perceptrons & Backpropagation from Scratch in PyTorch', description: 'Implement forward pass, loss calculation, and backward gradients.', estimatedHours: 18, priority: 'HIGH', completed: false, category: 'learn' },
-            { id: 't-ai-3-2', title: 'Convolutional Neural Networks (CNNs) & Transfer Learning (ResNet/EfficientNet)', description: 'Train image classifier on custom dataset with data augmentation.', estimatedHours: 20, priority: 'HIGH', completed: false, category: 'practice' }
+            { id: 't-ai3-1', title: 'Build RAG Question-Answering Pipeline with Pinecone & LangChain', description: 'Chunk documents, embed with text-embedding-3-small, and retrieve top-k context.', estimatedHours: 20, priority: 'HIGH', completed: false, category: 'project' },
+            { id: 't-ai3-2', title: 'Deploy FastAPI AI Microservice with Docker Container', description: 'Containerize backend and host live demo on Render or HuggingFace.', estimatedHours: 14, priority: 'HIGH', completed: false, category: 'project' },
           ],
           recommendedResources: [
-            { id: 'r-ai-3-1', title: 'PyTorch Deep Learning Zero to Mastery (Daniel Bourke)', type: 'video', url: 'https://youtube.com', whyUseful: 'Most hands-on PyTorch coding course on the web.', difficulty: 'Intermediate', estimatedTime: '25 hours' }
-          ]
-        },
-        {
-          id: 'ms-ai-4',
-          phaseNumber: 4,
-          title: 'Phase 4: LLMs, RAG Pipelines, Vector DBs & FastAPI Production',
-          timeframe: 'Months 4-6 (Weeks 13-24)',
-          whyThisStep: 'Modern AI engineers deploy GenAI agents, semantic search RAG systems, and API endpoints.',
-          status: 'upcoming',
-          tasks: [
-            { id: 't-ai-4-1', title: 'Build RAG System using LangChain / LlamaIndex & ChromaDB / Pinecone', description: 'Chunk documents, create embeddings, and query with LLM context grounding.', estimatedHours: 25, priority: 'HIGH', completed: false, category: 'project' },
-            { id: 't-ai-4-2', title: 'Serve ML Models via High-Speed FastAPI with Docker Containerization', description: 'Create POST endpoints, async request handling, and Swagger docs.', estimatedHours: 15, priority: 'HIGH', completed: false, category: 'practice' },
-            { id: 't-ai-4-3', title: 'Deploy AI Portfolio on HuggingFace Spaces / Render / Vercel', description: 'Interactive Streamlit or Gradio demo for recruiters.', estimatedHours: 10, priority: 'MEDIUM', completed: false, category: 'project' }
-          ],
-          recommendedResources: [
-            { id: 'r-ai-4-1', title: 'HuggingFace NLP Course (Free)', type: 'doc', url: 'https://huggingface.co/learn', whyUseful: 'World-leading Transformer and tokenization curriculum.', difficulty: 'Advanced', estimatedTime: '3 weeks' }
+            { id: 'r-ai3', title: 'Hugging Face Deep Learning & NLP Course', type: 'doc', url: 'https://huggingface.co/learn/nlp-course', whyUseful: 'Practical guide to modern Transformer models and tokenizers.', difficulty: 'Advanced', estimatedTime: '20 Hours' }
           ],
           projectIdea: {
-            title: 'BEU Exam Syllabus & PYQ Semantic RAG Assistant',
-            description: 'AI question answering system that indexes all BEU past papers and answers with exact unit references.',
-            techStack: ['Python', 'FastAPI', 'LangChain', 'OpenAI/Gemini API', 'ChromaDB', 'Docker']
-          }
-        }
-      ];
-    } else if (isBEUSem) {
-      milestones = [
-        {
-          id: 'ms-beu-1',
-          phaseNumber: 1,
-          title: 'Phase 1: Syllabus Decomposition & Compulsory Q1 Speed Mastery',
-          timeframe: 'Month 1 (Weeks 1-4)',
-          whyThisStep: 'Question 1 is compulsory (7 x 2 = 14 Marks). Scoring 14/14 in Q1 guarantees a passing baseline and builds immediate confidence.',
-          status: 'in_progress',
-          tasks: [
-            { id: 't-beu-1-1', title: 'Download Official BEU Syllabus & Mark High-Weightage Units (Units 2, 3, 4)', description: 'Catalog all 5 subjects and identify recurring theoretical concepts.', estimatedHours: 6, priority: 'HIGH', completed: true, category: 'beu_prep' },
-            { id: 't-beu-1-2', title: 'Create Compulsory Q1 2-Mark Flashcard Notebook for All 5 Subjects', description: 'Write crisp 3-line definitions with formula and standard SI units.', estimatedHours: 12, priority: 'HIGH', completed: false, category: 'practice' },
-            { id: 't-beu-1-3', title: 'Solve 2021, 2022, 2023, 2024 Q1 Collections from BEU PYQ Analyzer', description: 'Practice 2-minute timed speed drills.', estimatedHours: 10, priority: 'HIGH', completed: false, category: 'beu_prep' }
-          ],
-          recommendedResources: [
-            { id: 'r-beu-1-1', title: 'BEU Connect Hub PYQ Pattern Analyzer', type: 'beu_pyq', url: '#', whyUseful: 'Instant topic frequency breakdown for your branch and semester.', difficulty: 'Beginner', estimatedTime: 'Ongoing' }
-          ]
-        },
-        {
-          id: 'ms-beu-2',
-          phaseNumber: 2,
-          title: 'Phase 2: High-Yield 14-Mark Derivations & Neat Diagram Architecture',
-          timeframe: 'Month 2 (Weeks 5-8)',
-          whyThisStep: 'BEU evaluators award 12-14 marks for structured answers with clean circuit/flow diagrams, step-by-step derivations, and neat tables.',
-          status: 'upcoming',
-          tasks: [
-            { id: 't-beu-2-1', title: 'Master All Standard 14-Mark Derivations in Unit 2 & 3', description: 'Write derivations 3 times by hand without looking at notes.', estimatedHours: 20, priority: 'HIGH', completed: false, category: 'practice' },
-            { id: 't-beu-2-2', title: 'Practice Clean Pencil Diagrams, Block Charts & Timing Waveforms', description: 'Label all pinouts, axis variables, and state transitions clearly.', estimatedHours: 12, priority: 'HIGH', completed: false, category: 'practice' },
-            { id: 't-beu-2-3', title: 'Format 5-Page Standard Answer Blueprint (Intro → Diagram → Derivation → Numerical → Conclusion)', description: 'Adopt high-scoring topper presentation framework.', estimatedHours: 6, priority: 'MEDIUM', completed: false, category: 'learn' }
-          ],
-          recommendedResources: [
-            { id: 'r-beu-2-1', title: 'BEU Verified Topper Notes (BEU Connect Hub)', type: 'doc', url: '#', whyUseful: 'Clean handwritten diagrams and university format answers.', difficulty: 'Intermediate', estimatedTime: '2 weeks' }
-          ]
-        },
-        {
-          id: 'ms-beu-3',
-          phaseNumber: 3,
-          title: 'Phase 3: 5-Year PYQ Full Simulation & Lab Practical Viva Prep',
-          timeframe: 'Month 3 (Weeks 9-12)',
-          whyThisStep: 'Full 3-hour mock exam simulations under timed conditions eliminate last-minute exam panic and ensure 8.5+ SGPA.',
-          status: 'upcoming',
-          tasks: [
-            { id: 't-beu-3-1', title: 'Write 3 Full 70-Mark Mock Papers per Subject in Official 32-Page Booklet Format', description: 'Manage 3-hour time allocation (30 min Q1, 35 min each for 4 long questions).', estimatedHours: 25, priority: 'HIGH', completed: false, category: 'practice' },
-            { id: 't-beu-3-2', title: 'Prepare Lab Manuals & Master Practical Viva Questions with External Examiner Mindset', description: 'Revise apparatus specifications, error calculations, and safety rules.', estimatedHours: 10, priority: 'HIGH', completed: false, category: 'beu_prep' },
-            { id: 't-beu-3-3', title: 'Final 48-Hour Ultra-High-Yield Formula & Theorem Revision Sheet', description: 'One 4-page laminated formula cheat sheet per subject.', estimatedHours: 8, priority: 'HIGH', completed: false, category: 'beu_prep' }
-          ],
-          recommendedResources: [
-            { id: 'r-beu-3-1', title: 'BEU Connect Hub Senior Mentorship Viva Q&A Bank', type: 'practice', url: '#', whyUseful: 'Frequently asked viva questions by visiting external BEU examiners.', difficulty: 'Intermediate', estimatedTime: '1 week' }
-          ]
-        }
-      ];
-    } else if (isGovt) {
-      milestones = [
-        {
-          id: 'ms-gov-1',
-          phaseNumber: 1,
-          title: 'Phase 1: Core Branch Technical Foundations & Formulas',
-          timeframe: 'Months 1-3',
-          whyThisStep: 'BPSC AE Paper 5 & 6 test fundamental engineering depth and standard formulas with negative marking.',
-          status: 'in_progress',
-          tasks: [
-            { id: 't-gov-1-1', title: 'Master Core Engineering Concepts (Strength of Materials / Networks / Fluid Mechanics)', description: 'Solve 100 objective questions per chapter.', estimatedHours: 40, priority: 'HIGH', completed: true, category: 'learn' },
-            { id: 't-gov-1-2', title: 'Memorize Standard IS Codes & IRC Guidelines (for Civil/Mech/EE)', description: 'Create formula sheets for concrete grades, steel limits, and circuit theorems.', estimatedHours: 20, priority: 'HIGH', completed: false, category: 'practice' }
-          ],
-          recommendedResources: [
-            { id: 'r-gov-1-1', title: 'BPSC AE Previous 10-Year Solved Papers (Youth Competition)', type: 'practice', url: '#', whyUseful: 'Exact question repeat patterns for Bihar State Engineering Services.', difficulty: 'Intermediate', estimatedTime: '1 month' }
-          ]
-        },
-        {
-          id: 'ms-gov-2',
-          phaseNumber: 2,
-          title: 'Phase 2: General Studies, Bihar Special GK & Current Affairs',
-          timeframe: 'Months 4-6',
-          whyThisStep: 'General Studies paper determines the qualifying cut-off before technical papers are evaluated.',
-          status: 'upcoming',
-          tasks: [
-            { id: 't-gov-2-1', title: 'Study Bihar History, Geography, River Systems, Economy & Budget', description: 'Read Imtiaz Ahmad Bihar Special GK or Crown Bihar GK.', estimatedHours: 30, priority: 'HIGH', completed: false, category: 'learn' },
-            { id: 't-gov-2-2', title: 'Solve 500 Modern Indian History & Indian Polity MCQs', description: 'Focus on Fundamental Rights, Articles, and Bihar Freedom Fighters.', estimatedHours: 20, priority: 'HIGH', completed: false, category: 'practice' }
-          ],
-          recommendedResources: [
-            { id: 'r-gov-2-1', title: 'Bihar Special GK & Current Affairs Digest', type: 'doc', url: '#', whyUseful: 'Targeted state exam general studies compilation.', difficulty: 'Intermediate', estimatedTime: '3 weeks' }
-          ]
-        },
-        {
-          id: 'ms-gov-3',
-          phaseNumber: 3,
-          title: 'Phase 3: Conventional Subjective Mains Practice & Full Mock Series',
-          timeframe: 'Months 7-12',
-          whyThisStep: 'Writing speed and numerical precision in Mains determine merit list rank and department allotment (WRD vs RWD vs BCD).',
-          status: 'upcoming',
-          tasks: [
-            { id: 't-gov-3-1', title: 'Practice 50 Conventional Mains Engineering Problems by Hand', description: 'Step-by-step units, assumptions, and calculation steps.', estimatedHours: 45, priority: 'HIGH', completed: false, category: 'practice' },
-            { id: 't-gov-3-2', title: 'Attempt 15 Full-Length BPSC AE Mock Tests with Negative Marking Analysis', description: 'Achieve 75%+ score consistently.', estimatedHours: 35, priority: 'HIGH', completed: false, category: 'practice' }
-          ],
-          recommendedResources: [
-            { id: 'r-gov-3-1', title: 'BPSC AE Test Series Portal', type: 'practice', url: '#', whyUseful: 'Simulate exact BPSC AE examination pattern.', difficulty: 'Advanced', estimatedTime: '2 months' }
-          ]
-        }
-      ];
-    } else if (isCybersecurity) {
-      milestones = [
-        {
-          id: 'ms-sec-1',
-          phaseNumber: 1,
-          title: 'Phase 1: Linux CLI, Networking Fundamentals & Protocol Analysis',
-          timeframe: 'Month 1 (Weeks 1-4)',
-          whyThisStep: 'You cannot defend or exploit what you do not understand. Networking and Linux are the bedrock of security engineering.',
-          status: 'in_progress',
-          tasks: [
-            { id: 't-sec-1-1', title: 'Master Linux Terminal Commands, Permissions, Bash Scripting & SSH', description: 'Configure custom Debian/Kali environment and write automations.', estimatedHours: 15, priority: 'HIGH', completed: true, category: 'learn' },
-            { id: 't-sec-1-2', title: 'Deep Dive into TCP/IP, DNS, DHCP, TLS Handshake & Packet Capture with Wireshark', description: 'Analyze PCAP files and filter HTTP/DNS payloads.', estimatedHours: 18, priority: 'HIGH', completed: false, category: 'practice' }
-          ],
-          recommendedResources: [
-            { id: 'r-sec-1-1', title: 'OverTheWire: Bandit (Linux Security Wargame)', type: 'practice', url: 'https://overthewire.org', whyUseful: 'Interactive command-line hacking game for learning Linux security.', difficulty: 'Beginner', estimatedTime: '10 hours' }
-          ]
-        },
-        {
-          id: 'ms-sec-2',
-          phaseNumber: 2,
-          title: 'Phase 2: Web Application Security & OWASP Top 10 Exploits',
-          timeframe: 'Months 2-3 (Weeks 5-12)',
-          whyThisStep: 'Web vulnerabilities (SQLi, XSS, CSRF, IDOR, SSRF) form 90% of beginner bug bounties and application security roles.',
-          status: 'upcoming',
-          tasks: [
-            { id: 't-sec-2-1', title: 'Master Burp Suite Proxy, Repeater, Intruder & Decoder', description: 'Intercept requests, modify headers, and fuzz parameters.', estimatedHours: 16, priority: 'HIGH', completed: false, category: 'practice' },
-            { id: 't-sec-2-2', title: 'Solve 30 PortSwigger Web Security Academy Labs (SQLi, XSS, Auth Bypass)', description: 'Complete practical vulnerable application labs.', estimatedHours: 25, priority: 'HIGH', completed: false, category: 'practice' }
-          ],
-          recommendedResources: [
-            { id: 'r-sec-2-1', title: 'PortSwigger Web Security Academy (Free)', type: 'practice', url: 'https://portswigger.net/web-security', whyUseful: 'Industry-standard free training created by the makers of Burp Suite.', difficulty: 'Intermediate', estimatedTime: '4 weeks' }
-          ],
-          projectIdea: {
-            title: 'Automated Web Vulnerability Scanner & Security Header Auditor',
-            description: 'Python CLI tool that checks target domains for missing security headers, open ports, and common misconfigurations.',
-            techStack: ['Python', 'Requests', 'BeautifulSoup', 'Nmap API', 'Docker']
-          }
-        },
-        {
-          id: 'ms-sec-3',
-          phaseNumber: 3,
-          title: 'Phase 3: SOC Operations, SIEM Analysis & Junior Security Cert Prep',
-          timeframe: 'Months 4-6 (Weeks 13-24)',
-          whyThisStep: 'Junior cyber jobs in India (SOC L1 Analyst) focus on log analysis (Splunk/ELK), alert triage, and incident response.',
-          status: 'upcoming',
-          tasks: [
-            { id: 't-sec-3-1', title: 'Complete TryHackMe SOC Level 1 Learning Path (Splunk, Wireshark, Snort)', description: 'Investigate simulated ransomware and phishing attacks in virtual labs.', estimatedHours: 35, priority: 'HIGH', completed: false, category: 'practice' },
-            { id: 't-sec-3-2', title: 'Publish Security Writeups on Medium / GitHub & Prepare for CEH / Security+', description: 'Demonstrate methodology and responsible disclosure practices.', estimatedHours: 15, priority: 'HIGH', completed: false, category: 'project' }
-          ],
-          recommendedResources: [
-            { id: 'r-sec-3-1', title: 'TryHackMe SOC Level 1 Path', type: 'practice', url: 'https://tryhackme.com', whyUseful: 'Hands-on guided cybersecurity labs in cloud browser.', difficulty: 'Intermediate', estimatedTime: '1 month' }
-          ]
-        }
-      ];
-    } else if (isStartup) {
-      milestones = [
-        {
-          id: 'ms-stu-1',
-          phaseNumber: 1,
-          title: 'Phase 1: Problem Discovery, Student Interviews & Problem Validation',
-          timeframe: 'Month 1 (Weeks 1-4)',
-          whyThisStep: '90% of student startups fail because they build something nobody actually wants. Customer discovery comes before coding.',
-          status: 'in_progress',
-          tasks: [
-            { id: 't-stu-1-1', title: 'Conduct 25 In-Person Problem Interviews with BEU Engineering Students', description: 'Ask open-ended questions about academic pain points without pitching the solution.', estimatedHours: 15, priority: 'HIGH', completed: true, category: 'learn' },
-            { id: 't-stu-1-2', title: 'Fill 1-Page Lean Canvas & Competitive Landscape Map', description: 'Define Unique Value Proposition, Unfair Advantage, and Revenue Streams.', estimatedHours: 8, priority: 'HIGH', completed: false, category: 'learn' }
-          ],
-          recommendedResources: [
-            { id: 'r-stu-1-1', title: 'The Mom Test by Rob Fitzpatrick (Book/Summary)', type: 'doc', url: 'http://momtestbook.com', whyUseful: 'How to talk to customers and learn if your business is a good idea.', difficulty: 'Beginner', estimatedTime: '4 hours' }
-          ]
-        },
-        {
-          id: 'ms-stu-2',
-          phaseNumber: 2,
-          title: 'Phase 2: Rapid MVP Prototype, System Architecture & User Testing',
-          timeframe: 'Months 2-3 (Weeks 5-12)',
-          whyThisStep: 'Launch an ultra-focused prototype with just 1 killer feature in under 4 weeks to test real usage behavior.',
-          status: 'upcoming',
-          tasks: [
-            { id: 't-stu-2-1', title: 'Build and Deploy Functional SaaS MVP with React, Supabase & TailwindCSS', description: 'Focus exclusively on the primary core value proposition.', estimatedHours: 40, priority: 'HIGH', completed: false, category: 'project' },
-            { id: 't-stu-2-2', title: 'Onboard First 50 Active Beta Users across 3 BEU Engineering Colleges', description: 'Observe user drop-off with PostHog or Google Analytics.', estimatedHours: 20, priority: 'HIGH', completed: false, category: 'practice' }
-          ],
-          recommendedResources: [
-            { id: 'r-stu-2-1', title: 'Y Combinator Startup School (Free)', type: 'video', url: 'https://startupschool.org', whyUseful: 'World-class startup curriculum on how to launch and get users.', difficulty: 'Intermediate', estimatedTime: '15 hours' }
-          ],
-          projectIdea: {
-            title: 'Campus Peer Micro-Services & Automated Study Note Exchange',
-            description: 'Functional student marketplace with instant verification, UPI payment gateway, and campus leaderboard.',
-            techStack: ['Next.js', 'TailwindCSS', 'Supabase', 'Razorpay API', 'Vercel']
-          }
-        },
-        {
-          id: 'ms-stu-3',
-          phaseNumber: 3,
-          title: 'Phase 3: Pitch Deck & Bihar Startup Policy ₹10 Lakh Grant Application',
-          timeframe: 'Months 4-6 (Weeks 13-24)',
-          whyThisStep: 'The Department of Industries Government of Bihar provides ₹10 Lakhs seed funding with zero equity for registered student startups.',
-          status: 'upcoming',
-          tasks: [
-            { id: 't-stu-3-1', title: 'Prepare 10-Slide Pitch Deck (Problem, Solution, Market Size, Traction, Financials)', description: 'Highlight active student user metrics and retention rate.', estimatedHours: 15, priority: 'HIGH', completed: false, category: 'project' },
-            { id: 't-stu-3-2', title: 'Apply for Bihar Startup Policy Grant on startup.bihar.gov.in', description: 'Submit DPIIT recognition, pitch video, and college incubator recommendation.', estimatedHours: 12, priority: 'HIGH', completed: false, category: 'beu_prep' }
-          ],
-          recommendedResources: [
-            { id: 'r-stu-3-1', title: 'Bihar Startup Portal (startup.bihar.gov.in)', type: 'doc', url: 'https://startup.bihar.gov.in', whyUseful: 'Official Bihar Government Seed Grant application guidelines.', difficulty: 'Intermediate', estimatedTime: '1 week' }
-          ]
-        }
-      ];
-    } else {
-      // Dynamic Adaptive Roadmap for Custom Goals
-      milestones = [
-        {
-          id: `ms-dyn-1`,
-          phaseNumber: 1,
-          title: `Phase 1: Prerequisites & Foundation Theory for ${goalTitle}`,
-          timeframe: 'Month 1 (Weeks 1-4)',
-          whyThisStep: `Establish fundamental technical competencies and core principles required for ${goalTitle}.`,
-          status: 'in_progress',
-          tasks: [
-            { id: 't-dyn-1-1', title: `Study Fundamental Concepts & Core Architecture of ${goalTitle}`, description: 'Read authoritative documentation and set up working environment.', estimatedHours: 14, priority: 'HIGH', completed: true, category: 'learn' },
-            { id: 't-dyn-1-2', title: 'Complete 15 Guided Drills & Practical Exercises', description: 'Solve baseline hands-on exercises to build muscle memory.', estimatedHours: 18, priority: 'HIGH', completed: false, category: 'practice' },
-            { id: 't-dyn-1-3', title: `BEU Syllabus Connect: Align with ${branch} Semester ${semester} Curriculum`, description: 'Ensure university theoretical concepts are reinforced alongside practical learning.', estimatedHours: 8, priority: 'MEDIUM', completed: false, category: 'beu_prep' }
-          ],
-          recommendedResources: [
-            { id: 'r-dyn-1-1', title: `${goalTitle} Official Documentation & Reference Manual`, type: 'doc', url: 'https://developer.mozilla.org', whyUseful: 'Authoritative reference and best practices.', difficulty: 'Beginner', estimatedTime: '2 weeks' }
-          ]
-        },
-        {
-          id: `ms-dyn-2`,
-          phaseNumber: 2,
-          title: `Phase 2: Applied Skills, Real Project Implementation & Drills`,
-          timeframe: 'Months 2-3 (Weeks 5-12)',
-          whyThisStep: `Apply learned theory into a complete, standalone working system with real data.`,
-          status: 'upcoming',
-          tasks: [
-            { id: 't-dyn-2-1', title: `Build Intermediate Working Prototype for ${goalTitle}`, description: 'Implement end-to-end features with error handling and documentation.', estimatedHours: 25, priority: 'HIGH', completed: false, category: 'project' },
-            { id: 't-dyn-2-2', title: 'Solve 25 High-Yield Practice Problems / Exam Questions', description: 'Deepen problem solving speed and edge-case handling.', estimatedHours: 20, priority: 'HIGH', completed: false, category: 'practice' }
-          ],
-          recommendedResources: [
-            { id: 'r-dyn-2-1', title: 'BEU Connect Hub Verified Resource Bank', type: 'doc', url: '#', whyUseful: 'Curated university notes and exam pattern guides.', difficulty: 'Intermediate', estimatedTime: '1 week' }
-          ],
-          projectIdea: {
-            title: `Practical Implementation Capstone for ${goalTitle}`,
-            description: `A production-ready solution addressing core technical challenges in ${goalTitle} with clean documentation.`,
-            techStack: [branch, 'Full Implementation', 'Clean Architecture', 'Testing']
-          }
-        },
-        {
-          id: `ms-dyn-3`,
-          phaseNumber: 3,
-          title: `Phase 3: Portfolio Deployment, Mock Evaluations & Final Target Achievement`,
-          timeframe: 'Months 4-6 (Weeks 13-24)',
-          whyThisStep: `Package your outcomes into a compelling showcase for recruiters, evaluators, or university boards.`,
-          status: 'upcoming',
-          tasks: [
-            { id: 't-dyn-3-1', title: 'Deploy Live Project / Submit Final Technical Report', description: 'Host code repository on GitHub with interactive demo links and benchmarks.', estimatedHours: 15, priority: 'HIGH', completed: false, category: 'project' },
-            { id: 't-dyn-3-2', title: 'Simulate Final Target Assessment (Mock Interview / Exam Series)', description: 'Evaluate weak areas and refine performance under real testing conditions.', estimatedHours: 18, priority: 'HIGH', completed: false, category: 'practice' }
-          ],
-          recommendedResources: [
-            { id: 'r-dyn-3-1', title: 'BEU Senior Mentor 1-on-1 Review Session', type: 'practice', url: '#', whyUseful: 'Get feedback from placed seniors and university alumni.', difficulty: 'Advanced', estimatedTime: '45 mins' }
-          ]
+            title: 'BEU Academic AI Assistant with Live PDF RAG',
+            description: 'Upload BEU university regulations and syllabus PDFs to query exact course outcomes and exam credit rules.',
+            techStack: ['Python', 'FastAPI', 'LangChain', 'ChromaDB', 'OpenAI/Gemini', 'Docker'],
+            acceptanceCriteria: 'Sub-2-second response latency with clickable PDF page source citations.'
+          },
+          completionCriteria: ['Live public demo URL deployed with automated API documentation Swagger UI'],
         }
       ];
     }
 
-    // 3. BEU Academic Context Mapping
-    const beuAcademicContext = {
-      relevantSubjects: isFullStack
-        ? ['Data Structures & Algorithms (CS301)', 'DBMS (CS401)', 'Operating Systems (CS402)', 'Web Technologies (CS501)']
-        : isGate
-        ? ['Engineering Maths', 'Theory of Computation', 'Computer Networks', 'Algorithms', 'COA']
-        : isAIML
-        ? ['AI & Machine Learning (CS601)', 'Probability & Statistics', 'Numerical Methods', 'Data Mining']
-        : isBEUSem
-        ? [`${branch} Semester ${semester} Core Subjects`, 'Compulsory Q1 Collections', 'Lab Practical Vivas']
-        : isGovt
-        ? [`${branch} Core Engineering Paper 5 & 6`, 'General Studies & Bihar GK', 'BPSC AE Previous Papers']
-        : isCybersecurity
-        ? ['Computer Networks (CS502)', 'Cyber Security & Cryptography', 'Linux Administration']
-        : isStartup
-        ? ['Entrepreneurship & IP Rights', 'Software Engineering (CS403)', 'Bihar Startup Policy']
-        : [`${branch} Semester ${semester} Curriculum`, 'Departmental Labs & Engineering Practices'],
-      highYieldUnits: ['Unit 2 (Core Models)', 'Unit 3 (14-Mark High-Yield Derivations)', 'Unit 4 (Algorithms/Circuits)'],
-      examPatternFocus: 'Balanced daily practical drills with BEU 70-Mark Theory pattern so your SGPA stays distinction-grade while preparing for career milestones.'
-    };
-
-    // 4. Calculate Initial Progress
-    let totalTasks = 0;
-    let completedTasks = 0;
-    milestones.forEach(m => {
-      m.tasks.forEach(t => {
-        totalTasks++;
-        if (t.completed) completedTasks++;
-      });
-    });
-
-    const progressPercent = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-
-    const goalMap: GoalMap = {
-      id: `gm-${Date.now()}`,
-      userId,
-      goalTitle,
-      category,
-      targetOutcome: targetOutcome || `Successfully achieve mastery in ${goalTitle} with high-yield milestones.`,
-      targetDeadline: targetDeadline || '6 Months',
-      createdAt: 'Just now',
-      progressPercent,
-      streakDays: 3,
-      studentProfile: {
-        branch: branch || 'CSE',
-        semester: semester || 3,
-        currentLevel,
-        existingSkills: existingSkills.length > 0 ? existingSkills : ['Basic Programming'],
-        hoursDaily: hoursDaily || 3,
-        learningPreference: learningPreference.length > 0 ? learningPreference : ['Videos', 'Projects', 'Practice']
+    // Default Full-Stack / Software Dev / Placement 6-Phase Roadmap
+    return [
+      {
+        id: 'ms-1',
+        phaseNumber: 1,
+        title: 'Phase 1: Programming Fundamentals & Git Mastery',
+        timeframe: 'Month 1',
+        whyThisStep: 'Clean coding habits, Git branching, and algorithmic logic are the mandatory prerequisite for every engineering interview.',
+        whatToLearn: ['C++ / Java / Modern JavaScript ES6+', 'Memory Model, Pointers/References & Scopes', 'Git CLI (Branching, Merging, Pull Requests)', 'Linux CLI Basics'],
+        whatToDo: 'Solve 30 fundamental coding challenges, build a CLI project, and set up a polished GitHub profile with green contribution streaks.',
+        status: 'in_progress',
+        estimatedHours: 45,
+        tasks: [
+          { id: 't-1-1', title: 'Master Loops, Functions & Array Memory Layout', description: 'Understand contiguous memory allocation and passing references.', estimatedHours: 8, priority: 'HIGH', completed: false, category: 'learn' },
+          { id: 't-1-2', title: 'Solve 30 Easy Array & String Problems on LeetCode', description: 'Two Sum, Valid Palindrome, Best Time to Buy and Sell Stock.', estimatedHours: 14, priority: 'HIGH', completed: false, category: 'practice' },
+          { id: 't-1-3', title: 'Create GitHub Profile README & Push First Project', description: 'Showcase clean markdown, badges, and version control workflow.', estimatedHours: 4, priority: 'MEDIUM', completed: false, category: 'project' },
+        ],
+        recommendedResources: [
+          { id: 'r-1', title: 'JavaScript.info — The Modern JavaScript Tutorial', type: 'doc', url: 'https://javascript.info/', whyUseful: 'In-depth, crystal clear guide to modern JavaScript fundamentals.', difficulty: 'Beginner', estimatedTime: '15 Hours' },
+          { id: 'r-2', title: 'Git & GitHub Crash Course by freeCodeCamp', type: 'video', url: 'https://www.youtube.com/watch?v=RGOj5yH7evk', whyUseful: 'Step-by-step terminal commands for branch management and pull requests.', difficulty: 'Beginner', estimatedTime: '2 Hours' },
+        ],
+        practiceDrills: [
+          { title: 'LeetCode 75 — Array & String Warmup', platform: 'LeetCode', url: 'https://leetcode.com/studyplan/leetcode-75/' },
+          { title: 'HackerRank Problem Solving 30 Days of Code', platform: 'HackerRank', url: 'https://www.hackerrank.com' },
+        ],
+        projectIdea: {
+          title: 'CLI Task Manager & Expense Tracker',
+          description: 'A robust command-line application in Node.js or C++ with persistent JSON file storage, priority tags, and filter commands.',
+          techStack: ['Node.js' , 'TypeScript', 'Git'],
+          acceptanceCriteria: 'Supports add, delete, mark completed, and persistent disk file saving with zero crashes.'
+        },
+        completionCriteria: ['30 LeetCode Easy problems solved', 'Clean Git repo with 5+ atomic commits'],
       },
-      gapAnalysis: {
-        alreadyLearned: alreadyLearned.length > 0 ? alreadyLearned : ['Basic Logic & C/C++'],
-        inProgress: skillGap.slice(0, 2),
-        skillGap,
-        highPriority,
-        mediumPriority
+      {
+        id: 'ms-2',
+        phaseNumber: 2,
+        title: 'Phase 2: Modern Frontend & React Architecture',
+        timeframe: 'Month 2',
+        whyThisStep: 'Interactive user interfaces, component state management, and API rendering power modern enterprise web applications.',
+        whatToLearn: ['HTML5 Semantic Elements & Responsive CSS', 'TailwindCSS Utility Design & Flex/Grid', 'React Hooks (useState, useEffect, useMemo, useCallback)', 'State Management (Zustand / Redux Toolkit)', 'REST API Client Fetching (Axios / TanStack Query)'],
+        whatToDo: 'Build 2 responsive web applications from scratch, implement clean component hierarchies, and integrate public REST APIs.',
+        status: 'upcoming',
+        estimatedHours: 60,
+        tasks: [
+          { id: 't-2-1', title: 'Build Responsive Landing Page with TailwindCSS', description: 'Mobile-first navigation, responsive grid, and dark mode toggle.', estimatedHours: 10, priority: 'HIGH', completed: false, category: 'project' },
+          { id: 't-2-2', title: 'Master React State Management & Custom Hooks', description: 'Create reusable data-fetching and debounce custom hooks.', estimatedHours: 15, priority: 'HIGH', completed: false, category: 'learn' },
+          { id: 't-2-3', title: 'Integrate Live REST API with TanStack Query', description: 'Handle loading skeletons, pagination, and error boundaries.', estimatedHours: 12, priority: 'HIGH', completed: false, category: 'practice' },
+        ],
+        recommendedResources: [
+          { id: 'r-3', title: 'Official React Documentation (react.dev)', type: 'doc', url: 'https://react.dev/', whyUseful: 'Interactive code sandboxes teaching modern React component mental models.', difficulty: 'Intermediate', estimatedTime: '18 Hours' },
+        ],
+        projectIdea: {
+          title: 'BEU Student Academic Dashboard & CGPA Calculator',
+          description: 'Interactive single-page app calculating exact university SGPA with branch-wise credit weights, grade targets, and dark mode.',
+          techStack: ['React 18', 'TypeScript', 'TailwindCSS', 'Lucide Icons', 'Vite'],
+          acceptanceCriteria: 'Flawless responsive design on mobile and desktop with instant local storage persistence.'
+        },
+        completionCriteria: ['Working React application deployed to Vercel/Netlify with zero console errors'],
       },
-      beuAcademicContext,
-      milestones,
-      healthCheck: {
-        status: 'ON_TRACK',
-        summary: `Your GoalMap is calibrated for ${hoursDaily || 3} hours/day over ${targetDeadline || '6 Months'}. You are on track for Phase 1.`,
-        suggestions: [
-          'Maintain a minimum 4-day active weekly study streak.',
-          'Complete Phase 1 tasks before moving to complex advanced modules.',
-          'Solve BEU compulsory Q1 questions on weekends to keep academic CGPA strong.'
-        ]
+      {
+        id: 'ms-3',
+        phaseNumber: 3,
+        title: 'Phase 3: Backend API Engineering & Database Modeling',
+        timeframe: 'Month 3 - 4',
+        whyThisStep: 'Secure authentication, relational SQL queries, data validation, and REST API design form the backend backbone of scalable software.',
+        whatToLearn: ['Node.js & Express Architecture', 'RESTful API Standards & HTTP Status Codes', 'PostgreSQL & Prisma ORM / MongoDB', 'JWT Authentication & Password Hashing (bcrypt)', 'Input Validation (Zod) & Error Middleware'],
+        whatToDo: 'Design relational database schemas with foreign keys, write unit tests, and build an authenticated multi-resource backend server.',
+        status: 'upcoming',
+        estimatedHours: 70,
+        tasks: [
+          { id: 't-3-1', title: 'Build JWT Authentication & Role-Based Access Control', description: 'Register, login, refresh tokens, and protect route middleware.', estimatedHours: 16, priority: 'HIGH', completed: false, category: 'learn' },
+          { id: 't-3-2', title: 'Design Normalized PostgreSQL Schema with Prisma ORM', description: 'Write one-to-many and many-to-many relations with cascade rules.', estimatedHours: 18, priority: 'HIGH', completed: false, category: 'project' },
+          { id: 't-3-3', title: 'Implement Zod Validation & Global Error Handler', description: 'Prevent SQL injection and return standard JSend error responses.', estimatedHours: 10, priority: 'HIGH', completed: false, category: 'practice' },
+        ],
+        recommendedResources: [
+          { id: 'r-4', title: 'Prisma ORM Official PostgreSQL Guide', type: 'doc', url: 'https://www.prisma.io/docs', whyUseful: 'Best-in-class TypeScript ORM documentation with interactive schema design.', difficulty: 'Intermediate', estimatedTime: '10 Hours' }
+        ],
+        projectIdea: {
+          title: 'University Notes & Community Marketplace Backend',
+          description: 'REST API featuring authentication, college branch filtering, rating system, and file upload metadata handling.',
+          techStack: ['Node.js', 'Express', 'TypeScript', 'PostgreSQL', 'Prisma', 'Zod', 'JWT'],
+          acceptanceCriteria: 'All 8 endpoints documented with Postman/Swagger and verified with Supertest.'
+        },
+        completionCriteria: ['Passes 10+ automated Jest integration tests against a test database'],
+      },
+      {
+        id: 'ms-4',
+        phaseNumber: 4,
+        title: 'Phase 4: Full-Stack Capstone & Real-Time WebSockets',
+        timeframe: 'Month 5',
+        whyThisStep: 'Recruiters evaluate candidate quality based on complex production architectures, real-time sync, and end-to-end polish.',
+        whatToLearn: ['Full-Stack Integration (Vite / Next.js + Express)', 'Socket.IO Real-Time Messaging & Notifications', 'Cloud File Storage (Cloudinary / AWS S3)', 'Docker Containerization & Render/Railway Hosting'],
+        whatToDo: 'Build a production-grade full-stack web platform with live chat, optimistic UI updates, and automated deployments.',
+        status: 'upcoming',
+        estimatedHours: 75,
+        tasks: [
+          { id: 't-4-1', title: 'Connect Full-Stack Monorepo with Shared Types', description: 'End-to-end type safety between frontend API client and backend.', estimatedHours: 14, priority: 'HIGH', completed: false, category: 'project' },
+          { id: 't-4-2', title: 'Integrate Real-Time Socket.IO Channels', description: 'Broadcast live notifications, active presence, and chat rooms.', estimatedHours: 16, priority: 'HIGH', completed: false, category: 'learn' },
+          { id: 't-4-3', title: 'Deploy Full-Stack App with SSL & Custom Domain', description: 'Configure environment variables and database connection pooling.', estimatedHours: 8, priority: 'HIGH', completed: false, category: 'project' },
+        ],
+        recommendedResources: [
+          { id: 'r-5', title: 'Socket.IO Official Documentation & Chat Guide', type: 'doc', url: 'https://socket.io/docs/v4/', whyUseful: 'Step-by-step guide to WebSockets, rooms, and reconnection handlers.', difficulty: 'Intermediate', estimatedTime: '6 Hours' }
+        ],
+        projectIdea: {
+          title: 'BEU Connect Peer Collaboration & Code Sandbox',
+          description: 'A full-stack collaborative platform with real-time peer study rooms, live code snippet sharing, and instant college chat.',
+          techStack: ['React', 'Node.js', 'PostgreSQL', 'Socket.IO', 'TailwindCSS', 'Docker'],
+          acceptanceCriteria: 'Multi-user real-time room communication with sub-100ms sync latency.'
+        },
+        completionCriteria: ['Live public demo URL linked to GitHub repository with 100+ GitHub stars or peer testers'],
+      },
+      {
+        id: 'ms-5',
+        phaseNumber: 5,
+        title: 'Phase 5: DSA Problem Solving & Placement Interview Prep',
+        timeframe: 'Month 6',
+        whyThisStep: 'Technical interview rounds at top software companies demand rapid data structure recall, clean whiteboard coding, and mock interview practice.',
+        whatToLearn: ['NeetCode 150 / Striver SDE Sheet (Trees, Graphs, DP, Tries)', 'System Design Basics (Caching, Load Balancers, Sharding)', 'STAR Method for Behavioral / HR Questions', 'ATS-Optimized Tech Resume Construction'],
+        whatToDo: 'Solve 150 LeetCode problems, conduct 5 peer mock interviews, and apply to 20 verified software openings.',
+        status: 'upcoming',
+        estimatedHours: 80,
+        tasks: [
+          { id: 't-5-1', title: 'Complete Blind 75 / NeetCode 150 Core Problems', description: 'Focus on Binary Trees, DFS/BFS Graph traversals, and 1D/2D DP.', estimatedHours: 35, priority: 'HIGH', completed: false, category: 'practice' },
+          { id: 't-5-2', title: 'Construct ATS-Optimized Single-Page Tech Resume', description: 'Quantify project impact metrics (e.g. reduced latency by 40%).', estimatedHours: 8, priority: 'HIGH', completed: false, category: 'beu_prep' },
+          { id: 't-5-3', title: 'Conduct 3 Live Peer Mock Technical Interviews', description: 'Practice speaking out loud while coding under a 45-minute timer.', estimatedHours: 12, priority: 'HIGH', completed: false, category: 'practice' },
+        ],
+        recommendedResources: [
+          { id: 'r-6', title: 'NeetCode.io — Structured DSA Roadmap & Video Solutions', type: 'practice', url: 'https://neetcode.io/', whyUseful: 'Curated 150 essential coding interview patterns with video derivations.', difficulty: 'Advanced', estimatedTime: '40 Hours' },
+          { id: 'r-7', title: 'Striver SDE Sheet & TakeUForward', type: 'doc', url: 'https://takeuforward.org/interviews/strivers-sde-sheet-top-coding-interview-problems/', whyUseful: 'Most popular placement preparation sheet among Indian engineering undergraduates.', difficulty: 'Advanced', estimatedTime: '35 Hours' }
+        ],
+        practiceDrills: [
+          { title: 'Blind 75 Curated LeetCode Patterns', platform: 'LeetCode', url: 'https://leetcode.com' },
+          { title: 'Pramp Free Peer Mock Interview', platform: 'Pramp', url: 'https://www.pramp.com' }
+        ],
+        completionCriteria: ['150+ LeetCode problems solved', 'Score 85%+ on ATS resume review scan'],
       }
-    };
-
-    return goalMap;
-  },
-
-  /**
-   * AI Goal Mentor: Answers questions grounded in the student's active GoalMap in English, Hindi, or Hinglish
-   */
-  askGoalMentor: (query: string, activeGoalMap: GoalMap): { answer: string; suggestedAction?: string } => {
-    const lower = query.toLowerCase();
-
-    // 1. Why should I learn this?
-    if (lower.includes('why') || lower.includes('purpose') || lower.includes('reason') || lower.includes('kyu') || lower.includes('kyun')) {
-      const currentMilestone = activeGoalMap.milestones.find(m => m.status === 'in_progress') || activeGoalMap.milestones[0];
-      return {
-        answer: `### 🎯 Why This Step in Your GoalMap?
-For your goal of **"${activeGoalMap.goalTitle}"**, your current active phase is: **${currentMilestone?.title}**.
-
-**Reasoning & Strategic Value**:
-${currentMilestone?.whyThisStep || 'This milestone builds the foundational prerequisites required to solve complex problems and pass technical evaluations.'}
-
-**Industry & BEU Insight**:
-In tech interviews and BEU examinations, candidates who rush into advanced frameworks without mastering fundamentals struggle with debugging and fail to explain architectural trade-offs in technical vivas.`,
-        suggestedAction: 'Focus on completing the action items in this phase first.'
-      };
-    }
-
-    // 2. What should I study today? / Daily task
-    if (lower.includes('today') || lower.includes('what should i do') || lower.includes('next') || lower.includes('aaj') || lower.includes('kya padhu') || lower.includes('kya karu')) {
-      const currentMilestone = activeGoalMap.milestones.find(m => m.status === 'in_progress') || activeGoalMap.milestones[0];
-      const nextTask = currentMilestone?.tasks.find(t => !t.completed) || currentMilestone?.tasks[0];
-
-      return {
-        answer: `### 📋 Your Immediate Action Plan for Today:
-Based on your **${activeGoalMap.studentProfile.hoursDaily} hrs/day** schedule for **${activeGoalMap.goalTitle}**:
-
-**Priority Task**: 📌 **${nextTask?.title || 'Review core concepts'}**
-• **Estimated Time**: ${nextTask?.estimatedHours || 2} Hours
-• **Priority**: 🔴 ${nextTask?.priority || 'HIGH'}
-• **Action Details**: ${nextTask?.description || 'Follow recommended resources and practice coding drills.'}
-
-💡 **BEU Mentor Tip**:
-Spend the first 40% of your time (${Math.round((activeGoalMap.studentProfile.hoursDaily * 60) * 0.4)} mins) reviewing the theory/documentation, and the remaining 60% writing code or solving numerical problems.`,
-        suggestedAction: `Complete task: "${nextTask?.title}"`
-      };
-    }
-
-    // 3. I am stuck / Hard concept / Doubts
-    if (lower.includes('stuck') || lower.includes('confused') || lower.includes('difficult') || lower.includes('hard') || lower.includes('fas gaya') || lower.includes('samajh nahi') || lower.includes('doubt')) {
-      return {
-        answer: `### 🛠️ Don't Panic — Step-by-Step Unblocking Protocol:
-1. **Break it Down**: Isolate the exact sub-topic that feels confusing into a 15-minute chunk.
-2. **Consult Recommended Resources**: Check the verified documentation link in your active milestone card.
-3. **Write a Minimal Working Example**: Create a tiny 10-line test script or solve a simple base-case numerical rather than abstract theory.
-4. **Connect with a BEU Senior Mentor**: Request a quick 1-on-1 session with a placed 4th-year senior from your college via the Mentorship tab.`,
-        suggestedAction: 'Check the milestone curated resources or book a mentor session.'
-      };
-    }
-
-    // 4. Semester exam is near / Academic clash
-    if (lower.includes('exam') || lower.includes('semester') || lower.includes('backlog') || lower.includes('cgpa') || lower.includes('paper') || lower.includes('end sem')) {
-      return {
-        answer: `### 📚 BEU Academic Balancing Strategy:
-Your BEU semester exams are vital — avoiding backlogs protects your eligibility for placement drives and GATE!
-
-**Recommended 20-Day Time Split**:
-• **70% Time (Academic)**: Focus on Unit 2, 3, and 4 (which carry ~52% of BEU theory weightage) and past 5-year PYQs.
-• **30% Time (GoalMap)**: Maintain your career streak with just 1 problem or 30 minutes of revision daily.
-
-We recommend solving previous year 14-mark derivations by hand on weekends to secure university distinction!`,
-        suggestedAction: 'Prioritize BEU PYQ preparation for the upcoming weeks.'
-      };
-    }
-
-    // 5. Suggest project / Portfolio
-    if (lower.includes('project') || lower.includes('build') || lower.includes('idea') || lower.includes('portfolio') || lower.includes('resume')) {
-      const currentMilestone = activeGoalMap.milestones.find(m => m.status === 'in_progress') || activeGoalMap.milestones[0];
-      const idea = currentMilestone?.projectIdea;
-
-      return {
-        answer: `### 💡 Recommended Resume-Worthy Project for Phase ${currentMilestone?.phaseNumber || 1}:
-**Project Title**: 🚀 **${idea?.title || 'BEU Collaborative Academic Workspace'}**
-
-• **Description**: ${idea?.description || 'A full-stack web platform solving real university communication and academic resource sharing.'}
-• **Tech Stack**: ${idea?.techStack?.join(', ') || 'React, Node.js, Express, PostgreSQL, TailwindCSS'}
-• **Why Recruiters & Evaluators Love This**: Demonstrates practical problem-solving, clean database architecture, and authentication rather than a standard generic tutorial clone!`,
-        suggestedAction: 'Start by wireframing the user flow and drafting the database schema.'
-      };
-    }
-
-    // 6. Interview & Placement questions
-    if (lower.includes('interview') || lower.includes('placement') || lower.includes('viva') || lower.includes('job') || lower.includes('internship') || lower.includes('off campus')) {
-      return {
-        answer: `### 💼 Placement & Viva Readiness Tips:
-For **${activeGoalMap.goalTitle}**:
-1. **Explain the "Why"**: Recruiters test if you understand the architectural trade-offs, not just memorized syntax.
-2. **Project Deep Dive**: Be ready to answer: "What was the most challenging bug you encountered in this project, and how did you resolve it?"
-3. **Core CS Fundamentals**: Revise DBMS ACID properties, Operating System virtual memory/deadlocks, and OOP principles.
-4. **Behavioral STAR Technique**: Prepare concise examples of team collaboration, handling deadlines, and resolving technical disagreements.`,
-        suggestedAction: 'Schedule a peer mock interview on BEU Connect Hub.'
-      };
-    }
-
-    // Default intelligent mentor response
-    return {
-      answer: `### 🤖 BEU AI Goal Mentor Analysis
-Regarding your question for **${activeGoalMap.goalTitle}** (${activeGoalMap.studentProfile.branch} Sem ${activeGoalMap.studentProfile.semester}):
-
-• **Current Progress**: **${activeGoalMap.progressPercent}%** completed across **${activeGoalMap.milestones.length} Phases**.
-• **Daily Commitment**: **${activeGoalMap.studentProfile.hoursDaily} hrs/day** targeting **${activeGoalMap.targetDeadline}**.
-• **Immediate Focus**: Advancing through **${activeGoalMap.milestones.find(m => m.status === 'in_progress')?.title || 'Phase 1'}**.
-
-**Quick Things You Can Ask Me**:
-1. *"What should I study today?"* → Get immediate daily task drills.
-2. *"Why should I learn this milestone?"* → Understand industry and exam relevance.
-3. *"Semester exam is in 20 days"* → Get automated time-budget balancing advice.
-4. *"Suggest a capstone project"* → Get full resume-ready project blueprints!`,
-      suggestedAction: 'Pick the next pending task in your active phase and complete it today.'
-    };
+    ];
   }
-};
+}
