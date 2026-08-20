@@ -11,10 +11,13 @@ import {
   BEUQuestionPatternMeta,
 } from './ai.interface.js';
 
+/**
+ * Deterministic pattern analysis engine compiling 16-point examination frequency intelligence
+ * from authentic Bihar Engineering University (BEU) and AKU end-semester question papers (2018-2024).
+ */
 export class BEUPatternAnalyzerEngine {
   /**
-   * Generates a complete 16-point BEU PYQ Pattern Analysis Report based on authentic
-   * Bihar Engineering University (BEU) & AKU past examination papers (2018-2024).
+   * Dispatches subject input strings to specialized curriculum analyzers across CSE, ECE, EE, Civil, and Mechanical branches.
    */
   static generateReport(
     subjectInput: string,
@@ -81,7 +84,10 @@ export class BEUPatternAnalyzerEngine {
     return this.buildGenericBEUReport(subjectInput, branch, semester);
   }
 
-  // --- 1. DATA STRUCTURES & ALGORITHMS (PCC-CS301) ---
+  /**
+   * Compiles the 16-point examination blueprint for Data Structures & Algorithms (PCC-CS301),
+   * modeling 100% recurring AVL tree rotation problems and Prim/Kruskal MST edge-selection tables.
+   */
   private static buildDSAReport(branch: string, semester: number): BEUFullPatternAnalysisReport {
     const subjectName = 'Data Structures & Algorithms';
     const subjectCode = 'PCC-CS301 / 100301';
@@ -367,7 +373,10 @@ export class BEUPatternAnalyzerEngine {
     });
   }
 
-  // --- 2. OPERATING SYSTEMS (PCC-CS402 / 105402) ---
+  /**
+   * Compiles the 16-point examination blueprint for Operating Systems (PCC-CS402),
+   * modeling CPU scheduling Gantt charts, Banker deadlock avoidance matrices, and page fault algorithms.
+   */
   private static buildOSReport(branch: string, semester: number): BEUFullPatternAnalysisReport {
     const subjectName = 'Operating Systems';
     const subjectCode = 'PCC-CS402 / 105402';

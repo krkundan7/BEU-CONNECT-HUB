@@ -1,10 +1,14 @@
 import { PrismaClient, Role, VerificationStatus, PostType, OpportunityCategory, NoticeCategory, ExamFrequency } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import { BEUSyllabusSyncService } from '../src/services/beuSyllabusSync.service.js';
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log('🌱 Seeding BEU Connect Hub demo database...');
+
+  // 0. Sync Full Official BEU Curriculum (34 Branches, Regulations, Semesters, Subjects, Units & Topics)
+  await BEUSyllabusSyncService.syncAllFromOfficialSource();
 
   // 1. Colleges
   const mit = await prisma.college.upsert({

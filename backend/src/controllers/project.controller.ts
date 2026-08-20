@@ -3,6 +3,9 @@ import { ProjectService } from '../services/project.service.js';
 import { ResponseFormatter } from '../utils/apiResponse.js';
 
 export class ProjectController {
+  /**
+   * Project creation controller associating the authenticated user as team lead and initializing collaboration status.
+   */
   static async create(req: Request, res: Response, next: NextFunction) {
     try {
       const project = await ProjectService.createProject(req.user!.id, req.body);
@@ -33,6 +36,9 @@ export class ProjectController {
     }
   }
 
+  /**
+   * Teammate recommendation endpoint computing skill match percentages and returning sorted candidate peer lists.
+   */
   static async getMatches(req: Request, res: Response, next: NextFunction) {
     try {
       const matches = await ProjectService.findMatchesForProject(req.params.id as string);

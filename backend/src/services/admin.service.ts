@@ -1,6 +1,9 @@
 import prisma from '../config/prisma.js';
 
 export class AdminService {
+  /**
+   * Aggregates platform-wide health metrics and moderation backlogs executing 9 parallel Prisma count queries.
+   */
   static async getDashboardStats() {
     const [
       totalUsers,
@@ -38,6 +41,9 @@ export class AdminService {
     };
   }
 
+  /**
+   * Records an immutable administrative audit log capturing the administrator ID, action type, target entity, and origin IP.
+   */
   static async logAdminAction(adminId: string, actionType: string, targetType: string, targetId?: string, details?: string, ipAddress?: string) {
     return prisma.adminAction.create({
       data: {

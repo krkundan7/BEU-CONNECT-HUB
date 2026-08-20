@@ -5,6 +5,9 @@ import { IStorageService, UploadResult } from './storage.interface.js';
 import { env } from '../../config/env.js';
 import { AppError } from '../../utils/AppError.js';
 
+/**
+ * Local filesystem storage provider writing in-memory buffers to disk and exposing static HTTP asset paths.
+ */
 export class LocalStorageService implements IStorageService {
   private uploadDir: string;
 
@@ -15,6 +18,10 @@ export class LocalStorageService implements IStorageService {
     }
   }
 
+  /**
+   * Persists an uploaded multipart file buffer to disk under a target category folder
+   * with collision-resistant timestamp and random cryptographic hex identifiers.
+   */
   async uploadFile(file: Express.Multer.File, folder: string = 'general'): Promise<UploadResult> {
     try {
       const targetFolder = path.join(this.uploadDir, folder);
@@ -45,6 +52,9 @@ export class LocalStorageService implements IStorageService {
     }
   }
 
+  /**
+   * Safely deletes a file from the uploads directory after verifying path existence.
+   */
   async deleteFile(fileKey: string): Promise<boolean> {
     try {
       const filePath = path.join(this.uploadDir, fileKey);

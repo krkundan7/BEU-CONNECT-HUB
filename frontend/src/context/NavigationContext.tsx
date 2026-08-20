@@ -36,7 +36,8 @@ export type PageId =
   | 'admin-verification'
   | 'admin-moderation'
   | 'admin-notices'
-  | 'admin-resources';
+  | 'admin-resources'
+  | 'admin-syllabus';
 
 interface NavigationContextType {
   currentPage: PageId;

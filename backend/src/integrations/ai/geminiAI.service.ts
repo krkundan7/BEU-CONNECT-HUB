@@ -13,7 +13,8 @@ export class GeminiAIService implements IAIService {
   }
 
   /**
-   * Generates academic response following the BEU Master System Prompt
+   * Generates academic tutoring responses by attempting online Gemini LLM inference first,
+   * falling back automatically to the offline deterministic BEUKnowledgeEngine on network or API failures.
    */
   async generateAcademicResponse(messages: AIChatMessage[]): Promise<string> {
     const latestMsg = messages[messages.length - 1];
@@ -39,7 +40,8 @@ export class GeminiAIService implements IAIService {
   }
 
   /**
-   * Calls Google Gemini REST API with the BEU Master System Prompt & Multimodal attachments
+   * Dispatches multimodal requests to Google Gemini REST endpoint, formatting base64 image/PDF attachments into inline parts
+   * and injecting the comprehensive BEU system prompt.
    */
   private async callExternalLLM(messages: AIChatMessage[]): Promise<string | null> {
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${this.apiKey}`;
@@ -47,7 +49,7 @@ export class GeminiAIService implements IAIService {
     const formattedContents = messages.map(msg => {
       const parts: any[] = [{ text: msg.content }];
 
-      // Multimodal Image / PDF attachment support
+      // Multimodal Image / PDF attachment support with MIME type extraction
       if (msg.attachment && msg.attachment.dataUrl) {
         try {
           const [header, base64Data] = msg.attachment.dataUrl.split(',');
@@ -77,6 +79,7 @@ export class GeminiAIService implements IAIService {
       };
     });
 
+    // Enforce low temperature (0.2) to minimize hallucinations and maximize adherence to official BEU curriculum facts
     const requestBody = {
       systemInstruction: {
         parts: [{ text: BEU_MASTER_SYSTEM_PROMPT }],
@@ -105,7 +108,7 @@ export class GeminiAIService implements IAIService {
   }
 
   /**
-   * Analyzes historical PYQ patterns
+   * Generates a 16-point examination frequency analysis report mapping recurring question trends across past BEU papers.
    */
   async analyzePYQPatterns(
     subjectName: string,

@@ -3,6 +3,9 @@ import { AppError } from '../utils/AppError.js';
 import { CommunityCategory, CommunityMemberRole, Role } from '@prisma/client';
 
 export class CommunityService {
+  /**
+   * Provisions a new student community guild, generating URL-safe slug identifiers and assigning the creator as initial OWNER.
+   */
   static async createCommunity(creatorId: string, data: {
     name: string;
     description: string;
@@ -114,6 +117,9 @@ export class CommunityService {
     };
   }
 
+  /**
+   * Toggles community membership state, preventing OWNER members from abandoning communities without ownership transfer.
+   */
   static async toggleJoinCommunity(communityId: string, userId: string) {
     const existing = await prisma.communityMember.findUnique({
       where: { communityId_userId: { communityId, userId } },

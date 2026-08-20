@@ -8,10 +8,10 @@ import prisma from './config/prisma.js';
 const app = createApp();
 const server = http.createServer(app);
 
-// Initialize Socket.IO Server
+// Initialize Socket.IO Server attached to the shared HTTP listener for bi-directional WebSocket and polling fallback
 const socketServer = new SocketServer(server, env.CORS_ORIGIN);
 
-// Start HTTP Server
+// Start HTTP Server listening on the configured environment port
 server.listen(env.PORT, () => {
   Logger.info(`🚀 BEU Connect Hub Backend Server running on port ${env.PORT}`);
   Logger.info(`📖 Swagger OpenAPI docs available at http://localhost:${env.PORT}/api/docs`);
@@ -19,7 +19,10 @@ server.listen(env.PORT, () => {
   Logger.info(`⚡ Socket.IO real-time engine active`);
 });
 
-// Graceful Shutdown
+/**
+ * Two-phase graceful shutdown handler to stop accepting incoming HTTP/WebSocket connections,
+ * wait for in-flight requests to complete, and cleanly terminate the Prisma connection pool.
+ */
 const handleShutdown = async (signal: string) => {
   Logger.info(`Received ${signal}. Shutting down gracefully...`);
   server.close(async () => {
@@ -30,6 +33,7 @@ const handleShutdown = async (signal: string) => {
   });
 };
 
+// Register OS process signal handlers (SIGTERM for container/cloud orchestration and SIGINT for local Ctrl+C)
 process.on('SIGTERM', () => handleShutdown('SIGTERM'));
 process.on('SIGINT', () => handleShutdown('SIGINT'));
 

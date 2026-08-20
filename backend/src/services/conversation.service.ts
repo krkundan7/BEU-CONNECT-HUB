@@ -2,6 +2,9 @@ import prisma from '../config/prisma.js';
 import { AppError } from '../utils/AppError.js';
 
 export class ConversationService {
+  /**
+   * Idempotently retrieves an existing 1-to-1 direct messaging conversation between two users or provisions a new thread.
+   */
   static async getOrCreateConversation(userId1: string, userId2: string) {
     if (userId1 === userId2) {
       throw AppError.badRequest('You cannot create a conversation with yourself');
@@ -117,6 +120,9 @@ export class ConversationService {
     });
   }
 
+  /**
+   * Persists a message within a conversation room after validating sender authorization, updating the conversation's active timestamp.
+   */
   static async sendMessage(conversationId: string, senderId: string, data: { content: string; attachmentUrl?: string }) {
     const isMember = await prisma.conversationMember.findUnique({
       where: { conversationId_userId: { conversationId, userId: senderId } },

@@ -18,8 +18,12 @@ import noticeRoutes from './notice.routes.js';
 import notificationRoutes from './notification.routes.js';
 import reportRoutes from './report.routes.js';
 import adminRoutes from './admin.routes.js';
+import adminSyllabusRoutes from './adminSyllabus.routes.js';
 import searchRoutes from './search.routes.js';
 
+/**
+ * Master API router multiplexing 21 specialized domain sub-routers into a unified modular hierarchy under `/api`.
+ */
 const router = Router();
 
 // Route Mounts
@@ -41,7 +45,10 @@ router.use('/opportunities', opportunityRoutes);
 router.use('/notices', noticeRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/reports', reportRoutes);
+// Administrative syllabus and moderation routes with role-based authorization barriers
+router.use('/admin/syllabus', adminSyllabusRoutes);
 router.use('/admin', adminRoutes);
 router.use('/search', searchRoutes);
+
 
 export default router;

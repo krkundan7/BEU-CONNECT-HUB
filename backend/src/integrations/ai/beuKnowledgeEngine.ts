@@ -14,7 +14,8 @@ export interface BEUKnowledgeQuery {
 
 export class BEUKnowledgeEngine {
   /**
-   * Detects student context from query
+   * Multi-variable heuristic NLP parser extracting student engineering branch, semester number,
+   * natural query language (English, Hindi, or Hinglish), and academic intent mode (concept, pyq, exam14, notes, viva, plan).
    */
   static extractContext(query: string, defaultBranch = 'CSE', defaultSem = 3) {
     const lower = query.toLowerCase();
@@ -74,7 +75,8 @@ export class BEUKnowledgeEngine {
   }
 
   /**
-   * Generates a fully verified, structured response according to BEU Master System Prompt
+   * Deterministic academic concept dispatcher routing subject queries to structured 14-mark templates,
+   * LaTeX formula derivations, and BEU examination tips.
    */
   static generateAcademicResponse(query: string, branch = 'CSE', semester = 3): string {
     const context = this.extractContext(query, branch, semester);
@@ -136,6 +138,9 @@ export class BEUKnowledgeEngine {
 
   // --- TOPIC SPECIFIC RESPONSE FORMATTERS ---
 
+  /**
+   * Generates multilingual Hall Effect solutions formatted for BEU 14-mark question expectations with Lorentz force derivation.
+   */
   private static formatHallEffectResponse(lang: 'english' | 'hindi' | 'hinglish', mode: string): string {
     if (lang === 'hinglish') {
       return `### 🔎 Verified Information: Hall Effect (BEU Physics & Basic Electronics)
@@ -614,6 +619,9 @@ Based on historical Bihar Engineering University (BEU) End-Semester question pap
 - Official BEU Question Paper Archive (2018 - 2024)`;
   }
 
+  /**
+   * Generates a 7-day high-yield sprint revision roadmap allocating study blocks weighted by historical unit exam marks.
+   */
   private static formatRevisionPlanResponse(branch: string, sem: number, _lang: 'english' | 'hindi' | 'hinglish'): string {
     return `### 📅 BEU 7-Day High-Yield Exam Sprint Blueprint (${branch} Sem ${sem})
 

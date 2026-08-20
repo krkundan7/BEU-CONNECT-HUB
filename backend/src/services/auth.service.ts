@@ -5,6 +5,10 @@ import { AppError } from '../utils/AppError.js';
 import { Role, VerificationStatus } from '@prisma/client';
 
 export class AuthService {
+  /**
+   * Registers a new student account, dynamically provisioning missing College/Branch/Semester records,
+   * hashing passwords with bcrypt, queuing a pending academic verification record, and issuing initial tokens.
+   */
   static async register(data: {
     name: string;
     email: string;
@@ -143,6 +147,9 @@ export class AuthService {
     };
   }
 
+  /**
+   * Authenticates student credentials against stored bcrypt password hashes and issues fresh JWT access/refresh token pairs.
+   */
   static async login(email: string, password: string) {
     const user = await prisma.user.findUnique({
       where: { email: email.toLowerCase() },
@@ -196,6 +203,10 @@ export class AuthService {
     };
   }
 
+  /**
+   * Implements strict Single-Use Refresh Token Rotation (RTR), revoking the submitted token
+   * and issuing a brand new token pair to guard against token theft and replay attacks.
+   */
   static async refreshToken(rawRefreshToken: string) {
     const tokenHash = TokenUtils.hashToken(rawRefreshToken);
 
@@ -250,6 +261,9 @@ export class AuthService {
     return true;
   }
 
+  /**
+   * Retrieves the authenticated user's complete profile, joining enrolled college, branch, semester, skills, and social stats.
+   */
   static async getMe(userId: string) {
     const user = await prisma.user.findUnique({
       where: { id: userId },

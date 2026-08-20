@@ -2,6 +2,9 @@ import { Response } from 'express';
 import { HTTP_STATUS } from '../config/constants.js';
 import { ApiResponse, PaginatedResult } from '../types/index.js';
 
+/**
+ * Unified response envelope builder ensuring consistent JSend-compliant `{ success, data, message, error }` schemas across all endpoints.
+ */
 export class ResponseFormatter {
   static success<T>(res: Response, data: T, message: string = 'Success', statusCode: number = HTTP_STATUS.OK): Response {
     const payload: ApiResponse<T> = {
@@ -16,6 +19,9 @@ export class ResponseFormatter {
     return this.success(res, data, message, HTTP_STATUS.CREATED);
   }
 
+  /**
+   * Formats paginated query results with item collections and boundary navigation metadata (page, limit, total, totalPages, hasNext, hasPrev).
+   */
   static paginated<T>(res: Response, result: PaginatedResult<T>, message: string = 'Success'): Response {
     return res.status(HTTP_STATUS.OK).json({
       success: true,

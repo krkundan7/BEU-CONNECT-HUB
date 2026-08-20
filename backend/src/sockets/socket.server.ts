@@ -12,6 +12,10 @@ interface AuthenticatedSocket extends Socket {
   };
 }
 
+/**
+ * Real-time WebSocket engine managing authenticated connections, presence status broadcasts,
+ * conversation room subscriptions, and bi-directional message relays.
+ */
 export class SocketServer {
   private io: SocketIOServer;
   private onlineUsers: Map<string, string> = new Map(); // userId -> socketId
@@ -29,6 +33,9 @@ export class SocketServer {
     this.setupEventHandlers();
   }
 
+  /**
+   * Socket.IO connection authentication middleware validating JWT bearer tokens supplied in handshake auth or headers.
+   */
   private setupAuthMiddleware() {
     this.io.use((socket: AuthenticatedSocket, next) => {
       try {
@@ -59,7 +66,7 @@ export class SocketServer {
       // Broadcast presence
       this.io.emit('user_status', { userId: user.id, status: 'ONLINE' });
 
-      // Join conversation room
+      // Join isolated conversation room to scope message fan-out strictly to active participants
       socket.on('join_conversation', (conversationId: string) => {
         socket.join(`conversation_${conversationId}`);
         Logger.debug(`Socket ${socket.id} joined room conversation_${conversationId}`);
@@ -84,7 +91,7 @@ export class SocketServer {
         }
       });
 
-      // Typing indicators
+      // Broadcast typing indicator to conversation peers excluding the sending client socket
       socket.on('typing_start', (conversationId: string) => {
         socket.to(`conversation_${conversationId}`).emit('user_typing', {
           conversationId,

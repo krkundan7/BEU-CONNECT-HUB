@@ -2,6 +2,10 @@ import { Request, Response, NextFunction } from 'express';
 import { TokenUtils } from '../utils/token.js';
 import { AppError } from '../utils/AppError.js';
 
+/**
+ * Strict authentication guard extracting JWT from the Authorization Bearer header or fallback cookie,
+ * verifying signature validity, and hydrating `req.user` with decoded identity claims.
+ */
 export const requireAuth = (req: Request, res: Response, next: NextFunction): void => {
   try {
     let token: string | undefined;
@@ -21,6 +25,7 @@ export const requireAuth = (req: Request, res: Response, next: NextFunction): vo
     req.user = decoded;
     next();
   } catch (error: any) {
+    // Differentiate between expired tokens (prompting client token rotation) and malformed signatures
     if (error.name === 'TokenExpiredError') {
       next(AppError.unauthorized('Access token has expired. Please refresh your session.'));
     } else if (error.name === 'JsonWebTokenError') {
@@ -31,6 +36,10 @@ export const requireAuth = (req: Request, res: Response, next: NextFunction): vo
   }
 };
 
+/**
+ * Permissive authentication middleware that populates `req.user` if a valid Bearer token is present,
+ * but allows unauthenticated visitors to proceed anonymously for public syllabus & feed browsing.
+ */
 export const optionalAuth = (req: Request, res: Response, next: NextFunction): void => {
   try {
     let token: string | undefined;
@@ -49,3 +58,4 @@ export const optionalAuth = (req: Request, res: Response, next: NextFunction): v
     next();
   }
 };
+

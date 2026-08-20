@@ -4,6 +4,9 @@ import { ResponseFormatter } from '../utils/apiResponse.js';
 import { HTTP_STATUS } from '../config/constants.js';
 
 export class AuthController {
+  /**
+   * Student registration controller creating credentials, issuing tokens, and attaching an HTTP-only secure cookie for the refresh token.
+   */
   static async register(req: Request, res: Response, next: NextFunction) {
     try {
       const result = await AuthService.register(req.body);
@@ -45,6 +48,9 @@ export class AuthController {
     }
   }
 
+  /**
+   * Session renewal endpoint extracting the refresh token from either request body or HTTP cookies and issuing rotated token pairs.
+   */
   static async refresh(req: Request, res: Response, next: NextFunction) {
     try {
       const refreshToken = req.body.refreshToken || req.cookies?.refreshToken;

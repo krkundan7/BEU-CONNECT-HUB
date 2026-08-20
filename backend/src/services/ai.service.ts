@@ -1,9 +1,13 @@
 import prisma from '../config/prisma.js';
-import { aiService } from '../integrations/ai/geminiAI.service.js';
+import { aiService } from '../integrations/ai/aiFactory.js';
 import { AIChatMessage } from '../integrations/ai/ai.interface.js';
 import { AIRole } from '@prisma/client';
 
 export class AIChatService {
+  /**
+   * Orchestrates multi-turn academic AI conversations, automatically creating conversation threads,
+   * maintaining a sliding window of the last 10 messages for context, and persisting assistant replies.
+   */
   static async handleChat(
     userId: string,
     data: {
@@ -52,12 +56,12 @@ export class AIChatService {
       content: h.content,
     }));
 
-    // Attach current file to latest message for multimodal analysis
+    // Inject active multimodal attachment payload into the trailing user message turn
     if (data.attachment && aiInput.length > 0) {
       aiInput[aiInput.length - 1].attachment = data.attachment;
     }
 
-    // Generate AI response
+    // Generate AI response with official BEU syllabus grounding
     const aiResponseText = await aiService.generateAcademicResponse(aiInput);
 
     // Save Assistant message
@@ -75,6 +79,9 @@ export class AIChatService {
     };
   }
 
+  /**
+   * Dispatches subject-level queries to the BEU pattern analyzer to generate 16-point PYQ intelligence reports.
+   */
   static async analyzePYQ(subjectName: string, branch?: string, semester?: number) {
     const analysis = await aiService.analyzePYQPatterns(subjectName, branch, semester, []);
     return analysis;

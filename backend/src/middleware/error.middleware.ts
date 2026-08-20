@@ -11,7 +11,7 @@ export const errorHandler = (
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   next: NextFunction
 ): Response => {
-  // If it's our known operational error
+  // Intercept operational AppError instances to preserve explicit HTTP status codes, error codes, and field validation metadata
   if (err instanceof AppError) {
     Logger.warn(`Operational Error: ${err.message}`, {
       code: err.code,
@@ -23,7 +23,7 @@ export const errorHandler = (
     return ResponseFormatter.error(res, err.message, err.statusCode, err.code, err.details);
   }
 
-  // Handle Prisma unique constraint violation (P2002)
+  // Intercept Prisma P2002 unique constraint violations and extract offending column target names into user-friendly 409 Conflict messages
   if (err.code === 'P2002') {
     const fields = err.meta?.target ? (err.meta.target as string[]).join(', ') : 'field';
     return ResponseFormatter.error(
@@ -34,7 +34,7 @@ export const errorHandler = (
     );
   }
 
-  // Handle Prisma Record Not Found (P2025)
+  // Map Prisma P2025 record-not-found errors during updates/deletes to standard HTTP 404 responses
   if (err.code === 'P2025') {
     return ResponseFormatter.error(
       res,

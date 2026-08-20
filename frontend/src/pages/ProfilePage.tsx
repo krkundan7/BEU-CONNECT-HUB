@@ -3,10 +3,11 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigation } from '../context/NavigationContext';
 import { useNotification } from '../context/NotificationContext';
 import { StorageService } from '../services/storageService';
+import { AvatarUploadModal } from '../components/AvatarUploadModal';
 import {
   User as UserIcon, CheckCircle2, Award, ExternalLink,
   Globe, Sparkles, BookOpen, Layers, Plus, Share2, MessageSquare,
-  Shield, Calendar, Briefcase, FileCode, Check
+  Shield, Calendar, Briefcase, FileCode, Check, Camera
 } from 'lucide-react';
 
 export const ProfilePage: React.FC = () => {
@@ -16,6 +17,7 @@ export const ProfilePage: React.FC = () => {
 
   const [activeTab, setActiveTab] = useState<'passport' | 'projects' | 'posts' | 'badges'>('passport');
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
 
   // Identify target user: either viewedUserId or current logged in user
   const targetUser = (viewedUserId ? allUsers.find(u => u.id === viewedUserId) : currentUser) || currentUser;
@@ -59,14 +61,27 @@ export const ProfilePage: React.FC = () => {
         {/* Profile Info Row */}
         <div className="px-6 sm:px-8 pb-6 relative">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 -mt-16 sm:-mt-20 mb-4">
-            {/* Avatar */}
-            <div className="relative">
+            {/* Avatar with Upload Trigger */}
+            <div className="relative group">
               <img
                 src={targetUser.avatar}
                 alt={targetUser.name}
                 className="w-28 sm:w-32 h-28 sm:h-32 rounded-3xl object-cover border-4 border-white shadow-xl bg-white"
               />
-              {targetUser.verificationStatus === 'verified' && (
+
+              {/* Camera Upload Button on Avatar */}
+              {isOwnProfile && (
+                <button
+                  type="button"
+                  onClick={() => setShowAvatarModal(true)}
+                  className="absolute bottom-0 right-0 p-2 rounded-2xl bg-navy-950/85 hover:bg-navy-950 text-white shadow-lg border-2 border-white hover:scale-105 transition-all flex items-center justify-center cursor-pointer group-hover:ring-2 group-hover:ring-emerald-500/50"
+                  title="Upload Profile Photo"
+                >
+                  <Camera className="w-4 h-4 text-emerald-400" />
+                </button>
+              )}
+
+              {targetUser.verificationStatus === 'verified' && !isOwnProfile && (
                 <div className="absolute bottom-1 right-1 p-1.5 bg-emerald-500 text-navy-950 rounded-xl border-2 border-white shadow-sm" title="Verified BEU Student">
                   <CheckCircle2 className="w-4 h-4 fill-current" />
                 </div>
@@ -95,12 +110,22 @@ export const ProfilePage: React.FC = () => {
                   </button>
                 </>
               ) : (
-                <button
-                  onClick={() => navigateTo('settings')}
-                  className="px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-xs font-semibold text-slate-700 transition-colors"
-                >
-                  Edit Profile
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setShowAvatarModal(true)}
+                    className="px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-bold transition-colors flex items-center gap-1.5 shadow-2xs"
+                  >
+                    <Camera className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Upload Photo</span>
+                  </button>
+
+                  <button
+                    onClick={() => navigateTo('settings')}
+                    className="px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-xs font-semibold text-slate-700 transition-colors"
+                  >
+                    Edit Profile
+                  </button>
+                </div>
               )}
             </div>
           </div>
@@ -321,6 +346,12 @@ export const ProfilePage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Profile Photo Upload Modal */}
+      <AvatarUploadModal
+        isOpen={showAvatarModal}
+        onClose={() => setShowAvatarModal(false)}
+      />
     </div>
   );
 };

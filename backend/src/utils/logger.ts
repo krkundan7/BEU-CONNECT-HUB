@@ -1,3 +1,6 @@
+/**
+ * Centralized logging utility formatting ISO-8601 timestamps and serializing contextual metadata.
+ */
 export class Logger {
   private static format(level: string, message: string, meta?: any): string {
     const timestamp = new Date().toISOString();
@@ -14,7 +17,7 @@ export class Logger {
   }
 
   static error(message: string, meta?: any): void {
-    // Avoid logging sensitive fields like passwords, tokens or private identifiers
+    // Redact sensitive security attributes (passwords, JWTs, refresh tokens) before logging to standard error streams
     const sanitizedMeta = meta ? { ...meta } : undefined;
     if (sanitizedMeta && sanitizedMeta.password) delete sanitizedMeta.password;
     if (sanitizedMeta && sanitizedMeta.token) delete sanitizedMeta.token;

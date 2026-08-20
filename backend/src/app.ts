@@ -15,14 +15,14 @@ import { HTTP_STATUS } from './config/constants.js';
 export const createApp = (): Express => {
   const app = express();
 
-  // Security Headers
+  // Configure standard security headers with Cross-Origin Resource Policy set to 'cross-origin' to permit frontend embedding of uploaded documents and media
   app.use(
     helmet({
       crossOriginResourcePolicy: { policy: 'cross-origin' },
     })
   );
 
-  // CORS Configuration
+  // Dynamic CORS resolution supporting comma-separated origin whitelists, wildcard matchers, and mobile/curl clients without an Origin header
   app.use(
     cors({
       origin: (origin, callback) => {
@@ -44,7 +44,7 @@ export const createApp = (): Express => {
     app.use(morgan('dev'));
   }
 
-  // Request Parsers
+  // Request body parsing with strict 10MB payload size limits to guard against memory exhaustion and body-based DoS attacks
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -74,7 +74,7 @@ export const createApp = (): Express => {
   // Master API Routes
   app.use(env.API_PREFIX, apiRouter);
 
-  // 404 Route Handler
+  // Terminal 404 handler catching all unrouted API paths before delegating uncaught exceptions to central error middleware
   app.use((req: Request, res: Response) => {
     return ResponseFormatter.error(
       res,

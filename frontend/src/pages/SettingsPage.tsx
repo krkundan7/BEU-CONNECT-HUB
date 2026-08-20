@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigation } from '../context/NavigationContext';
 import { useNotification } from '../context/NotificationContext';
+import { AvatarUploadModal } from '../components/AvatarUploadModal';
 import {
   Settings, User, Lock, Bell, Shield, LogOut,
-  Trash2, CheckCircle2, EyeOff, Save
+  Trash2, CheckCircle2, EyeOff, Save, Camera, UploadCloud
 } from 'lucide-react';
 
 export const SettingsPage: React.FC = () => {
@@ -13,6 +14,7 @@ export const SettingsPage: React.FC = () => {
   const { showToast } = useNotification();
 
   const [activeTab, setActiveTab] = useState<'account' | 'privacy' | 'notifications' | 'security'>('account');
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
 
   // Account State
   const [name, setName] = useState(currentUser?.name || '');
@@ -89,8 +91,42 @@ export const SettingsPage: React.FC = () => {
         <div className="md:col-span-3 p-6 sm:p-8">
           {/* TAB 1: ACCOUNT */}
           {activeTab === 'account' && (
-            <form onSubmit={handleSaveAccount} className="space-y-4 text-xs">
+            <form onSubmit={handleSaveAccount} className="space-y-5 text-xs">
               <h3 className="text-base font-bold text-beu-dark">Public Profile Information</h3>
+
+              {/* Profile Photo Section */}
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row items-center gap-4">
+                <div className="relative">
+                  <img
+                    src={currentUser.avatar}
+                    alt={currentUser.name}
+                    className="w-20 h-20 rounded-2xl object-cover border-2 border-white shadow-md bg-white"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowAvatarModal(true)}
+                    className="absolute -bottom-1 -right-1 p-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-transform hover:scale-105"
+                    title="Change Photo"
+                  >
+                    <Camera className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                <div className="space-y-1.5 text-center sm:text-left">
+                  <h4 className="text-sm font-bold text-slate-900">Profile Photo</h4>
+                  <p className="text-xs text-slate-500">
+                    Upload a custom JPG, PNG or choose from student 3D avatars.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setShowAvatarModal(true)}
+                    className="px-3.5 py-1.5 rounded-xl bg-navy-950 hover:bg-navy-900 text-white text-xs font-bold transition-all inline-flex items-center gap-1.5 shadow-2xs"
+                  >
+                    <UploadCloud className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Upload New Photo</span>
+                  </button>
+                </div>
+              </div>
 
               <div>
                 <label className="block font-semibold text-beu-dark mb-1">Full Name</label>
@@ -296,6 +332,12 @@ export const SettingsPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Profile Photo Upload Modal */}
+      <AvatarUploadModal
+        isOpen={showAvatarModal}
+        onClose={() => setShowAvatarModal(false)}
+      />
     </div>
   );
 };

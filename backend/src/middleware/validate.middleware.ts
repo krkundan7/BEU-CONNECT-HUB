@@ -2,6 +2,10 @@ import { Request, Response, NextFunction } from 'express';
 import { AnyZodObject, ZodError } from 'zod';
 import { AppError } from '../utils/AppError.js';
 
+/**
+ * Higher-order middleware factory that validates incoming request bodies, query parameters,
+ * and route params against Zod schemas, stripping unrecognized fields and attaching coerced types.
+ */
 export const validate = (schema: AnyZodObject) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -18,6 +22,7 @@ export const validate = (schema: AnyZodObject) => {
 
       next();
     } catch (error) {
+      // Normalize Zod validation error paths by stripping root wrapper keys for clean client-side error mapping
       if (error instanceof ZodError) {
         const issues = error.errors.map(err => ({
           field: err.path.join('.').replace(/^(body|query|params)\./, ''),
@@ -30,3 +35,4 @@ export const validate = (schema: AnyZodObject) => {
     }
   };
 };
+

@@ -158,6 +158,47 @@ enum AIRole {
   SYSTEM
 }
 
+enum BranchCategory {
+  CORE
+  EMERGING_TECH
+  INTERDISCIPLINARY
+}
+
+enum SubjectType {
+  THEORY
+  PRACTICAL
+  TUTORIAL
+  DESIGN
+  PROJECT
+  MANDATORY
+}
+
+enum SubjectCategory {
+  PCC
+  BSC
+  ESC
+  HSMC
+  PEC
+  OEC
+  PROJ
+  MC
+}
+
+enum SyllabusStatus {
+  ACTIVE
+  ARCHIVED
+  REVISED
+  NEEDS_REVIEW
+  DRAFT
+}
+
+enum TopicProgressStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+  REVISION_REQUIRED
+}
+
 // ----------------------------------------------------
 // MODELS
 // ----------------------------------------------------
@@ -210,6 +251,7 @@ model User {
   mentorshipRequestsAsStudent MentorshipRequest[] @relation("StudentMentorship")
   studyPlans         StudyPlan[]
   aiConversations    AIConversation[]
+  topicProgress      TopicProgress[]
   reportsFiled       Report[]           @relation("ReporterRelation")
   adminActions       AdminAction[]
 
@@ -279,26 +321,65 @@ model College {
   users     User[]
 }
 
-model Branch {
-  id        String   @id @default(uuid())
-  name      String
-  code      String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model AcademicSession {
+  id        String     @id @default(uuid())
+  name      String     @unique // e.g. "2026-2027", "2025-2026", "2024-2025"
+  isActive  Boolean    @default(true)
+  syllabi   Syllabus[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 
-  users     User[]
-  subjects  Subject[]
+  @@index([name])
+}
+
+model RegulationVersion {
+  id                  String         @id @default(uuid())
+  code                String         @unique // e.g. "REG_2026", "REG_2018"
+  name                String         // "BEU UG Regulation 2026", "BEU AICTE Model Curriculum 2018-2025"
+  effectiveFromYear   Int            // 2026, 2018
+  officialDocumentUrl String?        @default("https://beu-bih.ac.in/backend/1778027052729-UG%20Regulation_05.04.2026.pdf")
+  description         String?
+  status              SyllabusStatus @default(ACTIVE)
+  syllabi             Syllabus[]
+  subjects            Subject[]
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+
+  @@index([code])
+}
+
+model Branch {
+  id                  String         @id @default(uuid())
+  name                String
+  code                String         @unique
+  category            BranchCategory @default(CORE)
+  officialCode        String?
+  hasOfficialSyllabus Boolean        @default(true)
+  syllabusStatus      String         @default("AVAILABLE")
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+
+  users               User[]
+  subjects            Subject[]
+  syllabi             Syllabus[]
+
+  @@index([code])
+  @@index([category])
 }
 
 model Semester {
-  id        String   @id @default(uuid())
-  number    Int      @unique
+  id        String     @id @default(uuid())
+  number    Int        @unique
   name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  group     String?    @default("Common")
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 
   users     User[]
   subjects  Subject[]
+  syllabi   Syllabus[]
+
+  @@index([number])
 }
 
 model Skill {
@@ -551,40 +632,80 @@ model Notification {
 }
 
 model Subject {
-  id          String      @id @default(uuid())
-  name        String
-  code        String      @unique
-  branchId    String
-  semesterId  String
-  credits     Int         @default(4)
-  description String?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id               String             @id @default(uuid())
+  name             String
+  code             String             @unique
+  shortName        String?
+  branchId         String
+  semesterId       String
+  regulationId     String?
+  type             SubjectType        @default(THEORY)
+  category         SubjectCategory    @default(PCC)
+  credits          Float              @default(4.0)
+  ltp              String             @default("3-1-0")
+  lectureHours     Int                @default(3)
+  tutorialHours    Int                @default(1)
+  practicalHours   Int                @default(0)
+  internalMarks    Int                @default(30)
+  endSemMarks      Int                @default(70)
+  totalMarks       Int                @default(100)
+  description      String?
+  prerequisites    String?
+  sourceUrl        String             @default("https://beu-bih.ac.in/academics/Syllabus/B.Tech")
+  isOfficialSource Boolean            @default(true)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
 
-  branch      Branch      @relation(fields: [branchId], references: [id])
-  semester    Semester    @relation(fields: [semesterId], references: [id])
-  syllabus    Syllabus?
-  pyqs        PYQ[]
-  notes       Note[]
-  videos      StudyVideo[]
-  studyTasks  StudyTask[]
+  branch           Branch             @relation(fields: [branchId], references: [id])
+  semester         Semester           @relation(fields: [semesterId], references: [id])
+  regulation       RegulationVersion? @relation(fields: [regulationId], references: [id])
+  syllabus         Syllabus?
+  units            SubjectUnit[]
+  pyqs             PYQ[]
+  notes            Note[]
+  videos           StudyVideo[]
+  studyTasks       StudyTask[]
 
   @@index([branchId])
   @@index([semesterId])
+  @@index([regulationId])
   @@index([code])
 }
 
 model Syllabus {
-  id            String          @id @default(uuid())
-  subjectId     String          @unique
-  totalHours    Int             @default(45)
-  examMarks     Int             @default(70)
-  internalMarks Int             @default(30)
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  id                 String             @id @default(uuid())
+  subjectId          String?            @unique
+  branchId           String?
+  semesterId         String?
+  regulationId       String?
+  academicSessionId  String?
+  versionNumber      String             @default("1.0")
+  status             SyllabusStatus     @default(ACTIVE)
+  source             String             @default("BEU Official Portal")
+  sourceUrl          String             @default("https://beu-bih.ac.in/academics/Syllabus/B.Tech")
+  sourceDocumentName String?            @default("BEU_BTech_Syllabus.pdf")
+  isOfficialSource   Boolean            @default(true)
+  lastVerifiedAt     DateTime           @default(now())
+  totalCredits       Float              @default(20.0)
+  totalHours         Int                @default(45)
+  examMarks          Int                @default(70)
+  internalMarks      Int                @default(30)
+  publishedAt        DateTime?
+  approvedBy         String?
+  adminNotes         String?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
 
-  subject       Subject         @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-  topics        SyllabusTopic[]
+  subject            Subject?           @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  branch             Branch?            @relation(fields: [branchId], references: [id])
+  semester           Semester?          @relation(fields: [semesterId], references: [id])
+  regulation         RegulationVersion? @relation(fields: [regulationId], references: [id])
+  academicSession    AcademicSession?   @relation(fields: [academicSessionId], references: [id])
+  topics             SyllabusTopic[]
+
+  @@index([branchId, semesterId])
+  @@index([regulationId])
+  @@index([status])
 }
 
 model SyllabusTopic {
@@ -605,27 +726,117 @@ model SyllabusTopic {
   @@index([unitNumber])
 }
 
+model SubjectUnit {
+  id            String         @id @default(uuid())
+  subjectId     String
+  unitNumber    Int
+  unitTitle     String
+  hours         Int            @default(8)
+  description   String?
+  examFrequency ExamFrequency  @default(HIGH)
+  sourceUrl     String?        @default("https://beu-bih.ac.in/academics/Syllabus/B.Tech")
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  subject       Subject        @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  topics        Topic[]
+  pyqs          PYQ[]
+  notes         Note[]
+
+  @@unique([subjectId, unitNumber])
+  @@index([subjectId])
+}
+
+model Topic {
+  id               String          @id @default(uuid())
+  unitId           String
+  orderIndex       Int             @default(0)
+  title            String
+  description      String?
+  hours            Float?          @default(2.0)
+  isCore           Boolean         @default(true)
+  learningOutcomes String[]        @default([])
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  unit             SubjectUnit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  subTopics        SubTopic[]
+  progress         TopicProgress[]
+  pyqs             PYQ[]
+  notes            Note[]
+
+  @@index([unitId])
+}
+
+model SubTopic {
+  id             String   @id @default(uuid())
+  topicId        String
+  orderIndex     Int      @default(0)
+  title          String
+  contentSummary String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  topic          Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@index([topicId])
+}
+
+model TopicProgress {
+  id                 String              @id @default(uuid())
+  userId             String
+  topicId            String
+  status             TopicProgressStatus @default(NOT_STARTED)
+  progressPercentage Int                 @default(0)
+  notes              String?
+  lastStudiedAt      DateTime?
+  completedAt        DateTime?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic              Topic               @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, topicId])
+  @@index([userId])
+  @@index([topicId])
+  @@index([status])
+}
+
 model PYQ {
-  id           String   @id @default(uuid())
+  id           String       @id @default(uuid())
   subjectId    String
+  unitId       String?
+  topicId      String?
   year         Int
-  examType     String   @default("END_TERM")
+  examType     String       @default("END_TERM")
+  marks        Int?         @default(7)
+  difficulty   String?      @default("MEDIUM")
+  questionText String?
+  solutionText String?
   fileUrl      String
   solutionUrl  String?
+  isVerified   Boolean      @default(true)
   uploadedById String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
 
-  subject      Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-  uploadedBy   User     @relation(fields: [uploadedById], references: [id])
+  subject      Subject      @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  unit         SubjectUnit? @relation(fields: [unitId], references: [id])
+  topic        Topic?       @relation(fields: [topicId], references: [id])
+  uploadedBy   User         @relation(fields: [uploadedById], references: [id])
 
   @@index([subjectId])
+  @@index([unitId])
+  @@index([topicId])
   @@index([year])
 }
 
 model Note {
   id               String           @id @default(uuid())
   subjectId        String
+  unitId           String?
+  topicId          String?
   title            String
   description      String?
   unitNumber       Int
@@ -637,9 +848,13 @@ model Note {
   updatedAt        DateTime         @updatedAt
 
   subject          Subject          @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  unit             SubjectUnit?     @relation(fields: [unitId], references: [id])
+  topic            Topic?           @relation(fields: [topicId], references: [id])
   uploadedBy       User             @relation(fields: [uploadedById], references: [id])
 
   @@index([subjectId])
+  @@index([unitId])
+  @@index([topicId])
   @@index([moderationStatus])
   @@index([uploadedById])
 }

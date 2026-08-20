@@ -4,6 +4,9 @@ import { PostType, Visibility, BookmarkItemType, Role } from '@prisma/client';
 import { PaginationQuery, PaginatedResult } from '../types/index.js';
 
 export class PostService {
+  /**
+   * Publishes a campus feed update with optional media attachments and awards 10 gamification contribution karma points.
+   */
   static async createPost(authorId: string, data: { content: string; type?: PostType; visibility?: Visibility; mediaUrls?: string[] }) {
     const post = await prisma.post.create({
       data: {
@@ -41,6 +44,9 @@ export class PostService {
     return post;
   }
 
+  /**
+   * Fetches a paginated feed of community posts, calculating total pages and resolving viewer-specific `isLiked` status.
+   */
   static async getPosts(currentUserId?: string, query?: PaginationQuery & { type?: PostType; authorId?: string }): Promise<PaginatedResult<any>> {
     const page = query?.page || 1;
     const limit = query?.limit || 10;

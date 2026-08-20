@@ -45,19 +45,113 @@ export interface Branch {
   id: string;
   name: string;
   code: string;
-  semesters: number[];
+  category?: string;
+  officialCode?: string;
+  hasOfficialSyllabus?: boolean;
+  syllabusStatus?: string;
+  semesters?: number[];
+}
+
+export interface AcademicSession {
+  id: string;
+  name: string;
+  isActive: boolean;
+}
+
+export interface RegulationVersion {
+  id: string;
+  code: string;
+  name: string;
+  effectiveFromYear: number;
+  officialDocumentUrl?: string;
+  description?: string;
+  status: 'ACTIVE' | 'ARCHIVED' | 'REVISED';
+}
+
+export interface SubTopic {
+  id: string;
+  orderIndex: number;
+  title: string;
+  contentSummary?: string;
+}
+
+export interface Topic {
+  id: string;
+  unitId?: string;
+  orderIndex: number;
+  title: string;
+  description?: string;
+  hours?: number;
+  isCore?: boolean;
+  learningOutcomes?: string[];
+  subTopics?: SubTopic[];
+  progress?: TopicProgress[];
+  unitTitle?: string;
+  unitNumber?: number;
+  subjectName?: string;
+  subjectCode?: string;
+}
+
+export interface TopicProgress {
+  id?: string;
+  userId?: string;
+  topicId: string;
+  status: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED' | 'REVISION_REQUIRED';
+  progressPercentage?: number;
+  notes?: string;
+  lastStudiedAt?: string;
+  completedAt?: string;
+}
+
+export interface SubjectUnit {
+  id: string;
+  subjectId?: string;
+  unitNumber: number;
+  unitTitle: string;
+  hours: number;
+  description?: string;
+  examFrequency: 'HIGH' | 'MEDIUM' | 'LOW';
+  sourceUrl?: string;
+  topics: Topic[];
+  pyqs?: PYQ[];
+  notes?: Note[];
 }
 
 export interface Subject {
   id: string;
   branchCode: string;
+  branchId?: string;
   semester: number;
+  semesterNumber?: number;
+  regulationCode?: string;
+  regulationId?: string;
   name: string;
   code: string;
+  shortName?: string;
   credits: number;
+  ltp?: string;
+  lectureHours?: number;
+  tutorialHours?: number;
+  practicalHours?: number;
+  internalMarks?: number;
+  endSemMarks?: number;
+  totalMarks?: number;
   description: string;
-  unitsCount: number;
+  unitsCount?: number;
   icon?: string;
+  sourceUrl?: string;
+  sourceDocumentName?: string;
+  isOfficialSource?: boolean;
+  lastVerifiedAt?: string;
+  units?: SubjectUnit[];
+  branch?: Branch | any;
+  regulation?: RegulationVersion;
+  _count?: {
+    notes: number;
+    pyqs: number;
+    videos: number;
+    units: number;
+  };
 }
 
 export interface SyllabusTopic {

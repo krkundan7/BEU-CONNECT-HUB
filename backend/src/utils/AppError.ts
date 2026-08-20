@@ -1,5 +1,9 @@
 import { HTTP_STATUS, ERROR_CODES } from '../config/constants.js';
 
+/**
+ * Base operational application error class capturing HTTP status codes, structured error identifiers,
+ * restoring custom prototype chains across transpiled TypeScript targets, and capturing V8 stack traces.
+ */
 export class AppError extends Error {
   public readonly statusCode: number;
   public readonly code: string;

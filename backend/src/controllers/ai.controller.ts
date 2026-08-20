@@ -3,6 +3,9 @@ import { AIChatService } from '../services/ai.service.js';
 import { ResponseFormatter } from '../utils/apiResponse.js';
 
 export class AIController {
+  /**
+   * AI tutoring endpoint receiving student questions and optional image/PDF attachments, invoking LLM inference with curriculum system prompt.
+   */
   static async chat(req: Request, res: Response, next: NextFunction) {
     try {
       const response = await AIChatService.handleChat(req.user!.id, req.body);
@@ -12,6 +15,9 @@ export class AIController {
     }
   }
 
+  /**
+   * Historical question paper analysis endpoint computing 16-point unit weightage and recurring question probability models.
+   */
   static async analyzePYQ(req: Request, res: Response, next: NextFunction) {
     try {
       const { subjectName, branch, semester } = req.body;

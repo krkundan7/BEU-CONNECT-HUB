@@ -110,18 +110,18 @@ export const AdminDashboardPage: React.FC = () => {
         </div>
 
         <div
-          onClick={() => navigateTo('admin-notices')}
+          onClick={() => navigateTo('admin-syllabus')}
           className="p-6 rounded-3xl bg-white border border-slate-200 shadow-subtle hover:shadow-card hover:border-navy-300 cursor-pointer transition-all space-y-3 group"
         >
-          <div className="p-3 w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
-            <BellRing className="w-6 h-6" />
+          <div className="p-3 w-12 h-12 rounded-2xl bg-blue-50 text-blue-700 flex items-center justify-center">
+            <BookOpen className="w-6 h-6" />
           </div>
-          <h3 className="text-base font-bold text-beu-dark group-hover:text-navy-900">Publish Official Notices</h3>
+          <h3 className="text-base font-bold text-beu-dark group-hover:text-navy-900">Syllabus & Curriculum Sync</h3>
           <p className="text-xs text-slate-600 leading-relaxed">
-            Broadcast examination datesheets, scrutiny results, and government circulars across the platform.
+            Manage 34 BEU branches, sync official syllabus versions, and verify 2026 UG regulations.
           </p>
-          <div className="flex items-center text-xs font-bold text-emerald-700 pt-2">
-            <span>Compose Circular →</span>
+          <div className="flex items-center text-xs font-bold text-blue-700 pt-2">
+            <span>Manage 34 BEU Branches →</span>
           </div>
         </div>
       </div>

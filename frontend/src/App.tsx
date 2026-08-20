@@ -44,6 +44,7 @@ import { AdminDashboardPage } from './pages/admin/AdminDashboardPage';
 import { UserVerificationPage } from './pages/admin/UserVerificationPage';
 import { ContentModerationPage } from './pages/admin/ContentModerationPage';
 import { NoticeManagerPage } from './pages/admin/NoticeManagerPage';
+import { AdminSyllabusManagementPage } from './pages/admin/AdminSyllabusManagementPage';
 
 const AppContent: React.FC = () => {
   const { currentPage } = useNavigation();
@@ -105,6 +106,7 @@ const AppContent: React.FC = () => {
       case 'admin-verification': return <UserVerificationPage />;
       case 'admin-moderation': return <ContentModerationPage />;
       case 'admin-notices': return <NoticeManagerPage />;
+      case 'admin-syllabus': return <AdminSyllabusManagementPage />;
       case 'admin-resources': return <NotesPage />;
 
       default: return <LandingPage />;

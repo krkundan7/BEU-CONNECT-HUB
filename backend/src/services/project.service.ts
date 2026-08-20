@@ -3,6 +3,9 @@ import { AppError } from '../utils/AppError.js';
 import { ProjectStatus, ProjectTaskStatus } from '@prisma/client';
 
 export class ProjectService {
+  /**
+   * Initializes a collaborative capstone project, assigning the creator as Team Lead and scaffolding initial backlog tasks.
+   */
   static async createProject(creatorId: string, data: {
     title: string;
     description: string;
@@ -52,6 +55,9 @@ export class ProjectService {
     return project;
   }
 
+  /**
+   * Lists projects filtered by recruitment status and case-insensitive keyword search across title and description.
+   */
   static async getProjects(status?: ProjectStatus, search?: string) {
     const where: any = {};
     if (status) where.status = status;
@@ -117,6 +123,10 @@ export class ProjectService {
     return project;
   }
 
+  /**
+   * Computes matchmaking compatibility scores between project requirements and student candidate skill profiles,
+   * factoring in skill coverage ratios and department affinity bonuses.
+   */
   static async findMatchesForProject(projectId: string) {
     const project = await prisma.project.findUnique({
       where: { id: projectId },
