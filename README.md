@@ -1,51 +1,37 @@
-# BEU Connect Hub
+# BEU Connect Hub 🎓
 
-> **Tagline**: *“One Hub. Every BEU Student.”*  
-> **Mission**: Connect, Learn, Collaborate, and Grow across Bihar Engineering University (BEU).
-
----
-
-## 📁 Repository Structure
-
-```
-beu-connect-ub/
-├── frontend/             # React 19 + TypeScript + Vite + Tailwind CSS SPA
-│   ├── src/              # Application source (components, pages, context, data)
-│   ├── public/           # Static assets
-│   ├── package.json      # Frontend dependencies & scripts
-│   └── vite.config.ts    # Vite configuration
-│
-├── backend/              # Node.js + Express + TypeScript + Prisma Backend
-│   ├── src/              # API routes, controllers, middleware, services, sockets
-│   ├── prisma/           # PostgreSQL schema & migrations
-│   ├── package.json      # Backend dependencies & scripts
-│   └── tests/            # Integration & unit test suites
-│
-└── package.json          # Monorepo root runner scripts
-```
+> **Unified Academic Collaboration & Career GPS Platform for Bihar Engineering University (BEU), Patna**  
+> *Developed by Team Novanex for Tejas India Hackathon 2026*
 
 ---
 
-## ⚡ Quick Start
+## 🚀 Key Highlights
+- 📚 **Official 5-Tier Syllabus Engine**: 34 engineering branches & 8 semesters with interactive topic tracking.
+- 🛡️ **Privacy-First Student Onboarding**: UIDAI-compliant identity verification with zero demographic storage.
+- 🗺️ **BEU GoalMap GPS**: Personalized 16-goal career discovery wizard & skill gap analyzer.
+- 📢 **Official Notice Radar**: Real-time university circulars with SHA-256 fingerprint deduplication.
+- ⭐ **Remarks Reward Ledger**: Community peer learning rewards for verified notes and PYQs.
+- ⚡ **Modern Monorepo**: React 19 + TypeScript frontend with Express & Prisma backend.
 
-### Frontend
+---
+
+## 🛠️ Quick Start
+
 ```bash
-# Run from root:
+# 1. Install dependencies
+npm install
+
+# 2. Start frontend & backend in development mode
 npm run dev:frontend
-
-# Or navigate to frontend folder:
-cd frontend
-npm install
-npm run dev
-```
-
-### Backend
-```bash
-# Run from root:
 npm run dev:backend
-
-# Or navigate to backend folder:
-cd backend
-npm install
-npm run dev
 ```
+
+---
+
+## 🏛️ Affiliated BEU Colleges
+Supports all 38 government engineering colleges across Bihar including Bhagalpur College of Engineering (BCE), Muzaffarpur Institute of Technology (MIT), Nalanda College of Engineering (NCE), Gaya College of Engineering (GCE), and all district GECs.
+
+---
+
+## 📜 License
+MIT License © 2026 Team Novanex
