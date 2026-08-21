@@ -4,7 +4,14 @@ import { validate } from '../middleware/validate.middleware.js';
 import { requireAuth } from '../middleware/auth.middleware.js';
 import { authLimiter } from '../middleware/rateLimiter.middleware.js';
 import {
-  registerSchema,
+  verifyBeuRegSchema,
+  sendMobileOtpSchema,
+  verifyMobileOtpSchema,
+  sendEmailOtpSchema,
+  verifyEmailOtpSchema,
+  initiateIdentitySchema,
+  confirmIdentitySchema,
+  registerVerifiedSchema,
   loginSchema,
   refreshTokenSchema,
   forgotPasswordSchema,
@@ -12,31 +19,90 @@ import {
 } from '../validators/auth.validator.js';
 
 /**
- * Authentication & Session Management Routes (`/api/auth`)
- * Houses endpoints for student registration, credential authentication,
- * single-use refresh token rotation, password recovery, and identity retrieval.
+ * Authentication & Verification Routes (`/api/auth`)
+ * Handles multi-step student verification, identity gateway, dual-token authentication,
+ * session renewal, and password recovery.
  */
 const router = Router();
 
-// Student self-registration protected with brute-force rate limiter
-router.post('/register', authLimiter, validate(registerSchema), AuthController.register);
+// Step 1: BEU Registration ID Verification
+router.post(
+  '/verify-beu-reg',
+  authLimiter,
+  validate(verifyBeuRegSchema),
+  AuthController.verifyBEURegistration
+);
 
-// Credential login issuing JWT access token and HTTP-only refresh cookie
+// Step 3: Mobile OTP Send & Verify
+router.post(
+  '/send-mobile-otp',
+  authLimiter,
+  validate(sendMobileOtpSchema),
+  AuthController.sendMobileOTP
+);
+
+router.post(
+  '/verify-mobile-otp',
+  authLimiter,
+  validate(verifyMobileOtpSchema),
+  AuthController.verifyMobileOTP
+);
+
+// Step 4: Email OTP Send & Verify
+router.post(
+  '/send-email-otp',
+  authLimiter,
+  validate(sendEmailOtpSchema),
+  AuthController.sendEmailOTP
+);
+
+router.post(
+  '/verify-email-otp',
+  authLimiter,
+  validate(verifyEmailOtpSchema),
+  AuthController.verifyEmailOTP
+);
+
+// Step 5: Privacy-Conscious Identity Verification Initiation & OTP Confirm
+router.post(
+  '/verify-identity/initiate',
+  authLimiter,
+  validate(initiateIdentitySchema),
+  AuthController.initiateIdentityVerification
+);
+
+router.post(
+  '/verify-identity/confirm',
+  authLimiter,
+  validate(confirmIdentitySchema),
+  AuthController.confirmIdentityVerification
+);
+
+// Step 7: Final Account Activation & Verified Registration
+router.post(
+  '/register-verified',
+  authLimiter,
+  validate(registerVerifiedSchema),
+  AuthController.registerVerified
+);
+
+// Legacy registration fallback
+router.post('/register', authLimiter, AuthController.register);
+
+// Multi-Identifier Login (BEU Reg ID / Email / Mobile + Password)
 router.post('/login', authLimiter, validate(loginSchema), AuthController.login);
 
-// Refresh token rotation endpoint renewing expired access tokens without re-prompting credentials
+// Session Refresh Token Rotation
 router.post('/refresh', validate(refreshTokenSchema), AuthController.refresh);
 
-// Explicit logout revoking active refresh tokens across the database
+// Explicit Logout
 router.post('/logout', requireAuth, AuthController.logout);
 
-// Password recovery initiation generating signed reset requests
+// Password Recovery
 router.post('/forgot-password', authLimiter, validate(forgotPasswordSchema), AuthController.forgotPassword);
-
-// Password reset completion with token signature verification
 router.post('/reset-password', authLimiter, validate(resetPasswordSchema), AuthController.resetPassword);
 
-// Identity profile endpoint for hydrating client session state
+// Profile
 router.get('/me', requireAuth, AuthController.getMe);
 
 export default router;

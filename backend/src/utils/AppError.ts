@@ -49,4 +49,8 @@ export class AppError extends Error {
   static validation(message: string, details?: any) {
     return new AppError(message, HTTP_STATUS.UNPROCESSABLE_ENTITY, ERROR_CODES.VALIDATION_ERROR, details);
   }
+
+  static tooManyRequests(message: string = 'Too many requests. Please try again later.') {
+    return new AppError(message, HTTP_STATUS.TOO_MANY_REQUESTS, ERROR_CODES.RATE_LIMIT_EXCEEDED);
+  }
 }

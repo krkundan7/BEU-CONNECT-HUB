@@ -64,10 +64,18 @@ export const ALLOWED_MIME_TYPES = {
   VIDEOS: ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-matroska', 'video/avi'],
 };
 
-/* NOV-COMMENT-7: Domain Error Segregation & Statutory AI Academic Disclaimers
- * Categorizes system operational error codes into machine-readable strings for frontend automated handling.
- * Defines the immutable AI_DISCLAIMER injected into all AI-generated question paper trend reports, assuring compliance
- * with Bihar Engineering University examination ethics and clarifying that AI summaries represent statistical frequency
- * rather than leaked or guaranteed exam papers. */
 export const AI_DISCLAIMER = 'This is historical pattern analysis, not a guaranteed prediction of future exam questions.';
+
+/**
+ * Verification & Authentication Lifecycle Security Constants
+ */
+export const VERIFICATION_CONFIG = {
+  OTP_LENGTH: 6,
+  OTP_EXPIRY_MS: 5 * 60 * 1000, // 5 minutes
+  OTP_RESEND_COOLDOWN_MS: 60 * 1000, // 60 seconds
+  OTP_MAX_ATTEMPTS: 3,
+  ACCOUNT_LOCKOUT_MAX_ATTEMPTS: 5,
+  ACCOUNT_LOCKOUT_DURATION_MS: 15 * 60 * 1000, // 15 minutes
+  IDENTITY_TOKEN_EXPIRY_MS: 30 * 60 * 1000, // 30 minutes
+};
 
