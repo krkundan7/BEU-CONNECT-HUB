@@ -5,18 +5,24 @@ import { StorageService } from '../services/storageService';
 import { Bell, CheckCheck, BookOpen, Radio, Users, Briefcase, Building2 } from 'lucide-react';
 import { useNotification } from '../context/NotificationContext';
 
+/* NOV-LOGIC-103: Multi-Category Notification Feed Container
+ * Renders real-time alerts spanning official circulars, mentorship invites, peer post reactions, and job deadlines. */
 export const NotificationsPage: React.FC = () => {
   const { currentUser } = useAuth();
   const { navigateTo } = useNavigation();
   const { showToast } = useNotification();
 
+  /* NOV-LOGIC-104: Local Storage Synced Notification State
+   * Hydrates read/unread state from browser storage with fallback to reactive notifications. */
   const [notifications, setNotifications] = useState(
     currentUser ? StorageService.getNotifications(currentUser.id) : []
   );
   const [filterType, setFilterType] = useState<string>('all');
 
+  /* NOV-LOGIC-105: Client-Side Faceted Filter Evaluator */
   const filtered = notifications.filter(n => filterType === 'all' || n.type === filterType);
 
+  /* NOV-LOGIC-106: Bulk Read-State Committer */
   const handleMarkAllRead = () => {
     if (!currentUser) return;
     StorageService.markAllNotificationsRead(currentUser.id);
@@ -24,6 +30,7 @@ export const NotificationsPage: React.FC = () => {
     showToast('All notifications marked as read', 'success');
   };
 
+  /* NOV-LOGIC-107: Category-to-Lucide Visual Icon Resolver */
   const getIcon = (type: string) => {
     switch (type) {
       case 'academic': return <BookOpen className="w-4 h-4 text-blue-600" />;
@@ -76,6 +83,7 @@ export const NotificationsPage: React.FC = () => {
           </div>
         ) : (
           filtered.map(n => (
+            /* NOV-LOGIC-108: Interactive Deep-Linking Navigation Target */
             <div
               key={n.id}
               onClick={() => navigateTo(n.link.replace('/', '') as any)}

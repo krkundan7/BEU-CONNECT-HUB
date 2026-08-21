@@ -11,6 +11,8 @@ import {
   GraduationCap, ArrowLeft, BarChart2, Book, CheckSquare, Square
 } from 'lucide-react';
 
+/* NOV-LOGIC-109: 5-Tier Interactive Academic Curriculum Explorer
+ * Orchestrates seamless navigation: Branch (34) -> Semester (8) -> Subject -> Unit (5) -> Topic Progress Tracking. */
 export const StudyHubPage: React.FC = () => {
   const { currentUser } = useAuth();
   const { navigateTo } = useNavigation();
@@ -18,7 +20,8 @@ export const StudyHubPage: React.FC = () => {
   // Primary active tab
   const [activeTab, setActiveTab] = useState<'hierarchy' | 'dashboard' | 'search' | 'recommendations'>('hierarchy');
 
-  // Hierarchy Step State: 1 = Branch, 2 = Semester, 3 = Subject, 4 = Unit/Topic
+  /* NOV-LOGIC-110: Four-Step Progressive Disclosure Stepper State
+   * Enables students to drill down hierarchically or jump directly into units and topics. */
   const [hierarchyStep, setHierarchyStep] = useState<1 | 2 | 3 | 4>(4);
 
   // Metadata Lists
@@ -55,7 +58,8 @@ export const StudyHubPage: React.FC = () => {
   // Expanded units in Unit-Wise view
   const [expandedUnits, setExpandedUnits] = useState<Record<string, boolean>>({});
 
-  // Load initial metadata on mount
+  /* NOV-LOGIC-111: Initial University Metadata Hydration Hook
+   * Concurrently pulls official branches, regulation versions, and sessions with deterministic static fallback. */
   useEffect(() => {
     async function loadMeta() {
       const [bList, rList, sList] = await Promise.all([
@@ -71,7 +75,8 @@ export const StudyHubPage: React.FC = () => {
     loadMeta();
   }, []);
 
-  // Fetch subjects whenever branch, semester or regulation changes
+  /* NOV-LOGIC-112: Reactive Syllabus Subject Hydration & Accordion Expansion
+   * Re-evaluates 5-unit syllabus dataset whenever user toggles branch, semester, or regulation version. */
   useEffect(() => {
     async function loadSubjectsAndProgress() {
       setLoading(true);

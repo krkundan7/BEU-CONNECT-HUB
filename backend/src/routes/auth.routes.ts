@@ -18,14 +18,11 @@ import {
   resetPasswordSchema,
 } from '../validators/auth.validator.js';
 
-/**
- * Authentication & Verification Routes (`/api/auth`)
- * Handles multi-step student verification, identity gateway, dual-token authentication,
- * session renewal, and password recovery.
- */
+/* NOV-LOGIC-58: Cryptographically Gated Authentication Routing Pipeline
+ * Enforces Zod contract validation and brute-force IP rate limiting on all registration and credential entrypoints. */
 const router = Router();
 
-// Step 1: BEU Registration ID Verification
+/* NOV-LOGIC-59: Step 1 BEU Registration ID Syntactic & Uniqueness Route */
 router.post(
   '/verify-beu-reg',
   authLimiter,
@@ -33,7 +30,7 @@ router.post(
   AuthController.verifyBEURegistration
 );
 
-// Step 3: Mobile OTP Send & Verify
+/* NOV-LOGIC-60: Step 3 Mobile Verification Token & Rate-Limited OTP Dispatch */
 router.post(
   '/send-mobile-otp',
   authLimiter,
@@ -41,6 +38,7 @@ router.post(
   AuthController.sendMobileOTP
 );
 
+/* NOV-LOGIC-61: Step 3 Mobile OTP SHA-256 Digest Verification Route */
 router.post(
   '/verify-mobile-otp',
   authLimiter,
@@ -48,7 +46,7 @@ router.post(
   AuthController.verifyMobileOTP
 );
 
-// Step 4: Email OTP Send & Verify
+/* NOV-LOGIC-62: Step 4 Institutional / Personal Email Verification Dispatch */
 router.post(
   '/send-email-otp',
   authLimiter,
@@ -56,6 +54,7 @@ router.post(
   AuthController.sendEmailOTP
 );
 
+/* NOV-LOGIC-63: Step 4 Email Token Verification Route */
 router.post(
   '/verify-email-otp',
   authLimiter,
@@ -63,7 +62,7 @@ router.post(
   AuthController.verifyEmailOTP
 );
 
-// Step 5: Privacy-Conscious Identity Verification Initiation & OTP Confirm
+/* NOV-LOGIC-64: Step 5 DPDP-Compliant UIDAI / DigiLocker Verification Initiation */
 router.post(
   '/verify-identity/initiate',
   authLimiter,
@@ -71,6 +70,7 @@ router.post(
   AuthController.initiateIdentityVerification
 );
 
+/* NOV-LOGIC-65: Step 5 Identity Gateway OTP Confirmation Route */
 router.post(
   '/verify-identity/confirm',
   authLimiter,
@@ -78,7 +78,7 @@ router.post(
   AuthController.confirmIdentityVerification
 );
 
-// Step 7: Final Account Activation & Verified Registration
+/* NOV-LOGIC-66: Step 7 Verified Multi-Token Account Provisioning */
 router.post(
   '/register-verified',
   authLimiter,
@@ -89,10 +89,10 @@ router.post(
 // Legacy registration fallback
 router.post('/register', authLimiter, AuthController.register);
 
-// Multi-Identifier Login (BEU Reg ID / Email / Mobile + Password)
+/* NOV-LOGIC-67: Multi-Identifier Credential Login with Progressive Lockout Protection */
 router.post('/login', authLimiter, validate(loginSchema), AuthController.login);
 
-// Session Refresh Token Rotation
+/* NOV-LOGIC-68: Single-Use Refresh Token Rotation & Session Re-Issuance */
 router.post('/refresh', validate(refreshTokenSchema), AuthController.refresh);
 
 // Explicit Logout

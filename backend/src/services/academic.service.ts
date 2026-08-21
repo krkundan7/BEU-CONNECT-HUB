@@ -9,10 +9,8 @@ import {
 import { TopicProgressStatus } from '@prisma/client';
 
 export class AcademicService {
-  /**
-   * Retrieves active academic sessions with a resilient multi-tier data access pattern,
-   * querying PostgreSQL first and gracefully falling back to official static curriculum definitions if the database is offline.
-   */
+  /* NOV-LOGIC-32: Dual-Tier Academic Session Resolution
+   * Retrieves active academic batches (e.g. 2026-2027) with automatic fallback to static configuration when database is offline. */
   static async getSessions() {
     try {
       const sessions = await prisma.academicSession.findMany({
@@ -25,9 +23,8 @@ export class AcademicService {
     return BEU_OFFICIAL_SESSIONS;
   }
 
-  /**
-   * Get all BEU Curriculum Regulations (2026 UG Regulation, 2018-25 AICTE Model)
-   */
+  /* NOV-LOGIC-33: University Regulation Version Resolver
+   * Returns syllabus versions (2026 UG Regulation vs 2018-2025 AICTE Model Curriculum) ordered by inception year. */
   static async getRegulations() {
     try {
       const regulations = await prisma.regulationVersion.findMany({
@@ -40,11 +37,9 @@ export class AcademicService {
     return BEU_OFFICIAL_REGULATIONS;
   }
 
-  /**
-   * Get all 34 BEU B.Tech Programmes / Branches
-   */
+  /* NOV-LOGIC-34: 34 BEU Engineering Programme Registry
+   * Serves all official Bachelor of Technology programmes across Core, Emerging Tech, and Interdisciplinary divisions. */
   static async getBranches() {
-    // BEU-COMMENT-2: Branch category filtering and official branch code validation logic
     try {
       const branches = await prisma.branch.findMany({
         orderBy: [{ category: 'asc' }, { name: 'asc' }],
@@ -59,11 +54,9 @@ export class AcademicService {
     return BEU_OFFICIAL_BRANCHES;
   }
 
-  /**
-   * Get all Semesters (1 to 8)
-   */
+  /* NOV-LOGIC-35: 8-Semester Curriculum Segmentation
+   * Maps semesters 1 to 8 with First Year Group A/B physical science divisions and 3rd-8th semester core discipline grouping. */
   static async getSemesters() {
-    // BEU-COMMENT-3: Semester group mapping adhering to BEU 1st Year Group A/B and discipline core structure
     try {
       const semesters = await prisma.semester.findMany({
         orderBy: { number: 'asc' },
@@ -87,10 +80,8 @@ export class AcademicService {
     ];
   }
 
-  /* NOV-COMMENT-21: Multi-Facet Curriculum Querying & Fallback Offline Resilience
-   * Dynamically filters subjects across branch codes, semester numbers, and regulation versions with relational unit/topic hydration.
-   * If the PostgreSQL connection pool is temporarily offline, seamlessly falls back to the deterministic in-memory BEU static curriculum,
-   * guaranteeing continuous offline syllabus availability for university students. */
+  /* NOV-LOGIC-36: Multi-Criteria Subject Hierarchy Traversal
+   * Dynamically constructs composite where clause resolving branch, semester, regulation version, and elective categories. */
   static async getSubjects(filters?: {
     branchId?: string;
     branchCode?: string;
@@ -98,27 +89,45 @@ export class AcademicService {
     semesterNumber?: number;
     regulationId?: string;
     regulationCode?: string;
+    type?: string;
+    category?: string;
     search?: string;
   }) {
-    // BEU-COMMENT-4: Strict branch-semester subject relationship enforcement preventing cross-discipline leakage
     try {
       const where: any = {};
 
       if (filters?.branchId) where.branchId = filters.branchId;
-      if (filters?.branchCode) where.branch = { code: filters.branchCode };
       if (filters?.semesterId) where.semesterId = filters.semesterId;
-      if (filters?.semesterNumber) where.semester = { number: filters.semesterNumber };
       if (filters?.regulationId) where.regulationId = filters.regulationId;
-      if (filters?.regulationCode) where.regulation = { code: filters.regulationCode };
 
+      /* NOV-LOGIC-37: Relational Code-to-Entity Subquery Resolvers
+       * Resolves alphanumeric branch codes (e.g. CSE) and semester numbers directly within the relational query. */
+      if (filters?.branchCode) {
+        where.branch = { code: filters.branchCode.toUpperCase() };
+      }
+      if (filters?.semesterNumber) {
+        where.semester = { number: Number(filters.semesterNumber) };
+      }
+      if (filters?.regulationCode) {
+        where.regulation = { code: filters.regulationCode.toUpperCase() };
+      }
+      if (filters?.type) {
+        where.type = filters.type.toUpperCase();
+      }
+      if (filters?.category) {
+        where.category = filters.category.toUpperCase();
+      }
       if (filters?.search) {
+        const q = filters.search.trim();
         where.OR = [
-          { name: { contains: filters.search, mode: 'insensitive' } },
-          { code: { contains: filters.search, mode: 'insensitive' } },
-          { shortName: { contains: filters.search, mode: 'insensitive' } },
+          { name: { contains: q, mode: 'insensitive' } },
+          { code: { contains: q, mode: 'insensitive' } },
+          { description: { contains: q, mode: 'insensitive' } },
         ];
       }
 
+      /* NOV-LOGIC-38: Five-Tier Deep Relational Inclusion Pattern
+       * Hydrates complete curriculum tree: Subject -> Units -> Topics -> SubTopics ordered sequentially. */
       const subjects = await prisma.subject.findMany({
         where,
         orderBy: [{ semester: { number: 'asc' } }, { code: 'asc' }],
@@ -131,11 +140,11 @@ export class AcademicService {
             include: {
               topics: {
                 orderBy: { orderIndex: 'asc' },
+                include: {
+                  subTopics: { orderBy: { orderIndex: 'asc' } },
+                },
               },
             },
-          },
-          _count: {
-            select: { notes: true, pyqs: true, videos: true, units: true },
           },
         },
       });
@@ -145,7 +154,8 @@ export class AcademicService {
       // Fallback
     }
 
-    // In-memory filter fallback
+    /* NOV-LOGIC-39: High-Fidelity Static Curriculum Normalizer
+     * Normalizes and filters the comprehensive in-memory BEU course catalog when live relational store is unavailable. */
     let filtered = [...BEU_OFFICIAL_SUBJECTS];
 
     if (filters?.branchCode) {

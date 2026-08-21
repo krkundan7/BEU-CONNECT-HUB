@@ -60,7 +60,10 @@ export interface VerifiedRegisterPayload {
   identityReference?: string;
 }
 
+/* NOV-LOGIC-86: Frontend Authentication & Gateway Bridge
+ * Connects registration and login forms to RESTful endpoints with offline fallback resilience. */
 export const AuthService = {
+  /* NOV-LOGIC-87: BEU Registration Syntax & Registry Query Bridge */
   async verifyBEURegistration(beuRegNo: string): Promise<BEUVerificationResponse> {
     try {
       const res = await fetch(`${API_BASE}/auth/verify-beu-reg`, {
@@ -89,6 +92,7 @@ export const AuthService = {
     }
   },
 
+  /* NOV-LOGIC-88: Mobile OTP Dispatch Caller */
   async sendMobileOTP(mobile: string): Promise<OTPResponse> {
     try {
       const res = await fetch(`${API_BASE}/auth/send-mobile-otp`, {
@@ -110,6 +114,7 @@ export const AuthService = {
     }
   },
 
+  /* NOV-LOGIC-89: Mobile OTP Verification Bridge */
   async verifyMobileOTP(mobile: string, otp: string): Promise<OTPVerifyResponse> {
     try {
       const res = await fetch(`${API_BASE}/auth/verify-mobile-otp`, {
@@ -133,6 +138,7 @@ export const AuthService = {
     }
   },
 
+  /* NOV-LOGIC-90: Email Verification OTP Dispatch Caller */
   async sendEmailOTP(email: string): Promise<OTPResponse> {
     try {
       const res = await fetch(`${API_BASE}/auth/send-email-otp`, {
@@ -154,6 +160,7 @@ export const AuthService = {
     }
   },
 
+  /* NOV-LOGIC-91: Email OTP Confirmation Bridge */
   async verifyEmailOTP(email: string, otp: string): Promise<OTPVerifyResponse> {
     try {
       const res = await fetch(`${API_BASE}/auth/verify-email-otp`, {
@@ -177,6 +184,7 @@ export const AuthService = {
     }
   },
 
+  /* NOV-LOGIC-92: UIDAI / DigiLocker Verification Initiation Request */
   async initiateIdentity(
     aadhaarNumber: string,
     studentName: string,
@@ -205,6 +213,7 @@ export const AuthService = {
     }
   },
 
+  /* NOV-LOGIC-93: Identity Gateway OTP Confirmation Caller */
   async confirmIdentity(referenceId: string, otp: string): Promise<IdentityConfirmResponse> {
     try {
       const res = await fetch(`${API_BASE}/auth/verify-identity/confirm`, {
@@ -231,6 +240,7 @@ export const AuthService = {
     }
   },
 
+  /* NOV-LOGIC-94: Verified Multi-Token Registration Dispatcher */
   async registerVerified(payload: VerifiedRegisterPayload): Promise<any> {
     try {
       const res = await fetch(`${API_BASE}/auth/register-verified`, {
@@ -265,6 +275,7 @@ export const AuthService = {
     }
   },
 
+  /* NOV-LOGIC-95: Multi-Identifier Polymorphic Login Dispatcher */
   async login(identifier: string, password: string): Promise<any> {
     const res = await fetch(`${API_BASE}/auth/login`, {
       method: 'POST',

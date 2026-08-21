@@ -5,10 +5,8 @@ import { AIRole } from '@prisma/client';
 import { Logger } from '../utils/logger.js';
 
 export class AIChatService {
-  /**
-   * Orchestrates multi-turn academic AI conversations, automatically creating conversation threads,
-   * maintaining a sliding window of the last 10 messages for context, and persisting assistant replies.
-   */
+  /* NOV-LOGIC-43: Conversational Academic Context Sliding Window
+   * Automatically initializes conversation threads, records student queries, and pulls trailing 10 turns for context preservation. */
   static async handleChat(
     userId: string,
     data: {
@@ -27,6 +25,8 @@ export class AIChatService {
 
     // 1. Try to record in DB if available
     try {
+      /* NOV-LOGIC-44: Lazy Conversation Auto-Provisioning
+       * Creates conversation record on first query using the first 40 characters as the thread title. */
       if (!data.conversationId) {
         const conv = await prisma.aIConversation.create({
           data: {
@@ -37,6 +37,8 @@ export class AIChatService {
         conversationId = conv.id;
       }
 
+      /* NOV-LOGIC-45: Multimodal Metadata Query Ingestion
+       * Formats attachment type and original filename into the message turn for provenance tracking. */
       await prisma.aIMessage.create({
         data: {
           conversationId,
@@ -56,7 +58,8 @@ export class AIChatService {
       Logger.warn('Database offline or message logging bypassed in AI Chat, continuing with direct inference', dbErr);
     }
 
-    // 2. Prepare AI input messages
+    /* NOV-LOGIC-46: Multimodal Payload Injection to Final Turn
+     * Maps Prisma message history to AIChatMessage array and attaches image/pdf data URLs to the active user turn. */
     const aiInput: AIChatMessage[] = history.length > 0
       ? history.map((h: any) => ({
           role: h.role.toLowerCase() as 'user' | 'assistant' | 'system',
@@ -69,12 +72,12 @@ export class AIChatService {
           },
         ];
 
-    // Inject active multimodal attachment payload into the trailing user message turn
     if (data.attachment && aiInput.length > 0) {
       aiInput[aiInput.length - 1].attachment = data.attachment;
     }
 
-    // 3. Generate AI response with official BEU syllabus grounding
+    /* NOV-LOGIC-47: Syllabus-Grounded Academic Synthesis
+     * Invokes the active AI provider (Gemini 1.5 Flash / OpenRouter) conditioned on BEU 14-marks marking patterns. */
     const aiResponseText = await aiService.generateAcademicResponse(aiInput);
 
     // 4. Try persisting assistant reply

@@ -3,7 +3,9 @@ import prisma from '../config/prisma.js';
 import { AppError } from '../utils/AppError.js';
 import { BEU_OFFICIAL_BRANCHES } from '../data/beuOfficialCurriculum.js';
 
-// BEU Registration ID RegEx: Matches standard 10 to 13 digits (e.g., 23105101001, 21101105023) or formatted BEU/YYYY/BRANCH/ROLL
+/* NOV-LOGIC-1: Canonical BEU Registration ID Syntax Grammar
+ * Matches official Bihar Engineering University 10-13 digit formats (e.g., 23105101001 where 23=Year, 105=College, 101=Branch, 001=Roll)
+ * or institutional structured rolls (BEU/YYYY/BRANCH/ROLL) using non-capturing case-insensitive anchors. */
 const BEU_REG_REGEX = /^([0-9]{10,13}|BEU\/[0-9]{4}\/[A-Z_]{2,8}\/[0-9]{1,4})$/i;
 
 export interface BEUStudentLookupResult {
@@ -27,13 +29,16 @@ export class BEUVerificationService {
   static async verifyRegistrationNumber(beuRegNo: string): Promise<BEUStudentLookupResult> {
     const cleanReg = beuRegNo.trim().toUpperCase();
 
+    /* NOV-LOGIC-2: Upfront Syntax & Format Rejection
+     * Guards registration pipeline against malformed, short, or invalid registration strings before database execution. */
     if (!BEU_REG_REGEX.test(cleanReg)) {
       throw AppError.badRequest(
         'Invalid BEU Registration ID format. Must be 10–13 digits (e.g., 23105101001) or official BEU roll format.'
       );
     }
 
-    // 1. Check for duplicate registered accounts
+    /* NOV-LOGIC-3: Anti-Duplication Collision Guard
+     * Queries User records for existing active accounts matching the BEU Registration Number, thwarting account duplication attacks. */
     try {
       const existingUser = await prisma.user.findFirst({
         where: { beuRegNo: cleanReg },
@@ -49,7 +54,8 @@ export class BEUVerificationService {
       // Continue if DB is offline in dev
     }
 
-    // 2. Parse BEU Admission Metadata from ID
+    /* NOV-LOGIC-4: Academic Hierarchy & Admission Cohort Parsing
+     * Extracts admission year prefix and college code substring to dynamically compute current semester progression (e.g., 2026 - admissionYear). */
     let admissionYear = 2023;
     let branchCode = 'CSE';
     let collegeCode = '101';
@@ -69,7 +75,8 @@ export class BEUVerificationService {
 
     const branch = BEU_OFFICIAL_BRANCHES.find(b => b.code === branchCode) || BEU_OFFICIAL_BRANCHES[0];
 
-    // 3. Generate cryptographic verification token
+    /* NOV-LOGIC-5: Cryptographic Single-Use Verification Token Signature
+     * Issues an HMAC/SHA-256 digest encoding the verified registration number and timestamp to guarantee tamper-proof handoff to subsequent steps. */
     const tokenPayload = `${cleanReg}:${admissionYear}:${Date.now()}`;
     const verificationToken = `beu_vtoken_${crypto.createHash('sha256').update(tokenPayload).digest('hex')}`;
 

@@ -1,11 +1,15 @@
 import { z } from 'zod';
 
+/* NOV-LOGIC-76: BEU Registration Identifier Contract Schema
+ * Enforces length boundaries (6-30 characters) for official university student identification strings. */
 export const verifyBeuRegSchema = z.object({
   body: z.object({
     beuRegNo: z.string().min(6, 'BEU Registration ID must be at least 6 characters').max(30),
   }),
 });
 
+/* NOV-LOGIC-77: Indian National Mobile Number Regex Validator
+ * Strictly validates 10-digit mobile numbers starting with valid TRAI carrier prefixes [6-9]. */
 export const sendMobileOtpSchema = z.object({
   body: z.object({
     mobile: z
@@ -14,6 +18,7 @@ export const sendMobileOtpSchema = z.object({
   }),
 });
 
+/* NOV-LOGIC-78: Mobile OTP Confirmation Contract */
 export const verifyMobileOtpSchema = z.object({
   body: z.object({
     mobile: z
@@ -23,12 +28,14 @@ export const verifyMobileOtpSchema = z.object({
   }),
 });
 
+/* NOV-LOGIC-79: RFC-Compliant Email Address Dispatch Schema */
 export const sendEmailOtpSchema = z.object({
   body: z.object({
     email: z.string().email('Please provide a valid email address'),
   }),
 });
 
+/* NOV-LOGIC-80: Email Verification Code Ingestion Contract */
 export const verifyEmailOtpSchema = z.object({
   body: z.object({
     email: z.string().email('Please provide a valid email address'),
@@ -36,6 +43,7 @@ export const verifyEmailOtpSchema = z.object({
   }),
 });
 
+/* NOV-LOGIC-81: UIDAI Statutory Consent & 12-Digit Numeric Verification Contract */
 export const initiateIdentitySchema = z.object({
   body: z.object({
     aadhaarNumber: z
@@ -49,6 +57,7 @@ export const initiateIdentitySchema = z.object({
   }),
 });
 
+/* NOV-LOGIC-82: Identity Session Reference & OTP Confirmation Schema */
 export const confirmIdentitySchema = z.object({
   body: z.object({
     referenceId: z.string().min(10, 'Reference ID is required'),
@@ -56,6 +65,8 @@ export const confirmIdentitySchema = z.object({
   }),
 });
 
+/* NOV-LOGIC-83: Verified Student Account Provisioning Contract
+ * Enforces complex password entropy (upper, lower, digit, symbol) and mandatory verification token quartet. */
 export const registerVerifiedSchema = z.object({
   body: z.object({
     name: z.string().min(2, 'Name must be at least 2 characters').max(100),
@@ -85,9 +96,8 @@ export const registerVerifiedSchema = z.object({
 
 export const registerSchema = registerVerifiedSchema;
 
-/**
- * Unified Login Schema supporting BEU Registration ID, Email, or Mobile
- */
+/* NOV-LOGIC-84: Multi-Identifier Polymorphic Login Schema
+ * Allows authentication via BEU registration ID, email address, or mobile number within a single input payload. */
 export const loginSchema = z.object({
   body: z.object({
     identifier: z.string().min(3, 'BEU Registration ID, Email, or Mobile Number is required').optional(),
@@ -96,6 +106,7 @@ export const loginSchema = z.object({
   }),
 });
 
+/* NOV-LOGIC-85: Refresh Token Rotation Validation Schema */
 export const refreshTokenSchema = z.object({
   body: z.object({
     refreshToken: z.string().min(1, 'Refresh token is required'),

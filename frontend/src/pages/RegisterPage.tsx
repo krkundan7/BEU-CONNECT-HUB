@@ -10,6 +10,8 @@ import {
   Phone, Mail, KeyRound, Eye, EyeOff, AlertTriangle, Fingerprint, RefreshCw, Check
 } from 'lucide-react';
 
+/* NOV-LOGIC-96: Privacy-Conscious 7-Step Registration State Machine
+ * Coordinates step progression from BEU identity verification through multi-channel OTP attestation and password hardening. */
 export const RegisterPage: React.FC = () => {
   const { register } = useAuth();
   const { navigateTo } = useNavigation();
@@ -65,7 +67,8 @@ export const RegisterPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Timers for cooldowns
+  /* NOV-LOGIC-97: Reactive OTP Resend Cooldown Timers
+   * Enforces 1-second countdown intervals to prevent client-side spamming of SMS and email verification endpoints. */
   useEffect(() => {
     let interval: any = null;
     if (mobileCooldown > 0) {
@@ -82,7 +85,8 @@ export const RegisterPage: React.FC = () => {
     return () => clearInterval(interval);
   }, [emailCooldown]);
 
-  // Password strength calculation
+  /* NOV-LOGIC-98: 5-Factor Password Entropy Evaluation Engine
+   * Calculates realtime security score enforcing length, character casing, numbers, and special symbols. */
   const hasMinLength = password.length >= 8;
   const hasUppercase = /[A-Z]/.test(password);
   const hasLowercase = /[a-z]/.test(password);
@@ -90,7 +94,7 @@ export const RegisterPage: React.FC = () => {
   const hasSpecial = /[^A-Za-z0-9]/.test(password);
   const passwordScore = [hasMinLength, hasUppercase, hasLowercase, hasNumber, hasSpecial].filter(Boolean).length;
 
-  // STEP 1: Verify BEU Registration ID
+  /* NOV-LOGIC-99: Step 1 Registration ID Validation Handler */
   const handleVerifyBEU = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!beuRegNo.trim()) {

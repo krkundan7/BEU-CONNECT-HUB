@@ -16,6 +16,8 @@ import {
   Code, Terminal, Rocket
 } from 'lucide-react';
 
+/* NOV-LOGIC-113: Personalized AI GoalMap Execution Engine
+ * Bridges student career goals with semester exam preparation through dynamic milestone mapping and task tracking. */
 export const GoalMapPage: React.FC = () => {
   const { currentUser } = useAuth();
   const { showToast } = useNotification();
@@ -44,7 +46,7 @@ export const GoalMapPage: React.FC = () => {
   ]);
   const [isMentorTyping, setIsMentorTyping] = useState<boolean>(false);
 
-  // Load user's saved goalmaps
+  /* NOV-LOGIC-114: Local Storage Goal Roadmap Synchronization Hook */
   useEffect(() => {
     if (currentUser) {
       const stored = StorageService.getGoalMaps(currentUser.id);
@@ -62,13 +64,14 @@ export const GoalMapPage: React.FC = () => {
 
   const activeGoalMap = goalMaps.find(g => g.id === activeGoalMapId) || goalMaps[0] || null;
 
-  // Auto-expand first milestone
+  /* NOV-LOGIC-115: Auto-Accordion Expansion for Active Milestone */
   useEffect(() => {
     if (activeGoalMap?.milestones && activeGoalMap.milestones.length > 0) {
       setExpandedMilestones({ [activeGoalMap.milestones[0].id]: true });
     }
   }, [activeGoalMap?.id]);
 
+  /* NOV-LOGIC-116: Goal Creation & Confetti Celebration Trigger */
   const handleGoalMapCreated = (newGoalMap: GoalMap) => {
     if (!currentUser) return;
     const updated = [newGoalMap, ...goalMaps];
@@ -80,6 +83,7 @@ export const GoalMapPage: React.FC = () => {
     confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
   };
 
+  /* NOV-LOGIC-117: Interactive Task Completion & Momentum Feedback */
   const handleToggleTask = (milestoneId: string, taskId: string) => {
     if (!activeGoalMap || !currentUser) return;
 

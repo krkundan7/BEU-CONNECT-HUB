@@ -41,9 +41,12 @@ async function tryDb<T>(operation: () => Promise<T>, timeoutMs = 800): Promise<T
 }
 
 export class AuthService {
-  // In-memory lockout tracker for brute force defense
+  /* NOV-LOGIC-16: Brute-Force Rate Limiting Lockout Registry
+   * Records consecutive failed credential attempts keyed by identifier to enforce 15-minute cooloffs after threshold exceedance. */
   private static lockoutMap = new Map<string, LoginLockoutRecord>();
-  // In-memory registered user cache for testing and offline resilience
+
+  /* NOV-LOGIC-17: Memory-Accelerated User State Mirror
+   * Maintains instant access cache of registered accounts to mitigate database latency and provide offline test resiliency. */
   private static inMemoryUsers = new Map<string, StoredUserMemory>();
 
   /**
@@ -71,27 +74,28 @@ export class AuthService {
     const cleanRegNo = data.beuRegNo.toUpperCase().trim();
     const cleanMobile = data.mobile.trim();
 
-    // 1. Verify BEU Token
+    /* NOV-LOGIC-18: Multi-Token Cryptographic Prerequisite Attestation
+     * Asserts genuine verification tokens for BEU registration ID, mobile OTP, and email OTP before account instantiation. */
     if (!BEUVerificationService.validateToken(data.beuToken)) {
       throw AppError.badRequest('Invalid or missing BEU Registration verification token.');
     }
 
-    // 2. Verify Mobile Token
     if (!OTPService.isTokenValid(cleanMobile, 'mobile', data.mobileToken)) {
       throw AppError.badRequest('Mobile number has not been verified with OTP.');
     }
 
-    // 3. Verify Email Token
     if (!OTPService.isTokenValid(cleanEmail, 'email', data.emailToken)) {
       throw AppError.badRequest('Email address has not been verified with OTP.');
     }
 
-    // 4. Verify Identity Token (if supplied)
+    /* NOV-LOGIC-19: Conditional DPDP-Compliant Identity Status Assignment
+     * Sets user verification status to VERIFIED if valid identityToken is present, otherwise assigns PENDING status. */
     const isIdentityVerified = !!(
       data.identityToken && IdentityVerificationService.validateToken(data.identityToken)
     );
 
-    // 5. Check duplicate in memory first
+    /* NOV-LOGIC-20: Memory & Relational Multi-Field Conflict Detection
+     * Rejects attempts to reuse existing email, BEU registration number, or mobile number across active student records. */
     for (const u of this.inMemoryUsers.values()) {
       if (u.email.toLowerCase() === cleanEmail) {
         throw AppError.conflict('An account with this email address already exists');
@@ -282,7 +286,8 @@ export class AuthService {
     const lockKey = rawId.toLowerCase();
     const now = Date.now();
 
-    // 1. Check account lockout state
+    /* NOV-LOGIC-21: Progressive Lockout Interception
+     * Blocks authentication evaluation if identifier is under an active lockout cooldown timestamp. */
     const lockEntry = this.lockoutMap.get(lockKey);
     if (lockEntry && lockEntry.lockedUntil > now) {
       const remainingMin = Math.ceil((lockEntry.lockedUntil - now) / 60000);
@@ -291,7 +296,8 @@ export class AuthService {
       );
     }
 
-    // 2. Query user in memory store first
+    /* NOV-LOGIC-22: Unified Multi-Identifier Credential Resolver
+     * Resolves student identity across email, BEU registration number, or mobile number simultaneously. */
     let user: StoredUserMemory | null =
       this.inMemoryUsers.get(rawId.toLowerCase()) ||
       this.inMemoryUsers.get(rawId.toUpperCase()) ||
@@ -349,7 +355,8 @@ export class AuthService {
       };
     }
 
-    // 3. Generic authentication validation to thwart account enumeration
+    /* NOV-LOGIC-23: Anti-Enumeration Generic Failure Dispatcher
+     * Increments failed attempt counters and triggers lockout without revealing whether the account exists. */
     const recordFailedAttempt = () => {
       const current = this.lockoutMap.get(lockKey) || { failedAttempts: 0, lockedUntil: 0 };
       current.failedAttempts += 1;
@@ -373,12 +380,15 @@ export class AuthService {
       recordFailedAttempt();
     }
 
+    /* NOV-LOGIC-24: Constant-Time Bcrypt Evaluation
+     * Evaluates password validity against bcrypt hash preventing side-channel timing analysis attacks. */
     const isValid = await PasswordUtils.compare(passwordInput, user!.passwordHash);
     if (!isValid) {
       recordFailedAttempt();
     }
 
-    // Reset lockout counter on successful authentication
+    /* NOV-LOGIC-25: Post-Auth State Cleansing & Dual Token Generation
+     * Clears lockout records and issues short-lived access JWT alongside a cryptographically hashed refresh token. */
     this.lockoutMap.delete(lockKey);
 
     const tokenPayload = {

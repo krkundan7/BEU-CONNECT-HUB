@@ -8,6 +8,8 @@ import {
   UserCheck, AlertCircle, Phone, RefreshCw, Sparkles, Shield
 } from 'lucide-react';
 
+/* NOV-LOGIC-100: Multi-Channel Authenticated Ingress Controller
+ * Handles polymorphic identifier parsing (BEU Reg / Email / Mobile), password evaluation, and brute-force lockout messaging. */
 export const LoginPage: React.FC = () => {
   const { login, switchPersona } = useAuth();
   const { navigateTo } = useNavigation();
@@ -21,6 +23,8 @@ export const LoginPage: React.FC = () => {
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  /* NOV-LOGIC-101: Polymorphic Credential Submission Flow
+   * Communicates with backend REST API with fallback to local session state on network partition. */
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -33,7 +37,8 @@ export const LoginPage: React.FC = () => {
       showToast(`Welcome back, ${res.user?.name || 'Student'}!`, 'success');
       navigateTo('dashboard');
     } catch (apiErr: any) {
-      // If backend throws brute-force lockout or credentials error
+      /* NOV-LOGIC-102: Progressive Lockout Alert Surface
+       * Extracts lockout countdown and remaining attempts directly from API response to alert student. */
       const errorMsg = apiErr.message || 'Invalid credentials.';
       if (errorMsg.includes('locked') || errorMsg.includes('attempt(s) remaining')) {
         setError(errorMsg);

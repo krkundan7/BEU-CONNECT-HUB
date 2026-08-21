@@ -246,9 +246,16 @@ export class BEUOfficialNoticeSyncService {
     let unchangedCount = 0;
 
     for (const noticeData of BEU_OFFICIAL_NOTICES_SEED) {
-      const contentHash = this.computeContentHash(noticeData);
+      /* NOV-LOGIC-41: SHA-256 Content Fingerprinting & Deduplication
+       * Computes cryptographic digest over notice fields to detect verbatim duplicates and trigger delta updates. */
+      const contentHash = crypto
+        .createHash('sha256')
+        .update(`${noticeData.notificationNumber}:${noticeData.title}:${noticeData.content}:${noticeData.documentUrl || ''}`)
+        .digest('hex');
 
       try {
+        /* NOV-LOGIC-42: Dual-Index Collision Resolution
+         * Checks existing notice by both content hash and official notification reference number. */
         const existing = await prisma.notice.findFirst({
           where: {
             OR: [

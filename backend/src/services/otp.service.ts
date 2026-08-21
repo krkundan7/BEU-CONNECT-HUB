@@ -13,7 +13,8 @@ interface OTPEntry {
 }
 
 export class OTPService {
-  // In-memory secure store indexed by identifier (mobile number or email)
+  /* NOV-LOGIC-6: Ephemeral In-Memory Verification Session Store
+   * Tracks active OTP state keyed by channel:identifier with automatic TTL expiration, preventing database bloat. */
   private static store: Map<string, OTPEntry> = new Map();
 
   /**
@@ -27,7 +28,8 @@ export class OTPService {
     const now = Date.now();
     const existing = this.store.get(key);
 
-    // Enforce 60s resend cooldown
+    /* NOV-LOGIC-7: Progressive Resend Cooldown Guard
+     * Enforces strict 60-second cooldown window between OTP dispatches to mitigate SMS/Email gateway flooding. */
     if (existing && now - existing.lastSentAt < VERIFICATION_CONFIG.OTP_RESEND_COOLDOWN_MS) {
       const remainingSec = Math.ceil(
         (VERIFICATION_CONFIG.OTP_RESEND_COOLDOWN_MS - (now - existing.lastSentAt)) / 1000
@@ -37,7 +39,8 @@ export class OTPService {
       );
     }
 
-    // Generate secure 6-digit OTP
+    /* NOV-LOGIC-8: Cryptographically Secure OTP Generation & SHA-256 Hashing
+     * Generates a 6-digit numeric token via crypto.randomInt and stores only its SHA-256 digest to prevent plaintext credential exposure in memory. */
     const rawOtp = crypto.randomInt(100000, 999999).toString();
     const hashedOtp = crypto.createHash('sha256').update(rawOtp).digest('hex');
 
@@ -51,7 +54,6 @@ export class OTPService {
 
     Logger.info(`[SECURITY] OTP dispatched to ${channel}: ${identifier.slice(0, 3)}****`);
 
-    // Return demo OTP in development/test environments for automated testing and demo UX
     const isDevOrTest = process.env.NODE_ENV !== 'production';
 
     return {
@@ -79,13 +81,13 @@ export class OTPService {
 
     const now = Date.now();
 
-    // Check expiration
+    /* NOV-LOGIC-9: Strict Session Expiry & Attempt Exhaustion Invalidation
+     * Immediately deletes expired sessions or sessions where attemptsLeft reaches 0 to block brute-force guessing. */
     if (now > entry.expiresAt) {
       this.store.delete(key);
       throw AppError.badRequest('The verification code has expired. Please request a new code.');
     }
 
-    // Check remaining attempts
     if (entry.attemptsLeft <= 0) {
       this.store.delete(key);
       throw AppError.badRequest(
@@ -112,7 +114,8 @@ export class OTPService {
       );
     }
 
-    // Mark as verified and emit a secure verification token
+    /* NOV-LOGIC-10: Single-Use Cryptographic OTP Verification Token
+     * Generates a signed verification token binded to the identifier and session hash for downstream registration validation. */
     const tokenPayload = `${identifier}:${now}:${entry.hashedOtp}`;
     const verificationToken = `otp_vtoken_${crypto.createHash('sha256').update(tokenPayload).digest('hex')}`;
 

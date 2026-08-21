@@ -3,18 +3,13 @@ import { storageService } from '../integrations/storage/localStorage.service.js'
 import { ResponseFormatter } from '../utils/apiResponse.js';
 import { AppError } from '../utils/AppError.js';
 
-/**
- * Universal File & Document Upload Controller
- * Handles image (PNG, JPG, WEBP, SVG) and document (PDF, DOCX) ingestion,
- * multipart stream processing, base64 dataURL ingestion, and secure file removal.
- */
+/* NOV-LOGIC-48: Universal Binary & Document Ingestion Gateway
+ * Handles cross-platform uploads spanning profile avatars, PDF handwritten notes, syllabus circulars, and PYQ solutions. */
 export class UploadController {
-  /**
-   * Universal single file upload handler accepting any field name ('file', 'image', 'document', 'pdf', 'avatar').
-   */
+  /* NOV-LOGIC-49: Dynamic Multipart Field Extraction
+   * Transparently extracts files across any standard field name ('file', 'image', 'document', 'avatar') or multi-part arrays. */
   static async uploadSingle(req: Request, res: Response, next: NextFunction) {
     try {
-      // Find file from req.file or from req.files (if upload.any() was used)
       let file: Express.Multer.File | undefined = req.file;
       if (!file && req.files) {
         if (Array.isArray(req.files) && req.files.length > 0) {
@@ -31,6 +26,8 @@ export class UploadController {
         throw AppError.badRequest('No file uploaded. Please attach a file (image or PDF).');
       }
 
+      /* NOV-LOGIC-50: Content-Type Driven Partitioning
+       * Automatically partitions uploaded binaries into distinct 'documents' vs 'images' directory trees. */
       const folder = (req.body.folder || req.query.folder || (file.mimetype.includes('pdf') ? 'documents' : 'images')) as string;
       const result = await storageService.uploadFile(file, folder);
 
@@ -50,9 +47,8 @@ export class UploadController {
     }
   }
 
-  /**
-   * Multiple file upload handler (e.g. multi-page PDFs, lecture slide series, multiple post images).
-   */
+  /* NOV-LOGIC-51: Batch Multi-File Ingestion Pipeline
+   * Loops through multipart array streams, storing each file with unique UUID prefixes and returning an aggregated metadata array. */
   static async uploadMultiple(req: Request, res: Response, next: NextFunction) {
     try {
       const files: Express.Multer.File[] = (req.files as Express.Multer.File[]) || (req.file ? [req.file] : []);
@@ -81,9 +77,8 @@ export class UploadController {
     }
   }
 
-  /**
-   * Base64 DataURL ingestion handler (converts base64 camera scans / PDF data URLs to static disk files).
-   */
+  /* NOV-LOGIC-52: In-Memory Base64 DataURL Transformer
+   * Parses client-side base64 camera scans and PDF buffer payloads directly into static disk assets without temporary file writes. */
   static async uploadBase64(req: Request, res: Response, next: NextFunction) {
     try {
       const { dataUrl, filename, folder } = req.body;
@@ -111,9 +106,8 @@ export class UploadController {
     }
   }
 
-  /**
-   * Deletes an uploaded file by key or relative path.
-   */
+  /* NOV-LOGIC-53: Idempotent Storage Key Remover
+   * Resolves storage key relative path and safely executes file unlinking while preventing path traversal exploits. */
   static async deleteFile(req: Request, res: Response, next: NextFunction) {
     try {
       const fileKey = (req.params.fileKey || req.body.fileKey || req.query.fileKey) as string;

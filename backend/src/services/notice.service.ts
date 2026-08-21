@@ -16,10 +16,8 @@ export interface NoticeQueryFilter {
 }
 
 export class NoticeService {
-  /**
-   * Fetches personalized notices for a logged-in student, matching their enrolled Branch & Semester,
-   * while also returning universal university-wide notices.
-   */
+  /* NOV-LOGIC-26: Context-Aware Student Personalization Pipeline
+   * Resolves enrolled student branch and semester parameters from user entity, then queries targeted notifications. */
   static async getPersonalizedNotices(userId: string, query?: NoticeQueryFilter) {
     try {
       const user = await prisma.user.findUnique({
@@ -36,7 +34,8 @@ export class NoticeService {
         semesterNumber: userSemesterNumber,
       }, userId);
     } catch (err) {
-      // Fallback for offline DB or unauthenticated mock
+      /* NOV-LOGIC-27: Zero-Downtime Static Fallback Data Feeder
+       * Supplies high-fidelity authentic official notifications when the relational database cluster is unreachable. */
       const inMemory = BEUOfficialNoticeSyncService.getInMemoryOfficialNotices({
         branchCode: query?.branchCode || 'CSE',
         semesterNumber: query?.semesterNumber || 3,
@@ -56,9 +55,8 @@ export class NoticeService {
     }
   }
 
-  /**
-   * Retrieves paginated notices matching multi-facet filters with optional read-state resolution.
-   */
+  /* NOV-LOGIC-28: Multi-Faceted Faceted Notice Query Engine
+   * Applies indexed filtering across category, verification status, priority flags, and case-insensitive search queries. */
   static async getNotices(filters?: NoticeQueryFilter, currentUserId?: string) {
     try {
       const page = filters?.page || 1;
@@ -83,6 +81,8 @@ export class NoticeService {
         where.isUrgent = filters.isUrgent;
       }
 
+      /* NOV-LOGIC-29: Multi-Column Text Search Indexing
+       * Executes OR query across notification title, summary, full text content, and notification ID. */
       if (filters?.search) {
         const q = filters.search.trim();
         where.OR = [
@@ -94,7 +94,8 @@ export class NoticeService {
         ];
       }
 
-      // Branch and semester targeting filter logic
+      /* NOV-LOGIC-30: Hierarchical Branch & Semester Target Disjunction
+       * Matches notices designated either for ALL branches/semesters or specifically targeting the filtered cohort. */
       const targetConditions: any[] = [];
 
       if (filters?.branchCode && filters.branchCode !== 'ALL') {
@@ -119,6 +120,8 @@ export class NoticeService {
         where.AND = targetConditions;
       }
 
+      /* NOV-LOGIC-31: Parallelized Count and Pagination Fetch
+       * Concurrently counts total matching records and streams paginated results ordered by urgent and important flags. */
       const [total, items] = await Promise.all([
         prisma.notice.count({ where }),
         prisma.notice.findMany({

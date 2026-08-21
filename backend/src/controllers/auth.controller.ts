@@ -7,9 +7,8 @@ import { ResponseFormatter } from '../utils/apiResponse.js';
 import { HTTP_STATUS } from '../config/constants.js';
 
 export class AuthController {
-  /**
-   * Step 1: BEU Registration ID Verification
-   */
+  /* NOV-LOGIC-69: Official BEU University Identification Validator
+   * Executes syntactic check and cross-references active university records to prevent registration duplication. */
   static async verifyBEURegistration(req: Request, res: Response, next: NextFunction) {
     try {
       const { beuRegNo } = req.body;
@@ -20,9 +19,8 @@ export class AuthController {
     }
   }
 
-  /**
-   * Step 3: Send Mobile Verification OTP
-   */
+  /* NOV-LOGIC-70: Mobile OTP Delivery Dispatcher
+   * Generates secure 6-digit OTP and triggers rate-limited mobile delivery. */
   static async sendMobileOTP(req: Request, res: Response, next: NextFunction) {
     try {
       const { mobile } = req.body;
@@ -33,9 +31,8 @@ export class AuthController {
     }
   }
 
-  /**
-   * Step 3: Confirm Mobile Verification OTP
-   */
+  /* NOV-LOGIC-71: Mobile OTP Cryptographic Assertion & Token Issuance
+   * Confirms incoming OTP against SHA-256 hash and returns signed verification token. */
   static async verifyMobileOTP(req: Request, res: Response, next: NextFunction) {
     try {
       const { mobile, otp } = req.body;
@@ -46,9 +43,8 @@ export class AuthController {
     }
   }
 
-  /**
-   * Step 4: Send Email Verification OTP
-   */
+  /* NOV-LOGIC-72: Academic Email Verification Dispatcher
+   * Sends 6-digit verification code to student institutional or personal email address. */
   static async sendEmailOTP(req: Request, res: Response, next: NextFunction) {
     try {
       const { email } = req.body;
@@ -59,9 +55,7 @@ export class AuthController {
     }
   }
 
-  /**
-   * Step 4: Confirm Email Verification OTP
-   */
+  /* NOV-LOGIC-73: Email OTP Confirmation & Token Generation */
   static async verifyEmailOTP(req: Request, res: Response, next: NextFunction) {
     try {
       const { email, otp } = req.body;
@@ -72,9 +66,8 @@ export class AuthController {
     }
   }
 
-  /**
-   * Step 5: Privacy-Conscious Identity Verification Initiation (Aadhaar / DigiLocker)
-   */
+  /* NOV-LOGIC-74: Privacy-First Identity Gateway Ingress
+   * Validates explicit DPDP student consent, masks Aadhaar numbers, and generates provider session references. */
   static async initiateIdentityVerification(req: Request, res: Response, next: NextFunction) {
     try {
       const { aadhaarNumber, studentName, consentGiven, dob } = req.body;
@@ -90,9 +83,7 @@ export class AuthController {
     }
   }
 
-  /**
-   * Step 5: Confirm Identity Verification OTP
-   */
+  /* NOV-LOGIC-75: UIDAI Gateway OTP Confirmation & Identity Token Dispatch */
   static async confirmIdentityVerification(req: Request, res: Response, next: NextFunction) {
     try {
       const { referenceId, otp } = req.body;

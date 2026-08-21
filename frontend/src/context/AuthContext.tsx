@@ -20,10 +20,13 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+/* NOV-LOGIC-118: Global Session & Persona State Context
+ * Manages active student profile, permissions, authentication state, and offline localStorage synchronization. */
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
+  /* NOV-LOGIC-119: Reactive Storage User Refresher */
   const refreshUsers = () => {
     const users = StorageService.getUsers();
     setAllUsers(users);
@@ -33,6 +36,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  /* NOV-LOGIC-120: Default Persona Session Bootstrapper */
   useEffect(() => {
     const users = StorageService.getUsers();
     setAllUsers(users);
@@ -41,8 +45,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCurrentUser(defaultUser);
   }, []);
 
-  const login = (email: string, _password?: string): boolean => {
-    const user = allUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
+  /* NOV-LOGIC-121: Multi-Identifier Memory Credential Matcher */
+  const login = (emailOrId: string, _password?: string): boolean => {
+    const clean = emailOrId.toLowerCase().trim();
+    const user = allUsers.find(
+      u => u.email.toLowerCase() === clean ||
+           (u.beuRegNo && u.beuRegNo.toLowerCase() === clean) ||
+           (u.mobile && u.mobile.replace(/[^0-9]/g, '') === clean.replace(/[^0-9]/g, ''))
+    );
     if (user) {
       setCurrentUser(user);
       return true;
@@ -50,6 +60,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return false;
   };
 
+  /* NOV-LOGIC-122: Verified Student Persona Factory & Confetti Celebration */
   const register = (userData: Partial<User>): User => {
     const newUser: User = {
       id: `usr-${Date.now()}`,
